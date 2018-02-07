@@ -5,7 +5,7 @@ channels:
   - malramsay
 dependencies:
   - python=3.6.1
-  - numpy=1.11
+  - numpy=1.13
   - malramsay::sdanalysis=0.4.6
   - malramsay::sdrun=0.4.0
   - pip:
