@@ -6,7 +6,7 @@ channels:
 dependencies:
   - python=3.6.1
   - numpy=1.11
+  - malramsay::sdanalysis=0.4.6
   - malramsay::sdrun=0.4.0
   - pip:
-    - sdanalysis==0.4.6
     - experi==0.1.0
