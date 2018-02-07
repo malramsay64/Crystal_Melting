@@ -1,0 +1,8 @@
+# Output file extensions
+*.gsd
+*.log
+*.pbs
+
+# Files output during simulation
+output
+logs
