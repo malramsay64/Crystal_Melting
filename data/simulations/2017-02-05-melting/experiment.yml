@@ -43,7 +43,7 @@ command:
 
 variables:
   create_temp: 0.3
-  melt_temp: 1.50
+  melt_temp: 1.30
   create_steps: 1_000_000
   equil_type: interface
   equil_steps: 1_000_000
@@ -54,9 +54,9 @@ variables:
       - p2
       - p2gg
     cell_dims:
-      - 20 30
-      - 20 30
-      - 20 15
+      - 30 30
+      - 30 30
+      - 30 15
     iterator: zip
   pressure:
     - 1.0
@@ -71,18 +71,16 @@ variables:
       - 0.80
       - 1.00
       - 1.20
-      - 1.40
     steps: 
-      - 100_000_000
-      - 100_000_000
-      - 100_000_000
-      - 100_000_000
-      - 100_000_000
       - 10_000_000
       - 10_000_000
       - 10_000_000
       - 10_000_000
       - 1_000_000
+      - 1_000_000
+      - 1_000_000
+      - 1_000_000
+      - 100_000
     iterator: zip
 
 pbs:
@@ -91,4 +89,4 @@ pbs:
     - conda activate simulations
   cpus: 12
   walltime: 320:00:00
-
+  logdir: logs
