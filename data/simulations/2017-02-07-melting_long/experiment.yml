@@ -1,0 +1,83 @@
+name: Low_Pressure
+
+command:
+  - >
+    sdrun create
+    --pressure {pressure}
+    --temperature {create_temp}
+    --space-group {space_group}
+    --lattice-lengths {cell_dims}
+    --output {outdir}
+    --steps {create_steps}
+    Trimer-T{create_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
+  - >
+    sdrun equil
+    --equil-type {equil_type}
+    --pressure {pressure}
+    --init-temp {create_temp}
+    --temperature {melt_temp}
+    --space-group {space_group}
+    --output {outdir}
+    --steps {equil_steps}
+    Trimer-T{create_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
+    Trimer-T{melt_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
+  - >
+    sdrun equil
+    --equil-type {equil_type}
+    --pressure {pressure}
+    --init-temp {melt_temp}
+    --temperature {temperature}
+    --space-group {space_group}
+    --output {outdir}
+    --steps {equil_steps}
+    Trimer-T{melt_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
+    Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
+  - >
+    sdrun prod
+    --pressure {pressure}
+    --temperature {temperature}
+    --space-group {space_group}
+    --output {outdir}
+    --steps {steps}
+    Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
+
+variables:
+  create_temp: 0.3
+  melt_temp: 0.80
+  create_steps: 1_000_000
+  equil_type: interface
+  equil_steps: 100_000_000
+  outdir: output
+  space_group:
+    value:
+      - pg
+      - p2
+      - p2gg
+    cell_dims:
+      - 60 60
+      - 60 60
+      - 60 30
+    iterator: zip
+  pressure:
+    - 1.0
+  steps: 1_000_000_000
+  temperature:
+    value: 
+      - 0.30
+      - 0.32
+      - 0.34
+      - 0.36
+      - 0.38
+      - 0.40
+      - 0.42
+      - 0.44
+      - 0.46
+      - 0.50
+
+pbs:
+  setup:
+    - source "$HOME/.miniconda/etc/profile.d/conda.sh"
+    - conda activate simulations
+  cpus: 12
+  walltime: 720:00:00
+  logdir: logs
