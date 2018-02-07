@@ -8,4 +8,5 @@ dependencies:
   - numpy=1.11
   - malramsay::sdrun=0.4.0
   - pip:
-    - "git+git://github.com/malramsay64/experi.git@8e8033478dc7dd8dbece5344983ab6354e65b24e --upgrade"
+    - experi==0.1.0
+    - sdanalysis
