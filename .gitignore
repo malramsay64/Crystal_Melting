@@ -3,6 +3,7 @@
 *.log
 *.pbs
 
-# Files output during simulation
-output
-logs
+# Ignore output data
+data/*
+# Never ignore experiment files
+!experiment.yml
