@@ -1,11 +1,13 @@
 name: crystal
 channels:
+  - defaults
   - conda-forge
   - glotzer
   - malramsay
 dependencies:
   - python=3.6.1
   - numpy=1.13
+  - jupyter
   - malramsay::sdanalysis=0.4.6
   - malramsay::sdrun=0.4.0
   - pip:
