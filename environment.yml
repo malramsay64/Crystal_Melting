@@ -5,9 +5,8 @@ channels:
   - malramsay
 dependencies:
   - python=3.6
-  - numpy=1.13
   - jupyter
-  - malramsay::sdanalysis=0.4.6
-  - malramsay::sdrun=0.4.1
+  - malramsay::sdrun=0.4.2
   - pip:
     - experi==0.2.1
+    - sdanalysis==0.4.8
