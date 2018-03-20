@@ -6,7 +6,9 @@ channels:
 dependencies:
   - python=3.6
   - jupyter
+  - numba
   - malramsay::sdrun=0.4.2
   - pip:
     - experi==0.2.1
     - sdanalysis==0.4.8
+    - git+git://github.com/altair-viz/altair
