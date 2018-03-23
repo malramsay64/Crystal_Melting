@@ -7,7 +7,7 @@ all:
 	@echo "Makefile needs your attention"
 
 analysis:
-	python src/analysis/melting_rates.py -i data/simulations/melting -o data/analysis
+	python src/analysis/melting_rates.py -i data/simulations/melting -o data/analysis -s 100
 
 
 

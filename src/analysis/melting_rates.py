@@ -42,12 +42,14 @@ def get_vars(fname: Path):
     return temp, press, crys
 
 
-def compute_crystal_growth(infile: Path, outfile: Path) -> None:
+def compute_crystal_growth(infile: Path, outfile: Path, skip_frames: int = 100) -> None:
     temp, pressure, crys = get_vars(infile)
     order_list = []
     order_dimension = 5.
     with gsd.hoomd.open(str(infile)) as traj:
-        for snap in traj:
+        max_frames = len(traj)
+        for index in range(0, max_frames, skip_frames):
+            snap = traj[index]
             try:
                 num_mols = snap.particles.body.max() + 1
                 ordering = order.compute_ml_order(
@@ -110,7 +112,8 @@ def compute_crystal_growth(infile: Path, outfile: Path) -> None:
     '-i', '--input-path', default=None, type=click.Path(exists=True, file_okay=False)
 )
 @click.option('-o', '--output-path', default=None)
-def main(input_path, output_path):
+@click.option('-s', '--skip-frames', default=100, type=int)
+def main(input_path, output_path, skip_frames):
     if input_path is None:
         input_path = Path.cwd()
     if output_path is None:
@@ -128,7 +131,7 @@ def main(input_path, output_path):
         if res is 'r':
             os.remove(outfile)
     for infile in file_list:
-        compute_crystal_growth(infile, outfile)
+        compute_crystal_growth(infile, outfile, skip_frames)
 
 
 if __name__ == "__main__":
