@@ -19,6 +19,7 @@ import numpy as np
 import pandas as pd
 from scipy.spatial import ConvexHull
 from sdanalysis import order
+from sdanalysis.frame import gsdFrame
 from sklearn import cluster
 
 
@@ -49,32 +50,27 @@ def compute_crystal_growth(infile: Path, outfile: Path, skip_frames: int = 100) 
     with gsd.hoomd.open(str(infile)) as traj:
         max_frames = len(traj)
         for index in range(0, max_frames, skip_frames):
-            snap = traj[index]
+            snap = gsdFrame(traj[index])
             try:
-                num_mols = snap.particles.body.max() + 1
                 ordering = order.compute_ml_order(
-                    order.knn_model(),
-                    snap.configuration.box,
-                    snap.particles.position,
-                    snap.particles.orientation,
+                    order.knn_model(), snap.box, snap.position, snap.orientation
                 )
                 states = pd.Series(ordering).value_counts(normalize=True)
                 crystalline = ordering != 'liq'
                 crystalline = np.expand_dims(crystalline, axis=1)
                 clustering_matrix = np.append(
-                    snap.particles.position, crystalline * order_dimension, axis=1
+                    snap.position, crystalline * order_dimension, axis=1
                 )
                 _, labels = cluster.dbscan(
                     clustering_matrix,
                     min_samples=4,
                     eps=3,
                     metric=partial(
-                        periodic_distance,
-                        np.append(snap.configuration.box[:3], order_dimension * 2),
+                        periodic_distance, np.append(snap.box[:3], order_dimension * 2)
                     ),
                 )
                 if np.sum(labels == 1) > 3:
-                    hull = ConvexHull(snap.particles.position[labels == 1,:2])
+                    hull = ConvexHull(snap.position[labels == 1, :2])
                 else:
 
                     def hull():
@@ -91,7 +87,7 @@ def compute_crystal_growth(infile: Path, outfile: Path, skip_frames: int = 100) 
                         'crystal': crys,
                         'surface-area': hull.area,
                         'volume': hull.volume,
-                        'time': snap.configuration.step,
+                        'time': snap.timestep,
                     }
                 )
                 order_list.append(df)
