@@ -7,6 +7,7 @@ dependencies:
   - python=3.6
   - jupyter
   - numba
+  - selenium
   - malramsay::sdrun=0.4.2
   - pip:
     - experi==0.2.1
