@@ -70,7 +70,7 @@ def compute_crystal_growth(infile: Path, outfile: Path, skip_frames: int = 100) 
                     ),
                 )
                 if np.sum(labels == 1) > 3:
-                    hull = ConvexHull(snap.position[labels == 1, :2])
+                    hull = ConvexHull(snap.position[labels == 1,:2])
                 else:
 
                     def hull():
