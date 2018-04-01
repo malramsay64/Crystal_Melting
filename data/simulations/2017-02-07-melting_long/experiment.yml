@@ -81,3 +81,4 @@ pbs:
   cpus: 12
   walltime: 720:00:00
   logdir: logs
+  j: oe
