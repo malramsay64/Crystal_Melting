@@ -80,4 +80,5 @@ pbs:
   memory: 16gb
   walltime: 504:00:00
   project: PRJ-CrysGrowth
+  o: logs
   j: oe
