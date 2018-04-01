@@ -10,6 +10,6 @@ dependencies:
   - selenium
   - malramsay::sdrun=0.4.3
   - pip:
-    - experi==0.2.1
+    - experi==0.2.2
     - sdanalysis==0.4.12
     - git+git://github.com/altair-viz/altair
