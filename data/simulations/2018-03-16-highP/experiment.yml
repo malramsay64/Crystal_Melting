@@ -36,6 +36,7 @@ command:
     Trimer-T{melt_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
     Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
   - >
+    mpirun -np 12
     sdrun prod
     --pressure {pressure}
     --temperature {temperature}
