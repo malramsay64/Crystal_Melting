@@ -8,7 +8,7 @@ dependencies:
   - jupyter
   - numba
   - selenium
-  - malramsay::sdrun=0.4.2
+  - malramsay::sdrun=0.4.3
   - pip:
     - experi==0.2.1
     - sdanalysis==0.4.12
