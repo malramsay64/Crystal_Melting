@@ -45,7 +45,7 @@ command:
     Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
 
 variables:
-  create_temp: 0.8
+  create_temp: 0.6
   melt_temp: 2.50
   create_steps: 1_000_000
   equil_type: interface
