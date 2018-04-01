@@ -54,9 +54,9 @@ variables:
       - p2
       - p2gg
     cell_dims:
-      - 40 40
-      - 40 40
-      - 40 20
+      - 40 42
+      - 40 42
+      - 40 21
   pressure:
     - 13.50
   steps: 1_000_000_000
