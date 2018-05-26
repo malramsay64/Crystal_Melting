@@ -7,3 +7,6 @@
 data/*
 # Never ignore experiment files
 !experiment.yml
+
+# Ignore json output from altair
+*.json
