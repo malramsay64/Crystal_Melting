@@ -5,11 +5,10 @@ channels:
   - malramsay
 dependencies:
   - python=3.6
-  - jupyter
+  - ipykernel
   - numba
-  - selenium
+  - Cython
   - malramsay::sdrun=0.4.3
-  - pip:
-    - experi==0.2.2
-    - sdanalysis==0.4.12
-    - git+git://github.com/altair-viz/altair
+  - malramsay::sdanalysis=0.4.12
+  - malramsay::experi
+  - conda-forge::altair
