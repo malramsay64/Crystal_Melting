@@ -52,9 +52,9 @@ variables:
         - p2
         - p2gg
       cell_dims:
-        - 30 30
-        - 30 30
-        - 30 15
+        - 20 20
+        - 20 20
+        - 20 10
 
   create_steps: 100_000
   equil_type: harmonic
