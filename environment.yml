@@ -10,5 +10,5 @@ dependencies:
   - Cython
   - malramsay::sdrun=0.4.3
   - malramsay::sdanalysis=0.4.12
-  - malramsay::experi
+  - malramsay::experi>=0.2.4
   - conda-forge::altair
