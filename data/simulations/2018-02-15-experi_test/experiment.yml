@@ -1,0 +1,83 @@
+name: experi-test
+
+command:
+  - >
+    sdrun create
+    --pressure {pressure}
+    --temperature {create_temp}
+    --space-group {space_group}
+    --lattice-lengths {cell_dims}
+    --output {outdir}
+    --steps {create_steps}
+    Trimer-T{create_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
+  - >
+    sdrun equil
+    --equil-type {equil_type}
+    --pressure {pressure}
+    --init-temp {create_temp}
+    --temperature {melt_temp}
+    --space-group {space_group}
+    --output {outdir}
+    --steps {equil_steps}
+    Trimer-T{create_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
+    Trimer-T{melt_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
+  - >
+    sdrun equil
+    --equil-type {equil_type}
+    --pressure {pressure}
+    --init-temp {melt_temp}
+    --temperature {temperature}
+    --space-group {space_group}
+    --output {outdir}
+    --steps {equil_steps}
+    Trimer-T{melt_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
+    Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
+  - >
+    sdrun prod
+    --pressure {pressure}
+    --temperature {temperature}
+    --space-group {space_group}
+    --output {outdir}
+    --steps {steps}
+    Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
+
+variables:
+  create_temp: 0.3
+  melt_temp: 1.60
+  create_steps: 100
+  equil_type: interface
+  equil_steps: 100
+  outdir: .
+  zip:
+    space_group:
+      - pg
+      - p2
+      - p2gg
+    cell_dims:
+      - 20 30
+      - 20 30
+      - 20 15
+  pressure:
+    - 1.0
+  temperature:
+    - 0.30
+    - 0.35
+    - 0.40
+    - 0.45
+    - 0.50
+    - 0.60
+    - 0.80
+    - 1.00
+    - 1.20
+    - 1.40
+    - 1.60
+  steps: 100
+
+pbs:
+  setup:
+    - export PATH="$HOME/.miniconda/bin:$PATH"
+    - conda activate simulations
+  cpus: 1
+  walltime: 1:00
+  project: PRJ-CrysGrowth
+  j: oe

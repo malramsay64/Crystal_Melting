@@ -1,0 +1,74 @@
+name: Harmonic Pinning
+
+command:
+  - >
+    mpirun -np 12
+    sdrun create
+    --pressure {pressure}
+    --temperature {create_temp}
+    --space-group {space_group}
+    --lattice-lengths {cell_dims}
+    --output {outdir}
+    --steps {create_steps}
+    Trimer-T{create_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
+  - >
+    mpirun -np 12
+    sdrun equil
+    --equil-type {equil_type}
+    --pressure {pressure}
+    --init-temp {create_temp}
+    --temperature {melt_temp}
+    --space-group {space_group}
+    --harmonic-force {harmonic_force}
+    --output {outdir}
+    --steps {equil_steps}
+    Trimer-T{create_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
+    Trimer-T{melt_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
+  - >
+    mpirun -np 12
+    sdrun prod
+    --pressure {pressure}
+    --temperature {temperature}
+    --space-group {space_group}
+    --harmonic-force {harmonic_force}
+    --output {outdir}
+    --steps {steps}
+    Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
+
+variables:
+  outdir: .
+  zip:
+    - create_temp:
+        - 0.35
+        - 1.35
+      pressure:
+        - 1.00
+        - 13.50
+
+    - space_group:
+        - pg
+        - p2
+        - p2gg
+      cell_dims:
+        - 30 30
+        - 30 30
+        - 30 15
+
+  create_steps: 100_000
+  equil_type: harmonic
+  equil_steps: 1_000_000
+  steps: 10_000_000
+  harmonic_force:
+    {% for i in range(100) %}
+      - {{ i * 0.1 }}
+    {% endfor %}
+
+pbs:
+  setup:
+    - export PATH=$HOME/.pyenv/versions/crystals/bin:$PATH
+    - source "$HOME/.miniconda/etc/profile.d/conda.sh"
+    - conda activate simulations
+  cpus: 12
+  walltime: 20:00:00
+  logdir: logs
+  j: oe

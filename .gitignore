@@ -4,9 +4,11 @@
 *.pbs
 
 # Ignore output data
-data/*
+data/simulations/*/*
+data/analysis/*
+
 # Never ignore experiment files
-!experiment.yml
+!data/simulations/*/experiment.yml
 
 # Ignore json output from altair
 *.json
