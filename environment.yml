@@ -8,7 +8,7 @@ dependencies:
   - ipykernel
   - numba
   - Cython
-  - malramsay::sdrun=0.4.3
+  - malramsay::sdrun=0.4.7
   - malramsay::sdanalysis=0.4.12
   - malramsay::experi>=0.2.4
   - conda-forge::altair
