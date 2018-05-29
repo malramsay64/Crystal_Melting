@@ -1,31 +1,33 @@
+{% set ncpus = 8 %}
+
 name: Harmonic Pinning
 
 command:
   - >
-    mpirun -np 12
+    mpirun -np {{ ncpus }}
     sdrun create
     --pressure {pressure}
-    --temperature {create_temp}
+    --temperature {temperature}
     --space-group {space_group}
     --lattice-lengths {cell_dims}
     --output {outdir}
     --steps {create_steps}
-    Trimer-T{create_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
+    Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
   - >
-    mpirun -np 12
+    mpirun -np {{ ncpus }}
     sdrun equil
     --equil-type {equil_type}
     --pressure {pressure}
-    --init-temp {create_temp}
-    --temperature {melt_temp}
+    --init-temp {temperature}
+    --temperature {temperature}
     --space-group {space_group}
     --harmonic-force {harmonic_force}
     --output {outdir}
     --steps {equil_steps}
-    Trimer-T{create_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
-    Trimer-T{melt_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
+    Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
+    Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
   - >
-    mpirun -np 12
+    mpirun -np {{ ncpus }}
     sdrun prod
     --pressure {pressure}
     --temperature {temperature}
@@ -38,7 +40,7 @@ command:
 variables:
   outdir: .
   zip:
-    - create_temp:
+    - temperature:
         - 0.35
         - 1.35
       pressure:
@@ -66,9 +68,7 @@ variables:
 pbs:
   setup:
     - export PATH=$HOME/.pyenv/versions/crystals/bin:$PATH
-    - source "$HOME/.miniconda/etc/profile.d/conda.sh"
-    - conda activate simulations
-  cpus: 12
+  cpus: {{ ncpus }}
   walltime: 20:00:00
   logdir: logs
   j: oe
