@@ -42,34 +42,35 @@ variables:
   space_group: p2gg
   cell_dims: 34 14
   pressure: 1.0
-  steps: 
-    - 1_000_000_000
-    - 1_000_000_000
-    - 1_000_000_000
-    - 1_000_000_000
-    - 1_000_000_000
-    - 1_000_000_000
-    - 1_000_000_000
-    - 100_000_000
-    - 100_000_000
-    - 100_000_000
-  temperature:
-      - 0.30
-      - 0.32
-      - 0.34
-      - 0.36
-      - 0.38
-      - 0.40
-      - 0.42
-      - 0.44
-      - 0.46
-      - 0.50
+  zip:
+    steps:
+      - 1_000_000_000
+      - 1_000_000_000
+      - 1_000_000_000
+      - 1_000_000_000
+      - 1_000_000_000
+      - 1_000_000_000
+      - 1_000_000_000
+      - 100_000_000
+      - 100_000_000
+      - 100_000_000
+    temperature:
+        - 0.30
+        - 0.32
+        - 0.34
+        - 0.36
+        - 0.38
+        - 0.40
+        - 0.42
+        - 0.44
+        - 0.46
+        - 0.50
 
 pbs:
   setup:
-    - source "$HOME/.miniconda/etc/profile.d/conda.sh"
-    - conda activate crystal
+    - export PATH=$HOME/.pyenv/versions/crystal/bin:$PATH
   cpus: 12
   walltime: 504:00:00
+  o: logs
   j: oe
   project: PRJ-CrysGrowth
