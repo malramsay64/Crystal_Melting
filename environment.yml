@@ -9,6 +9,6 @@ dependencies:
   - numba
   - Cython
   - malramsay::sdrun=0.4.7
-  - malramsay::sdanalysis=0.5.2
+  - malramsay::sdanalysis=0.5.3
   - malramsay::experi>=0.2.4
   - conda-forge::altair
