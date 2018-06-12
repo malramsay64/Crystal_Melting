@@ -1,21 +1,21 @@
-{% set ncpus = 8 %}
+{% set ncpus = 1 %}
 
 name: Harmonic Pinning
 
 command:
   - >
-    mpirun -np {{ ncpus }}
-    sdrun create
+    sdrun
+    create
     --pressure {pressure}
     --temperature {temperature}
     --space-group {space_group}
     --lattice-lengths {cell_dims}
     --output {outdir}
     --steps {create_steps}
-    Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
+    Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
   - >
-    mpirun -np {{ ncpus }}
-    sdrun equil
+    sdrun
+    equil
     --equil-type {equil_type}
     --pressure {pressure}
     --init-temp {temperature}
@@ -24,21 +24,21 @@ command:
     --harmonic-force {harmonic_force}
     --output {outdir}
     --steps {equil_steps}
-    Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
-    Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
+    Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
+    Trimer-P{pressure:.2f}-T{temperature:.2f}-K{harmonic_force:.2f}-{space_group}.gsd
   - >
-    mpirun -np {{ ncpus }}
-    sdrun prod
+    sdrun
+    prod
     --pressure {pressure}
     --temperature {temperature}
     --space-group {space_group}
     --harmonic-force {harmonic_force}
     --output {outdir}
     --steps {steps}
-    Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
+    Trimer-P{pressure:.2f}-T{temperature:.2f}-K{harmonic_force:.2f}-{space_group}.gsd
 
 variables:
-  outdir: .
+  outdir: output
   zip:
     - temperature:
         - 0.35
@@ -52,9 +52,9 @@ variables:
         - p2
         - p2gg
       cell_dims:
-        - 20 20
-        - 20 20
-        - 20 10
+        - 30 30
+        - 30 30
+        - 30 15
 
   create_steps: 100_000
   equil_type: harmonic
@@ -67,8 +67,8 @@ variables:
 
 pbs:
   setup:
-    - export PATH=$HOME/.pyenv/versions/crystals/bin:$PATH
+    - export PATH=$HOME/.pyenv/versions/crystal/bin:$PATH
   cpus: {{ ncpus }}
-  walltime: 20:00:00
-  logdir: logs
+  walltime: 10:00:00
+  o: logs
   j: oe
