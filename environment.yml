@@ -12,3 +12,4 @@ dependencies:
   - malramsay::sdanalysis=0.5.3
   - malramsay::experi>=0.2.4
   - conda-forge::altair
+  - conda-forge::nbdime>=1.0
