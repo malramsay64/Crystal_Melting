@@ -1,48 +1,41 @@
-name: High_Pressure
+name: High_Pressure Interface
 
 command:
   - >
     mpirun -np 12
-    sdrun create
+    sdrun
     --pressure {pressure}
-    --temperature {create_temp}
+    --temperature {melt_temp}
+    --init-temp {create_temp}
     --space-group {space_group}
     --lattice-lengths {cell_dims}
     --output {outdir}
-    --steps {create_steps}
-    Trimer-T{create_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
-  - >
-    mpirun -np 12
-    sdrun equil
-    --equil-type {equil_type}
-    --pressure {pressure}
-    --init-temp {create_temp}
-    --temperature {melt_temp}
-    --space-group {space_group}
-    --output {outdir}
-    --steps {equil_steps}
-    Trimer-T{create_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
+    --num-steps {equil_steps}
+    create
     Trimer-T{melt_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
   - >
     mpirun -np 12
-    sdrun equil
+    sdrun
     --equil-type {equil_type}
     --pressure {pressure}
     --init-temp {melt_temp}
     --temperature {temperature}
     --space-group {space_group}
     --output {outdir}
-    --steps {equil_steps}
+    --num-steps {equil_steps}
+    equil
     Trimer-T{melt_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
     Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
   - >
     mpirun -np 12
-    sdrun prod
+    sdrun
     --pressure {pressure}
     --temperature {temperature}
     --space-group {space_group}
     --output {outdir}
-    --steps {steps}
+    --num-steps {steps}
+    prod
+    --no-dynamics
     Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
 
 variables:

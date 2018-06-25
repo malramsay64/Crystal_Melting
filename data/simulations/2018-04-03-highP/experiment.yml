@@ -3,12 +3,13 @@ name: High_Pressure
 command:
   - >
     mpirun -np 12
-    sdrun prod
+    sdrun
     --pressure {pressure}
     --temperature {temperature}
     --space-group {space_group}
     --output {output}
-    --steps {steps}
+    --num-steps {steps}
+    prod
     Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
 
 variables:

@@ -2,43 +2,47 @@ name: Low_Pressure
 
 command:
   - >
-    sdrun create
+    sdrun
     --pressure {pressure}
     --temperature {create_temp}
     --space-group {space_group}
     --lattice-lengths {cell_dims}
     --output {outdir}
-    --steps {create_steps}
+    --num-steps {create_steps}
+    create
     Trimer-T{create_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
   - >
-    sdrun equil
-    --equil-type {equil_type}
+    sdrun
     --pressure {pressure}
     --init-temp {create_temp}
     --temperature {melt_temp}
     --space-group {space_group}
     --output {outdir}
-    --steps {equil_steps}
+    --num-steps {equil_steps}
+    equil
+    --equil-type {equil_type}
     Trimer-T{create_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
     Trimer-T{melt_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
   - >
-    sdrun equil
-    --equil-type {equil_type}
+    sdrun
     --pressure {pressure}
     --init-temp {melt_temp}
     --temperature {temperature}
     --space-group {space_group}
     --output {outdir}
-    --steps {equil_steps}
+    --num-steps {equil_steps}
+    equil
+    --equil-type {equil_type}
     Trimer-T{melt_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
     Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
   - >
-    sdrun prod
+    sdrun
     --pressure {pressure}
     --temperature {temperature}
     --space-group {space_group}
     --output {outdir}
-    --steps {steps}
+    --num-steps {steps}
+    prod
     Trimer-T{temperature:.2f}-P{pressure:.2f}-{space_group}.gsd
 
 variables:
@@ -48,20 +52,19 @@ variables:
   equil_type: interface
   equil_steps: 1_000_000
   outdir: .
-  space_group:
-    value:
+  pressure:
+    - 1.0
+  zip:
+    - space_group:
       - pg
       - p2
       - p2gg
-    cell_dims:
+      cell_dims:
       - 30 30
       - 30 30
       - 30 15
-    iterator: zip
-  pressure:
-    - 1.0
-  temperature:
-    value: 
+
+    - temperature:
       - 0.30
       - 0.35
       - 0.40
@@ -71,7 +74,7 @@ variables:
       - 0.80
       - 1.00
       - 1.20
-    steps: 
+      steps:
       - 10_000_000
       - 10_000_000
       - 10_000_000
@@ -81,7 +84,6 @@ variables:
       - 1_000_000
       - 1_000_000
       - 100_000
-    iterator: zip
 
 pbs:
   setup:

@@ -3,34 +3,37 @@ name: Low_Pressure
 command:
   - >
     mpirun -np 12
-    sdrun create
+    sdrun
     --pressure {pressure}
     --temperature {create_temp}
     --space-group {space_group}
     --lattice-lengths {cell_dims}
     --output {outdir}
-    --steps {create_steps}
+    --num-steps {create_steps}
+    create
     Trimer-T{create_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
   - >
     mpirun -np 12
-    sdrun equil
-    --equil-type {equil_type}
+    sdrun
     --pressure {pressure}
     --init-temp {create_temp}
     --temperature {temperature}
     --space-group {space_group}
     --output {outdir}
-    --steps {equil_steps}
+    --num-steps {equil_steps}
+    equil
+    --equil-type {equil_type}
     Trimer-T{create_temp:.2f}-P{pressure:.2f}-{space_group}.gsd
     Trimer-T{temperature:.2f}-P{pressure:.2f}.gsd
   - >
     mpirun -np 12
-    sdrun prod
+    sdrun
     --pressure {pressure}
     --temperature {temperature}
     --space-group {space_group}
     --output {outdir}
-    --steps {steps}
+    --num-steps {steps}
+    prod
     Trimer-T{temperature:.2f}-P{pressure:.2f}.gsd
 
 variables:

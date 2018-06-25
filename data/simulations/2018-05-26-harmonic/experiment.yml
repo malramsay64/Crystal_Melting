@@ -5,18 +5,16 @@ name: Harmonic Pinning
 command:
   - >
     sdrun
-    create
     --pressure {pressure}
     --temperature {temperature}
     --space-group {space_group}
     --lattice-lengths {cell_dims}
     --output {outdir}
     --steps {create_steps}
+    create
     Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
   - >
     sdrun
-    equil
-    --equil-type {equil_type}
     --pressure {pressure}
     --init-temp {temperature}
     --temperature {temperature}
@@ -24,17 +22,19 @@ command:
     --harmonic-force {harmonic_force}
     --output {outdir}
     --steps {equil_steps}
+    equil
+    --equil-type {equil_type}
     Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
     Trimer-P{pressure:.2f}-T{temperature:.2f}-K{harmonic_force:.2f}-{space_group}.gsd
   - >
     sdrun
-    prod
     --pressure {pressure}
     --temperature {temperature}
     --space-group {space_group}
     --harmonic-force {harmonic_force}
     --output {outdir}
     --steps {steps}
+    prod
     Trimer-P{pressure:.2f}-T{temperature:.2f}-K{harmonic_force:.2f}-{space_group}.gsd
 
 variables:
