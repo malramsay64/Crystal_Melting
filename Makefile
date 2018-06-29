@@ -2,26 +2,28 @@
 # Makefile
 # Malcolm Ramsay, 2018-03-20 17:19
 #
+# The excellent documentation of the functions in this makefile are adapted 
+# from a blogpost by François Zaninotto
+# https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
+#
+.DEFAULT_GOAL := help
 
-all:
-	@echo ""
-	@echo "make melting      Compute melting rates of the simulations in the"
-	@echo "                  directory data/simulations/melting"
-	@echo "make dynamics     Compute the dynamics quantities of the simulations"
-	@echo "                  in the directory data/simulations/dynamics"
-	@echo "make relaxations  Compute the relaxations quantities of all values"
-	@echo "                  in the file data/analysis/dynamics.h5"
-	@echo ""
-
-melting:
+melting: ## Compute melting rates o the simulations in the directory data/simulations/melting
 	python src/analysis/melting_rates.py -i data/simulations/melting -o data/analysis -s 100
 
-dynamics:
+dynamics: ## Compute the dynamics quantites of the simulations in the directory data/simulations/dynamics
 	ls data/simulations/dynamics/trajectory-* | xargs -n1 sdanalysis comp_dynamics -o data/analysis
 
-relaxations:
+relaxations: ## Compute the relaxation quantities of all values in the file data/analysis/dynamics.h5
 	python src/relaxations.py
 
+interface-dynamics: ## Compute the dynamics of a simulation with a liquid--crystal interface in data/simulations/2017-09-04-interface/
+	ls data/simulations/2017-09-04-interface/trajectory-* | xargs -n0 sdanalysis comp_dynamics -o data/analysis/interface
+
+.PHONY: help
+
+help:
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 # vim:ft=make
 #
