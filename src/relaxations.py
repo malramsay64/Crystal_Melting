@@ -69,7 +69,7 @@ def main():
     df_dyn = pd.read_hdf("data/analysis/dynamics.h5", "dynamics")
     # Remove columns with no relaxation value to calculate
     df_dyn.drop(
-        ["mean_displacement", "mean_rotation", "mfd", "overlap", "start_index"],
+        columns=["mean_displacement", "mean_rotation", "mfd", "overlap", "start_index"],
         inplace=True,
     )
     # Average over all intial times
