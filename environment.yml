@@ -10,7 +10,7 @@ dependencies:
   - Cython
   - malramsay::sdrun=0.5.0
   - malramsay::sdanalysis=0.5.3
-  - malramsay::experi>=0.2.4
+  - malramsay::experi=0.2.6
   - conda-forge::altair>=2.0
   - conda-forge::nbdime>=1.0
   - conda-forge::ipywidgets
