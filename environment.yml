@@ -14,3 +14,6 @@ dependencies:
   - conda-forge::altair>=2.0
   - conda-forge::nbdime>=1.0
   - conda-forge::ipywidgets
+  - pytest
+  - mypy
+  - black
