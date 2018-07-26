@@ -12,3 +12,7 @@ data/analysis/*
 
 # Ignore json output from altair
 *.json
+
+# Ignore generated files in notebook directory
+notebooks/*
+!notebooks/*.ipynb
