@@ -8,10 +8,11 @@
 
 """Helper functions for the creation and analysis of defects."""
 
+from bokeh.layouts import gridplot
 from hoomd.data import SnapshotParticleData, make_snapshot
+from sdanalysis import HoomdFrame
 from sdanalysis.figures import configuration
-from sdanalysis.frame import HoomdFrame
-from sdrun.params import SimulationParams
+from sdrun import SimulationParams
 
 
 def remove_molecule(snapshot: SnapshotParticleData, index: int) -> SnapshotParticleData:
