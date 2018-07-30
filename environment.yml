@@ -17,3 +17,6 @@ dependencies:
   - pytest
   - mypy
   - black
+  - pip
+  - pip:
+    - blackcellmagic
