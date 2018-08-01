@@ -12,7 +12,7 @@ from bokeh.layouts import gridplot
 from hoomd.data import SnapshotParticleData, make_snapshot
 from sdanalysis import HoomdFrame
 from sdanalysis.figures import configuration
-from sdanalysis.order import knn_model, compute_ml_order
+from sdanalysis.order import compute_ml_order, knn_model
 from sdrun import SimulationParams
 
 
@@ -78,15 +78,15 @@ def remove_horizontal(
 ) -> SnapshotParticleData:
     center = central_molecule(run_params)
     x, y, x = run_params.cell_dimensions
-    extent = 2 * int(num_mols / 2) * y
+    extent = 2 * int(num_mols / 4) * y
 
-    for index in range(center - extent, center, (y - 1) * 2):
+    for index in range(center - extent, center + extent, (y - 1) * 2):
         snapshot = remove_molecule(snapshot, index)
         snapshot = remove_molecule(snapshot, index + 2)
     return snapshot
 
 
-def _plot_snapshot(snapshot: SnapshotParticleData, order: bool = False):
+def plot_snapshot(snapshot: SnapshotParticleData, order: bool = False):
     """Helper function to plot a single snapshot."""
     frame = HoomdFrame(snapshot)
     if order:
@@ -97,17 +97,20 @@ def _plot_snapshot(snapshot: SnapshotParticleData, order: bool = False):
     return configuration.plot_frame(frame)
 
 
-def plot_snapshots(snapshots, num_rows: int = 2, order: bool = False):
+def plot_snapshots(
+    snapshots, num_columns: int = 2, num_rows: int = None, order: bool = False
+):
     # Length of sides to make a square
-    num_columns = int(len(snapshots) / num_rows)
+    if num_rows is None:
+        num_rows = int(len(snapshots) / num_columns)
     figures = []
-    for i in range(num_rows):
+    for i in range(num_columns):
         row = []
-        for j in range(num_columns):
-            if i * num_columns + j > len(snapshots):
+        for j in range(num_rows):
+            if i * num_rows + j > len(snapshots):
                 figures.append(row)
                 return gridplot(figures)
-            fig = _plot_snapshot(snapshots[i * num_columns + j], order=order)
+            fig = plot_snapshot(snapshots[i * num_rows + j], order=order)
             fig.plot_height = int(fig.plot_height / num_rows)
             fig.plot_width = int(fig.plot_width / num_rows)
             row.append(fig)
