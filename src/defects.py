@@ -92,8 +92,8 @@ def plot_snapshot(snapshot: SnapshotParticleData, order: bool = False):
     if order:
         from functools import partial
 
-        order = partial(compute_ml_order, knn_model())
-        return configuration.plot_frame(frame, order)
+        order_function = partial(compute_ml_order, knn_model())
+        return configuration.plot_frame(frame, order_function)
     return configuration.plot_frame(frame)
 
 
