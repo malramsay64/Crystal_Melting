@@ -10,7 +10,7 @@ command:
     --space-group {space_group}
     --lattice-lengths {cell_dims}
     --output {output}
-    --steps {create_steps}
+    --num-steps {create_steps}
     create
     --interface
     Trimer-P{pressure:.2f}-T{melt_temp:.2f}-{space_group}.gsd
@@ -22,7 +22,7 @@ command:
     --temperature {temperature}
     --space-group {space_group}
     --output {output}
-    --steps {equil_steps}
+    --num-steps {equil_steps}
     equil
     --equil-type {equil_type}
     Trimer-P{pressure:.2f}-T{melt_temp:.2f}-{space_group}.gsd
@@ -34,7 +34,7 @@ command:
     --temperature {temperature}
     --space-group {space_group}
     --output {output}
-    --steps {steps}
+    --num-steps {steps}
     prod
     Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
 
