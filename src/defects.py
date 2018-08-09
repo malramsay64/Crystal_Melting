@@ -8,6 +8,7 @@
 
 """Helper functions for the creation and analysis of defects."""
 
+import numpy as np
 from bokeh.layouts import gridplot
 from hoomd.data import SnapshotParticleData, make_snapshot
 from sdanalysis import HoomdFrame
@@ -92,7 +93,10 @@ def plot_snapshot(snapshot: SnapshotParticleData, order: bool = False):
     if order:
         from functools import partial
 
-        order_function = partial(compute_ml_order, knn_model())
+        def order_function(*args, **kwargs):
+            result = compute_ml_order(knn_model(), *args, **kwargs)
+            return result == "liq"
+
         return configuration.plot_frame(frame, order_function)
     return configuration.plot_frame(frame)
 
