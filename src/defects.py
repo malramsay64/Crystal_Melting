@@ -8,13 +8,20 @@
 
 """Helper functions for the creation and analysis of defects."""
 
+import logging
+from typing import List
+
 import numpy as np
 from bokeh.layouts import gridplot
+from bokeh.plotting import Figure
 from hoomd.data import SnapshotParticleData, make_snapshot
 from sdanalysis import HoomdFrame
 from sdanalysis.figures import configuration
 from sdanalysis.order import compute_ml_order, knn_model
 from sdrun import SimulationParams
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def remove_molecule(snapshot: SnapshotParticleData, index: int) -> SnapshotParticleData:
@@ -35,16 +42,15 @@ def remove_molecule(snapshot: SnapshotParticleData, index: int) -> SnapshotParti
     snapshot, and ensures a valid configuration once the molecule has been removed.
 
     ... note:
-        The index of molecules changes when this function is applied. All molecule ids need to be 
-        contigous, so on the removal of a molecule the largeset molecule id is removed, so all molecule 
+        The index of molecules changes when this function is applied. All molecule ids need to be
+        contigous, so on the removal of a molecule the largeset molecule id is removed, so all molecule
         IDs between ``index`` and the number of bodies will have shifted by 1.
 
     """
     mask = snapshot.particles.body != index
     num_particles = int(np.sum(mask))
     if num_particles == snapshot.particles.N:
-        print("Index not in snapshot")
-        return snapshot
+        raise IndexError(f"Index {index} does not match a molecule in the snapshot")
 
     new_snapshot = make_snapshot(
         num_particles, snapshot.box, snapshot.particles.types, snapshot.pairs.types
@@ -75,19 +81,51 @@ def remove_molecule(snapshot: SnapshotParticleData, index: int) -> SnapshotParti
 def central_molecule(run_params: SimulationParams) -> int:
     """Find the molecule closest to the center of the simulation.
 
-    This finds the unit cell halfway along each of the axes, then multiplies
-    by 2 since there are 2 molecules in each unit cell.
+    Args
+    ----
+        run_params (SimulationParams): The simulation parameters object for running the simulation.
+
+    Returns
+    -------
+        int: Index of the most cental molecule in the simulation.
+
+    This uses the crystal lattice dimensions to find the unit cell halfway along each of the axes,
+    then multiplies by the number of molecules in each unit cell.
 
     """
     x, y, z = run_params.cell_dimensions
-    return int(x / 2 * y + y / 2) * 2
+    molecules_cell = run_params.crystal.get_num_molecules()
+    return int((x / 2 * y + y / 2) * molecules_cell)
 
 
 def remove_vertical(
     snapshot: SnapshotParticleData, run_params: SimulationParams, num_mols: int
 ) -> SnapshotParticleData:
+    """Remove a number of molecules along a vertical line.
+
+    Args
+    ----
+        snapshot (SnapshotParticleData): The snapshot from which to remove the particles.
+        run_params (SimulationParams): The parameters the simulation has been set up with.
+        num_mols (int): The number of molecules to be removed from the simulation. The number of
+            molecules actually removed will be rounded to an even number.
+
+    Returns
+    -------
+        SnapshotParticleData: A Hoomd snapshot with a number of particles removed from 
+            the configuration centered around the centre most molecule.
+
+    More important than removing molecules from the exact center or the exact number of molecules
+    is the consistency of the removal. This means that the same layer of the crystal lattice
+    should be removed regardless of the number of molecules.
+
+    """
+    if num_mols < 0:
+        raise ValueError("Can't remove a negative number of molecules.")
+    if num_mols == 0:
+        return snapshot
     center = central_molecule(run_params)
-    for index in range(center - 2 * int(num_mols / 2), center):
+    for index in range(center - 2 * num_mols // 2, center):
         snapshot = remove_molecule(snapshot, index)
     return snapshot
 
@@ -95,13 +133,54 @@ def remove_vertical(
 def remove_horizontal(
     snapshot: SnapshotParticleData, run_params: SimulationParams, num_mols: int
 ) -> SnapshotParticleData:
+    """Remove a number of molecules along a horizontal line.
+
+    Args
+    ----
+        snapshot (SnapshotParticleData): The snapshot from which to remove the particles.
+        run_params (SimulationParams): The parameters the simulation has been set up with.
+        num_mols (int): The number of molecules to be removed from the simulation. The number of
+            molecules actually removed will be rounded to an even number.
+
+    Returns
+    -------
+        SnapshotParticleData: A hoomd snapshot with a number of particles removed from 
+            the configuration centered around the centre most molecule.
+
+    More important than removing molecules from the exact center or the exact number of molecules is
+    the consistency of the removal. This means that the same layer of the crystal lattice should be
+    removed regardless of the number of molecules and also that the molecules are in the middle of
+    the simulation cell. For these reasons the minimum number of molecuels removed is 4, with other
+    numbers of molecules removed being multiples of 4.
+
+    """
+    if num_mols < 0:
+        raise ValueError("Can't remove a negative number of molecules.")
+    if num_mols == 0:
+        return snapshot
     center = central_molecule(run_params)
     x, y, x = run_params.cell_dimensions
-    extent = 2 * int(num_mols / 4) * y
+    # The minimum number of molecules removed is 4
+    extent = max(num_mols // 4 * 2, 2)
+    counter = 0
 
-    for index in range(center - extent, center + extent, (y - 1) * 2):
+    for count, column in enumerate(range(-extent, extent, 2)):
+        # Adjust center by column, then number of molecules removed
+        index = center + column * y - count * 2
+
         snapshot = remove_molecule(snapshot, index)
         snapshot = remove_molecule(snapshot, index + 2)
+        counter += 2
+    logger.debug("Molecules Removed: %s", counter)
+    return snapshot
+
+
+def remove_vertical_cell(
+    snapshot: SnapshotParticleData, run_params: SimulationParams, num_cells: int
+) -> SnapshotParticleData:
+    center = central_molecule(run_params)
+    for index in range(center - 2 * num_cells // 2, center):
+        snapshot = remove_molecule(snapshot, index)
     return snapshot
 
 
@@ -124,17 +203,17 @@ def plot_snapshots(
 ):
     # Length of sides to make a square
     if num_rows is None:
-        num_rows = int(len(snapshots) / num_columns)
+        num_rows = len(snapshots) // num_columns
     figures = []
     for i in range(num_columns):
-        row = []
+        row: List[Figure] = []
         for j in range(num_rows):
             if i * num_rows + j > len(snapshots):
                 figures.append(row)
                 return gridplot(figures)
             fig = plot_snapshot(snapshots[i * num_rows + j], order=order)
-            fig.plot_height = int(fig.plot_height / num_rows)
-            fig.plot_width = int(fig.plot_width / num_rows)
+            fig.plot_height = fig.plot_height // num_rows
+            fig.plot_width = fig.plot_width // num_rows
             row.append(fig)
         figures.append(row)
     return gridplot(figures)
