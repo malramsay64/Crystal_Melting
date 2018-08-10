@@ -20,6 +20,9 @@ relaxations: ## Compute the relaxation quantities of all values in the file data
 interface-dynamics: ## Compute the dynamics of a simulation with a liquid--crystal interface in data/simulations/2017-09-04-interface/
 	ls data/simulations/2017-09-04-interface/trajectory-* | xargs -n0 sdanalysis comp_dynamics -o data/analysis/interface
 
+test: ## Test the functionality of the helper modules in src
+	python -m pytest src
+
 .PHONY: help
 
 help:
