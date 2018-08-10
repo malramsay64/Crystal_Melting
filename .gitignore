@@ -13,6 +13,9 @@ data/analysis/*
 # Ignore json output from altair
 *.json
 
+# Ignore pytest files
+.pytest_cache
+
 # Ignore generated files in notebook directory
 notebooks/*
 !notebooks/*.ipynb
