@@ -18,21 +18,38 @@ from sdrun import SimulationParams
 
 
 def remove_molecule(snapshot: SnapshotParticleData, index: int) -> SnapshotParticleData:
-    """Remove an arbitratry molecule from the simulation.
+    """Remove an arbitratry molecule from a hoomd snapshot.
 
-    This also ensures a valid configuration once the molecule has been removed.
+    Args
+    ----
+        snapshot (SnapshotParticleData): Snapshot from which a particle will be removed.
+        index (int): The index of the molecule to remove. This index is the zero indexed body of the
+            particle. All particles with the same body index will also be removed from the snapshot.
+
+    Returns
+    -------
+        SnapshotParticleData: A new snapshot with one less molecule.
+
+    The removal of a molecule is done by creating a new snapshot with N fewer particles, where N is
+    the number of particles in a molecule. This approach is simpler than modifying the existing
+    snapshot, and ensures a valid configuration once the molecule has been removed.
+
+    ... note:
+        The index of molecules changes when this function is applied. All molecule ids need to be 
+        contigous, so on the removal of a molecule the largeset molecule id is removed, so all molecule 
+        IDs between ``index`` and the number of bodies will have shifted by 1.
+
     """
     mask = snapshot.particles.body != index
-    if sum(mask) == snapshot.particles.N:
+    num_particles = int(np.sum(mask))
+    if num_particles == snapshot.particles.N:
         print("Index not in snapshot")
         return snapshot
 
     new_snapshot = make_snapshot(
-        snapshot.particles.N - 3,
-        snapshot.box,
-        snapshot.particles.types,
-        snapshot.pairs.types,
+        num_particles, snapshot.box, snapshot.particles.types, snapshot.pairs.types
     )
+    # All the attributes from the old snapshot which need to be applied to the new one.
     snapshot_attributes = [
         "position",
         "angmom",
@@ -49,6 +66,7 @@ def remove_molecule(snapshot: SnapshotParticleData, index: int) -> SnapshotParti
         getattr(new_snapshot.particles, attr)[:] = getattr(snapshot.particles, attr)[
             mask
         ]
+    # Remove the tag of the largest
     body_mask = snapshot.particles.body != max(snapshot.particles.body)
     new_snapshot.particles.body[:] = snapshot.particles.body[body_mask]
     return new_snapshot
