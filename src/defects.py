@@ -178,9 +178,41 @@ def remove_horizontal(
 def remove_vertical_cell(
     snapshot: SnapshotParticleData, run_params: SimulationParams, num_cells: int
 ) -> SnapshotParticleData:
+    """Remove unit cells in the vertical direction.
+
+    Args
+    ----
+        snapshot (SnapshotParticleData): The snapshot from which to remove the particles.
+        run_params (SimulationParams): The parameters the simulation has been set up with.
+        num_mols (int): The number of molecules to be removed from the simulation. The number of
+            molecules actually removed will be rounded to an even number.
+
+    Returns
+    -------
+        SnapshotParticleData: A Hoomd snapshot with a number of particles removed from 
+            the configuration centered around the centre most molecule.
+
+    Rather than just removing a single layer of molecules like :py:`remove_vertical`, this removes
+    both particles from the unit cell, meaning that the remaining layers can come together to form a
+    suitable crystal structure.
+
+    """
+    if num_cells < 0:
+        raise ValueError("Can't remove a negative number of cells.")
+    if num_cells == 0:
+        return snapshot
     center = central_molecule(run_params)
-    for index in range(center - 2 * num_cells // 2, center):
+    # This ensures the appropriate molecules are removed
+    index = center - num_cells // 2 * 2
+    counter = 0
+    for i in range(num_cells):
+        if i == 0:
+            snapshot = remove_molecule(snapshot, index - 2)
+        else:
+            snapshot = remove_molecule(snapshot, index - 1)
         snapshot = remove_molecule(snapshot, index)
+        counter += 2
+    logger.debug("Molecules Removed: %s", counter)
     return snapshot
 
 

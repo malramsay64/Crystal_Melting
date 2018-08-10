@@ -18,6 +18,7 @@ from ..defects import (
     remove_horizontal,
     remove_molecule,
     remove_vertical,
+    remove_vertical_cell,
 )
 
 
@@ -109,3 +110,20 @@ def test_remove_horizontal_failure(params_snapshot, mols_removed):
     sim_params, snapshot = params_snapshot
     with pytest.raises(ValueError):
         remove_snap = remove_horizontal(snapshot, sim_params, mols_removed)
+
+
+@pytest.mark.parametrize("cells_removed", [2, 8, 9, 21])
+def test_remove_vert_cells(params_snapshot, cells_removed):
+    """Ensure the number of unit cells removed remains consistent."""
+    sim_params, snapshot = params_snapshot
+    remove_snap = remove_vertical_cell(snapshot, sim_params, cells_removed)
+    actual_removed = cells_removed * 2
+    num_removed = sim_params.molecule.num_particles * actual_removed
+    assert snapshot.particles.N == remove_snap.particles.N + num_removed
+
+
+@pytest.mark.parametrize("cells_removed", [-1])
+def test_remove_vert_cells_failure(params_snapshot, cells_removed):
+    sim_params, snapshot = params_snapshot
+    with pytest.raises(ValueError):
+        remove_snap = remove_vertical_cell(snapshot, sim_params, cells_removed)
