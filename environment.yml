@@ -1,25 +1,28 @@
 name: crystal
 channels:
   - defaults
-  - glotzer
+  - conda-forge
   - malramsay
 dependencies:
+  # Running Simulations
   - python=3.6
-  - ipykernel
   - numba
   - Cython
-  - malramsay::sdrun=0.5.3
+  - malramsay::sdrun=0.6.0
   - malramsay::sdanalysis=0.5.6
   - malramsay::experi=0.2.6
-  - conda-forge::altair>=2.0
-  - conda-forge::nbdime>=1.0
-  - conda-forge::ipywidgets
-  - PhantomJS
-  - pillow
-  - selenium
+  # Dev tools
   - pytest
   - mypy
   - black
   - pip
   - pip:
     - blackcellmagic
+  # Interactive analysis
+  - ipykernel
+  - ipywidgets
+  - altair>=2.0
+  - nbdime>=1.0
+  - PhantomJS
+  - pillow
+  - selenium
