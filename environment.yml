@@ -10,7 +10,7 @@ dependencies:
   - Cython
   - malramsay::sdrun=0.6.0
   - malramsay::sdanalysis=0.5.6
-  - malramsay::experi=0.2.6
+  - malramsay::experi=0.2.8
   # Dev tools
   - pytest
   - mypy
