@@ -18,21 +18,21 @@ jobs:
         {creates}
 
   - command:
-    requires: Trimer-P{pressure:.2f}-T{melt_temp:.2f}-{space_group}.gsd
-    creates: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
-    cmd: >
-      mpirun -np 12
-      sdrun
-      --pressure {pressure}
-      --init-temp {melt_temp}
-      --temperature {temperature}
-      --space-group {space_group}
-      --output {output}
-      --num-steps {equil_steps}
-      equil
-      --equil-type {equil_type}
-      {requires}
-      {creates}
+      requires: Trimer-P{pressure:.2f}-T{melt_temp:.2f}-{space_group}.gsd
+      creates: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
+      cmd: >
+        mpirun -np 12
+        sdrun
+        --pressure {pressure}
+        --init-temp {melt_temp}
+        --temperature {temperature}
+        --space-group {space_group}
+        --output {output}
+        --num-steps {equil_steps}
+        equil
+        --equil-type {equil_type}
+        {requires}
+        {creates}
 
   - command:
       requires: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
