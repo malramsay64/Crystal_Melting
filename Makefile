@@ -2,23 +2,23 @@
 # Makefile
 # Malcolm Ramsay, 2018-03-20 17:19
 #
-# The excellent documentation of the functions in this makefile are adapted 
+# The excellent documentation of the functions in this makefile are adapted
 # from a blogpost by François Zaninotto
 # https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 #
 .DEFAULT_GOAL := help
 
-melting: ## Compute melting rates o the simulations in the directory data/simulations/melting
-	python src/analysis/melting_rates.py -i data/simulations/melting -o data/analysis -s 100
+melting: ## Compute melting rates of the simulations in the directory data/simulations/melting
+	python src/melting_rates.py -i data/simulations/melting -o data/analysis -s 100
 
 dynamics: ## Compute the dynamics quantites of the simulations in the directory data/simulations/dynamics
-	ls data/simulations/dynamics/trajectory-* | xargs -n1 sdanalysis comp_dynamics -o data/analysis
+	ls data/simulations/dynamics/trajectory-* | xargs sdanalysis comp_dynamics -o data/analysis
 
 relaxations: ## Compute the relaxation quantities of all values in the file data/analysis/dynamics.h5
-	python src/relaxations.py
+	sdanalysis comp_relaxations
 
 interface-dynamics: ## Compute the dynamics of a simulation with a liquid--crystal interface in data/simulations/2017-09-04-interface/
-	ls data/simulations/2017-09-04-interface/trajectory-* | xargs -n0 sdanalysis comp_dynamics -o data/analysis/interface
+	ls data/simulations/2017-09-04-interface/trajectory-* | xargs sdanalysis comp_dynamics -o data/analysis/interface
 
 test: ## Test the functionality of the helper modules in src
 	python -m pytest src
