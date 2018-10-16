@@ -94,11 +94,11 @@ variables:
 
 pbs:
   setup:
-    - export PATH="$HOME/.miniconda/bin"
+    - export PATH="$HOME/.miniconda/bin:$PATH"
     - source activate crystal
   cpus: 12
   memory: 16gb
-  walltime: 504:00:00
+  walltime: "504:00:00"
   project: PRJ-CrysGrowth
   o: logs
   j: oe
