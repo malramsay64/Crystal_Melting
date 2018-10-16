@@ -8,9 +8,9 @@ dependencies:
   - python=3.6
   - numba
   - Cython
-  - malramsay::sdrun=0.6.0
+  - malramsay::sdrun=0.6.1
   - malramsay::sdanalysis=0.6.6
-  - malramsay::experi=0.2.10
+  - malramsay::experi=0.2.11
   # Dev tools
   - pytest
   - mypy
