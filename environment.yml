@@ -16,8 +16,6 @@ dependencies:
   - mypy
   - black
   - pip
-  - pip:
-    - blackcellmagic
   # Interactive analysis
   - ipykernel
   - ipywidgets
