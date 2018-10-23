@@ -24,3 +24,7 @@ dependencies:
   - PhantomJS
   - pillow
   - selenium
+  # Writing tools
+  - pandoc
+  - pip:
+    - pandoc-fignos

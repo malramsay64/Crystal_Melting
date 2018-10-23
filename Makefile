@@ -28,8 +28,15 @@ figures: ## Generate all the figures in the figures directory
 	@mkdir -p figures
 	jupyter nbconvert --to notebook --ExecutePreprocessor.timeout=-1 --execute notebooks/06_Defect_Creation.ipynb
 
-.PHONY: help
+report_targets := $(wildcard reports/*.md)
 
+reports: $(report_targets:.md=.pdf) ## Generate reports
+	echo $<
+
+%.pdf: %.md
+	cd $(dir $<); pandoc $(notdir $<) --filter pandoc-fignos -o $(notdir $@)
+
+.PHONY: help
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
