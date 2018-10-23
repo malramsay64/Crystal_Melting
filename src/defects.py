@@ -249,3 +249,8 @@ def plot_snapshots(
             row.append(fig)
         figures.append(row)
     return gridplot(figures)
+
+
+def run_sim(snapshot: SnapshotParticleData, sim_params: SimulationParams):
+    snap = initialise.thermalise(snapshot, sim_params)
+    return simulation.equilibrate(snap, sim_params, equil_type="crystal")
