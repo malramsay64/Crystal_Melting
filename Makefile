@@ -26,7 +26,7 @@ test: ## Test the functionality of the helper modules in src
 .PHONY: figures
 figures: ## Generate all the figures in the figures directory
 	@mkdir -p figures
-	jupyter nbconvert --execute notebooks/06_Defect_Creation.ipynb
+	jupyter nbconvert --to notebook --ExecutePreprocessor.timeout=-1 --execute notebooks/06_Defect_Creation.ipynb
 
 .PHONY: help
 
