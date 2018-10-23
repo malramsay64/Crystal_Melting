@@ -6,6 +6,7 @@
 # Ignore output data
 data/simulations/*/*
 data/analysis/*
+figures/*
 
 # Never ignore experiment files
 !data/simulations/*/experiment.yml
