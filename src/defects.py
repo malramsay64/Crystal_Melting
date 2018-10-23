@@ -10,6 +10,7 @@
 
 import logging
 from typing import List
+import hoomd
 
 import numpy as np
 from bokeh.layouts import gridplot
@@ -18,7 +19,7 @@ from hoomd.data import SnapshotParticleData, make_snapshot
 from sdanalysis import HoomdFrame
 from sdanalysis.figures import configuration
 from sdanalysis.order import compute_ml_order, knn_model
-from sdrun import SimulationParams
+from sdrun import SimulationParams, initialise, simulation
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -112,7 +113,7 @@ def remove_vertical(
 
     Returns
     -------
-        SnapshotParticleData: A Hoomd snapshot with a number of particles removed from 
+        SnapshotParticleData: A Hoomd snapshot with a number of particles removed from
             the configuration centered around the centre most molecule.
 
     More important than removing molecules from the exact center or the exact number of molecules
@@ -144,7 +145,7 @@ def remove_horizontal(
 
     Returns
     -------
-        SnapshotParticleData: A hoomd snapshot with a number of particles removed from 
+        SnapshotParticleData: A hoomd snapshot with a number of particles removed from
             the configuration centered around the centre most molecule.
 
     More important than removing molecules from the exact center or the exact number of molecules is
@@ -189,7 +190,7 @@ def remove_vertical_cell(
 
     Returns
     -------
-        SnapshotParticleData: A Hoomd snapshot with a number of particles removed from 
+        SnapshotParticleData: A Hoomd snapshot with a number of particles removed from
             the configuration centered around the centre most molecule.
 
     Rather than just removing a single layer of molecules like :py:`remove_vertical`, this removes
