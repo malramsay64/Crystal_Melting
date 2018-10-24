@@ -7,6 +7,7 @@
 data/simulations/*/*
 data/analysis/*
 figures/*
+models/*
 
 # Never ignore experiment files
 !data/simulations/*/experiment.yml
