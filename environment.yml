@@ -16,6 +16,7 @@ dependencies:
   - mypy
   - black
   - pip
+  - isort
   # Interactive analysis
   - ipykernel
   - ipywidgets
