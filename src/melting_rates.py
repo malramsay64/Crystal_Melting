@@ -9,8 +9,10 @@
 """
 
 import os
+from collections import namedtuple
 from functools import partial
 from pathlib import Path
+from typing import NamedTuple
 
 import click
 import gsd.hoomd
@@ -18,97 +20,86 @@ import numba
 import numpy as np
 import pandas as pd
 from scipy.spatial import ConvexHull
-from sdanalysis import order
-from sdanalysis.frame import gsdFrame
+from sdanalysis import order, read
+from sdanalysis.frame import HoomdFrame
+from sdanalysis.util import get_filename_vars
 from sklearn import cluster
+from sklearn.externals import joblib
+
+from detection import spatial_clustering
+
+KNNModel = joblib.load(Path(__file__).parent / "../models/knn-trimer.pkl")
 
 
-@numba.autojit
-def periodic_distance(box: np.ndarray, X: np.ndarray, Y: np.ndarray) -> float:
-    inv_box = 1. / box
-    x = X - Y
-    for j in range(len(x)):
-        if box[j] > 1e-6:
-            images = inv_box[j] * x[j]
-            x[j] = box[j] * (images - round(images))
-    return np.linalg.norm(x)
+class CrystalFractions(NamedTuple):
+    liquid: float = 0.
+    p2: float = 0.
+    p2gg: float = 0.
+    pg: float = 0.
 
-
-def get_vars(fname: Path):
-    """Extract simulation variables from the filename."""
-    flist = fname.stem.split('-')
-    temp = flist[3][1:]
-    press = flist[2][1:]
-    crys = flist[4]
-    return temp, press, crys
+    @classmethod
+    def from_ordering(cls, ordering: np.ndarray) -> "CrystalFractions":
+        lookup = {0: "liquid", 1: "p2", 2: "p2gg", 3: "pg"}
+        values, counts = np.unique(ordering.astype(int), return_counts=True)
+        num_elements = len(ordering)
+        return cls(**{lookup[v]: c / num_elements for v, c in zip(values, counts)})
 
 
 def compute_crystal_growth(infile: Path, outfile: Path, skip_frames: int = 100) -> None:
-    temp, pressure, crys = get_vars(infile)
+    fvars = get_filename_vars(infile)
     order_list = []
     order_dimension = 5.
+
     with gsd.hoomd.open(str(infile)) as traj:
         max_frames = len(traj)
         for index in range(0, max_frames, skip_frames):
-            snap = gsdFrame(traj[index])
-            try:
-                ordering = order.compute_ml_order(
-                    order.knn_model(), snap.box, snap.position, snap.orientation
-                )
-                states = pd.Series(ordering).value_counts(normalize=True)
-                crystalline = ordering != 'liq'
-                crystalline = np.expand_dims(crystalline, axis=1)
-                clustering_matrix = np.append(
-                    snap.position, crystalline * order_dimension, axis=1
-                )
-                _, labels = cluster.dbscan(
-                    clustering_matrix,
-                    min_samples=4,
-                    eps=3,
-                    metric=partial(
-                        periodic_distance, np.append(snap.box[:3], order_dimension * 2)
-                    ),
-                )
-                if np.sum(labels == 1) > 3:
-                    hull = ConvexHull(snap.position[labels == 1,:2])
+            snap = HoomdFrame(traj[index])
+            ordering = order.compute_ml_order(
+                KNNModel, snap.box, snap.position, snap.orientation
+            )
+            labels = spatial_clustering(snap, ordering)
+
+            if np.sum(labels == 1) > 3:
+                hull0 = ConvexHull(snap.position[labels == 0, :2])
+                hull1 = ConvexHull(snap.position[labels == 1, :2])
+                if hull0.volume > hull1.volume:
+                    hull = hull1
                 else:
+                    hull = hull0
 
-                    def hull():
-                        pass
+            else:
+                hull = namedtuple("hull", ["area", "volume"])
+                hull.area = 0
+                hull.volume = 0
+            states = CrystalFractions.from_ordering(ordering)
+            df = {
+                "temperature": float(fvars.temperature),
+                "pressure": float(fvars.pressure),
+                "crystal": fvars.crystal,
+                "liq": float(states.liquid),
+                "p2": float(states.p2),
+                "p2gg": float(states.p2gg),
+                "pg": float(states.pg),
+                "surface_area": float(hull.area),
+                "volume": float(hull.volume),
+                "time": float(snap.timestep),
+            }
 
-                    hull.area = 0
-                    hull.volume = 0
-                df = pd.DataFrame(
-                    {
-                        'state': states.index,
-                        'fraction': states.values,
-                        'temperature': temp,
-                        'pressure': pressure,
-                        'crystal': crys,
-                        'surface-area': hull.area,
-                        'volume': hull.volume,
-                        'time': snap.timestep,
-                    }
-                )
-                order_list.append(df)
-            except ValueError:
-                # There are occasions when the molecule positions are outside the unit cell volume.
-                # Rather than checking all molecules in all confiurations, instead I am just waiting
-                # for the errors to come up, catch them and continue on. This is a rare occurence so
-                # not a huge problem with the statistics.
-                continue
+            order_list.append(df)
 
-        order_df = pd.concat(order_list)
+        order_df = pd.DataFrame.from_records(order_list)
         order_df.time = order_df.time.astype(np.uint32)
-        order_df.to_hdf(outfile, 'fractions', format='table', append=True)
+        order_df.to_hdf(
+            outfile, "fractions", format="table", append=True, min_itemsize=4
+        )
 
 
 @click.command()
 @click.option(
-    '-i', '--input-path', default=None, type=click.Path(exists=True, file_okay=False)
+    "-i", "--input-path", default=None, type=click.Path(exists=True, file_okay=False)
 )
-@click.option('-o', '--output-path', default=None)
-@click.option('-s', '--skip-frames', default=100, type=int)
+@click.option("-o", "--output-path", default=None)
+@click.option("-s", "--skip-frames", default=100, type=int)
 def main(input_path, output_path, skip_frames):
     if input_path is None:
         input_path = Path.cwd()
@@ -116,17 +107,18 @@ def main(input_path, output_path, skip_frames):
         output_path = Path.cwd()
     input_path = Path(input_path)
     output_path = Path(output_path)
-    file_list = list(input_path.glob('dump-*.gsd'))
+    file_list = list(input_path.glob("dump-*.gsd"))
     if len(file_list) == 0:
-        raise FileNotFoundError(f'No gsd files found in {input_path}')
+        raise FileNotFoundError(f"No gsd files found in {input_path}")
 
     output_path.mkdir(parents=True, exist_ok=True)
-    outfile = Path(output_path) / 'melting.h5'
+    outfile = Path(output_path) / "melting.h5"
     if outfile.exists():
-        res = click.prompt('File already exists, append or replace {A,r}')
-        if res is 'r':
+        res = click.prompt("File already exists, append or replace {A,r}")
+        if res is "r":
             os.remove(outfile)
     for infile in file_list:
+        print(f"Processing: {infile.name}")
         compute_crystal_growth(infile, outfile, skip_frames)
 
 
