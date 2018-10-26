@@ -8,18 +8,19 @@
 
 """Utilities for handling the trimer molecule."""
 
-import numpy as np
-from pathlib import Path
 from itertools import product
+from pathlib import Path
 from typing import List, Tuple
-import matplotlib.pyplot as plt
 
-from bokeh.plotting import gridplot
-from sdanalysis.figures import plot_frame
-from sdanalysis import HoomdFrame, util
-from sdanalysis.order import compute_neighbours
-from scipy.sparse import coo_matrix
 import gsd.hoomd
+import matplotlib.pyplot as plt
+import numpy as np
+import sklearn
+from bokeh.plotting import gridplot
+from scipy.sparse import coo_matrix
+from sdanalysis import HoomdFrame, util
+from sdanalysis.figures import plot_frame
+from sdanalysis.order import compute_ml_order, compute_neighbours
 
 
 def read_files(
@@ -119,6 +120,20 @@ def neighbour_connectivity(snapshot, max_neighbours=6, max_radius=5):
     )
     connectivity = coo_matrix((sparse_values, sparse_coordinates))
     return connectivity.toarray()
+
+
+def spatial_clustering(snapshot, classification: np.ndarray = None):
+    if classification is None:
+        KnnModel = sklearn.externals.joblib.load("../models/knn-trimer.pkl")
+        classification = compute_ml_order(
+            KnnModel, snapshot.box, snapshot.position, snapshot.orientation
+        )
+
+    connectivity = neighbour_connectivity(snapshot)
+    agg_cluster = sklearn.cluster.AgglomerativeClustering(
+        n_clusters=2, connectivity=connectivity
+    )
+    return agg_cluster.fit_predict((classification > 0).reshape(-1, 1))
 
 
 def plot_confusion_matrix(
