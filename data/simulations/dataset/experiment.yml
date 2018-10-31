@@ -1,0 +1,85 @@
+name: Interface
+
+jobs:
+  - command:
+      creates: Trimer-P{pressure:.2f}-T{melt_temp:.2f}-{space_group}.gsd
+      cmd: >
+        mpirun -np 12
+        sdrun
+        --pressure {pressure}
+        --init-temp {create_temp}
+        --temperature {melt_temp}
+        --space-group {space_group}
+        --lattice-lengths {cell_dims}
+        --output {output}
+        --num-steps {create_steps}
+        create
+        --interface
+        {creates}
+
+  - command:
+      requires: Trimer-P{pressure:.2f}-T{melt_temp:.2f}-{space_group}.gsd
+      creates: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
+      cmd: >
+        mpirun -np 12
+        sdrun
+        --pressure {pressure}
+        --init-temp {melt_temp}
+        --temperature {temperature}
+        --space-group {space_group}
+        --output {output}
+        --num-steps {equil_steps}
+        equil
+        --equil-type {equil_type}
+        {requires}
+        {creates}
+
+  - command:
+      requires: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
+      creates: output/dump-Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
+      cmd: >
+        mpirun -np 12
+        sdrun
+        --pressure {pressure}
+        --temperature {temperature}
+        --space-group {space_group}
+        --output {output}
+        --output-interval {output_interval}
+        --num-steps {steps}
+        prod
+        {requires}
+
+variables:
+  create_temp: 0.4
+  create_steps: 10_000_000
+  equil_type: interface
+  equil_steps: 100_000_000
+  output: output
+  output_interval: 1_000_000
+  steps: 50_000_000
+  zip:
+    - space_group:
+        - p2
+        - pg
+        - p2gg
+      cell_dims:
+        - 48 42
+        - 48 42
+        - 48 21
+  - pressure: 1.00
+    melt_temp: 0.80
+    temperature:
+      - 0.30
+      - 0.40
+      - 0.50
+
+pbs:
+  setup:
+    - export PATH="$HOME/.miniconda/bin:$PATH"
+    - source activate crystal
+  cpus: 12
+  memory: 16gb
+  walltime: "504:00:00"
+  project: PRJ-CrysGrowth
+  o: logs
+  j: oe
