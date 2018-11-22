@@ -21,3 +21,12 @@ models/*
 # Ignore generated files in notebook directory
 notebooks/*
 !notebooks/*.ipynb
+
+# Ignore generated report files
+reports/*.pdf
+reports/*.html
+logbook/*.pdf
+logbook/*.html
+
+# Ignore pandoc generated files
+pandoc.out
