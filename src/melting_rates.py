@@ -8,11 +8,13 @@
 """Compute the melting rates of the crystal structures.
 """
 
+import logging
 import os
 from collections import namedtuple
 from functools import partial
+from multiprocessing import Manager, Pool, Queue, cpu_count
 from pathlib import Path
-from typing import NamedTuple
+from typing import NamedTuple, Optional, Tuple
 
 import click
 import gsd.hoomd
@@ -27,6 +29,8 @@ from sklearn import cluster
 from sklearn.externals import joblib
 
 from detection import spatial_clustering
+
+logger = logging.getLogger(__name__)
 
 KNNModel = joblib.load(Path(__file__).parent / "../models/knn-trimer.pkl")
 
@@ -45,7 +49,9 @@ class CrystalFractions(NamedTuple):
         return cls(**{lookup[v]: c / num_elements for v, c in zip(values, counts)})
 
 
-def compute_crystal_growth(infile: Path, outfile: Path, skip_frames: int = 100) -> None:
+def compute_crystal_growth(
+    infile: Path, outfile: Path = None, skip_frames: int = 100
+) -> Optional[pd.DataFrame]:
     fvars = get_filename_vars(infile)
     order_list = []
     order_dimension = 5.
@@ -89,9 +95,55 @@ def compute_crystal_growth(infile: Path, outfile: Path, skip_frames: int = 100) 
 
         order_df = pd.DataFrame.from_records(order_list)
         order_df.time = order_df.time.astype(np.uint32)
+        if outfile is None:
+            return order_df
         order_df.to_hdf(
             outfile, "fractions", format="table", append=True, min_itemsize=4
         )
+
+
+def file_writer(queue: Queue, outfile: Path):
+    logger.info("Started writer process")
+    with pd.HDFStore(outfile, "w") as dst:
+        while True:
+            group, dataset = queue.get()
+            logger.info("Writing: %s to %s", dataset.head(1), group)
+            if dataset is None:
+                break
+            dst.append(group, dataset)
+        dst.flush()
+    logger.info("Completed Writing")
+
+
+def process_crystal_growth(queue: Queue, infile: str, skip_frames: int = 100) -> None:
+    logger.info("Processing: %s", infile.name)
+    melting_data = compute_crystal_growth(infile, outfile=None, skip_frames=skip_frames)
+    logger.info("Adding to write queue\n%s", melting_data.head(1))
+    queue.put(("fractions", melting_data))
+
+
+def parallel_process_files(input_files: Tuple[str], outfile: Path) -> None:
+    manager = Manager()
+    queue = manager.Queue()
+
+    with Pool(cpu_count() + 1) as pool:
+        writer = pool.apply_async(file_writer, (queue, outfile))
+
+        pool.starmap(process_crystal_growth, ((queue, i) for i in input_files))
+        logger.info("Completed Processing")
+
+        queue.put((None, None))
+        writer.wait()
+        logger.info("Completed Writing")
+
+
+def _verbosity(ctx, param, value) -> None:  # pylint: disable=unused-argument
+    root_logger = logging.getLogger(__name__)
+    levels = {0: "INFO", 1: "DEBUG"}
+    log_level = levels.get(value, "DEBUG")
+    logging.basicConfig(level=log_level)
+    root_logger.setLevel(log_level)
+    logger.debug("Setting log level to %s", log_level)
 
 
 @click.command()
@@ -100,6 +152,7 @@ def compute_crystal_growth(infile: Path, outfile: Path, skip_frames: int = 100) 
 )
 @click.option("-o", "--output-path", default=None)
 @click.option("-s", "--skip-frames", default=100, type=int)
+@click.option("-v", "--verbosity", callback=_verbosity, expose_value=False, count=True)
 def main(input_path, output_path, skip_frames):
     if input_path is None:
         input_path = Path.cwd()
@@ -117,9 +170,7 @@ def main(input_path, output_path, skip_frames):
         res = click.prompt("File already exists, append or replace {A,r}")
         if res is "r":
             os.remove(outfile)
-    for infile in file_list:
-        print(f"Processing: {infile.name}")
-        compute_crystal_growth(infile, outfile, skip_frames)
+    parallel_process_files(tuple(file_list), outfile)
 
 
 if __name__ == "__main__":
