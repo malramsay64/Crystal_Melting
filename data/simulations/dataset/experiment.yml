@@ -4,7 +4,8 @@ jobs:
   - command:
       creates: Trimer-P{pressure:.2f}-T{melt_temp:.2f}-{space_group}.gsd
       cmd: >
-        mpirun -np 12
+        docker run -v $(pwd):/workdir -w /workdir malramsay/statdyn-simulation
+        mpirun -np 4
         sdrun
         --pressure {pressure}
         --init-temp {create_temp}
@@ -21,10 +22,10 @@ jobs:
       requires: Trimer-P{pressure:.2f}-T{melt_temp:.2f}-{space_group}.gsd
       creates: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
       cmd: >
-        mpirun -np 12
+        docker run -v $(pwd):/workdir -w /workdir malramsay/statdyn-simulation
+        mpirun -np 4
         sdrun
         --pressure {pressure}
-        --init-temp {melt_temp}
         --temperature {temperature}
         --space-group {space_group}
         --output {output}
@@ -38,7 +39,8 @@ jobs:
       requires: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
       creates: output/dump-Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
       cmd: >
-        mpirun -np 12
+        docker run -v $(pwd):/workdir -w /workdir malramsay/statdyn-simulation
+        mpirun -np 4
         sdrun
         --pressure {pressure}
         --temperature {temperature}
@@ -50,13 +52,13 @@ jobs:
         {requires}
 
 variables:
-  create_temp: 0.4
-  create_steps: 10_000_000
-  equil_type: interface
-  equil_steps: 100_000_000
+  create_temp: 0.40
+  create_steps: 10_000
+  equil_type: liquid
+  equil_steps: 10_000
   output: output
-  output_interval: 1_000_000
-  steps: 50_000_000
+  output_interval: 100_000
+  steps: 100_000
   zip:
     - space_group:
         - p2
@@ -66,20 +68,22 @@ variables:
         - 48 42
         - 48 42
         - 48 21
-  - pressure: 1.00
-    melt_temp: 0.80
-    temperature:
-      - 0.30
-      - 0.40
-      - 0.50
+  pressure: 1.00
+  melt_temp: 0.80
+  temperature:
+    - 0.40
+    - 0.42
+    - 0.44
+    - 0.46
+    - 0.50
 
-pbs:
-  setup:
-    - export PATH="$HOME/.miniconda/bin:$PATH"
-    - source activate crystal
-  cpus: 12
-  memory: 16gb
-  walltime: "504:00:00"
-  project: PRJ-CrysGrowth
-  o: logs
-  j: oe
+# pbs:
+  # setup:
+    # - export PATH="$HOME/.miniconda/bin:$PATH"
+    # - source activate crystal
+  # cpus: 8
+  # memory: 16gb
+  # walltime: "504:00:00"
+  # project: PRJ-CrysGrowth
+  # o: logs
+  # j: oe
