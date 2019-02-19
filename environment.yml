@@ -8,7 +8,7 @@ dependencies:
   - python=3.6
   - numba
   - Cython
-  - malramsay::sdrun=0.6.1
+  - malramsay::sdrun=0.6.3
   - malramsay::sdanalysis=0.6.8
   - malramsay::experi=0.2.11
   # Dev tools
@@ -22,6 +22,7 @@ dependencies:
   - ipywidgets
   - altair>=2.0
   - nbdime>=1.0
+  - matplotlib
   - PhantomJS
   - pillow
   - selenium
