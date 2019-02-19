@@ -36,10 +36,10 @@ KNNModel = joblib.load(Path(__file__).parent / "../models/knn-trimer.pkl")
 
 
 class CrystalFractions(NamedTuple):
-    liquid: float = 0.
-    p2: float = 0.
-    p2gg: float = 0.
-    pg: float = 0.
+    liquid: float = 0.0
+    p2: float = 0.0
+    p2gg: float = 0.0
+    pg: float = 0.0
 
     @classmethod
     def from_ordering(cls, ordering: np.ndarray) -> "CrystalFractions":
@@ -54,7 +54,7 @@ def compute_crystal_growth(
 ) -> Optional[pd.DataFrame]:
     fvars = get_filename_vars(infile)
     order_list = []
-    order_dimension = 5.
+    order_dimension = 5.0
 
     with gsd.hoomd.open(str(infile)) as traj:
         max_frames = len(traj)
@@ -65,7 +65,7 @@ def compute_crystal_growth(
             )
             labels = spatial_clustering(snap, ordering)
 
-            if np.sum(labels == 1) > 3:
+            if np.sum(labels == 1) > 5:
                 hull0 = ConvexHull(snap.position[labels == 0, :2])
                 hull1 = ConvexHull(snap.position[labels == 1, :2])
                 if hull0.volume > hull1.volume:
@@ -118,7 +118,7 @@ def file_writer(queue: Queue, outfile: Path):
 def process_crystal_growth(queue: Queue, infile: str, skip_frames: int = 100) -> None:
     logger.info("Processing: %s", infile.name)
     melting_data = compute_crystal_growth(infile, outfile=None, skip_frames=skip_frames)
-    logger.info("Adding to write queue\n%s", melting_data.head(1))
+    logger.debug("Adding data to write queue\n%s", melting_data.head(1))
     queue.put(("fractions", melting_data))
 
 

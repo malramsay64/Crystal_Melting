@@ -8,9 +8,10 @@
 
 """Utilities for handling the trimer molecule."""
 
+import logging
 from itertools import product
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, NamedTuple, Tuple
 
 import gsd.hoomd
 import matplotlib.pyplot as plt
@@ -21,6 +22,8 @@ from scipy.sparse import coo_matrix
 from sdanalysis import HoomdFrame, util
 from sdanalysis.figures import plot_frame
 from sdanalysis.order import compute_ml_order, compute_neighbours
+
+logger = logging.getLogger(__name__)
 
 
 def read_files(
@@ -40,20 +43,48 @@ def read_files(
     snapshots = []
     for press, temp, crys in product(pressure, temperature, crystals):
         fname = f"dump-Trimer-P{press:.2f}-T{temp:.2f}-{crys}.gsd"
-        with gsd.hoomd.open(str(data_dir / fname)) as trj:
+        with gsd.hoomd.open(str(data_dir / fname), "rb") as trj:
             snapshots.append(HoomdFrame(trj[index]))
 
     return snapshots
 
 
+class SnapshotData(NamedTuple):
+    snapshot: HoomdFrame
+    temperature: str
+    pressure: str
+    crystal: str
+
+    @classmethod
+    def from_variables(
+        cls, snapshot: HoomdFrame, variables: util.variables
+    ) -> "SnapshotData":
+        return cls(
+            snapshot=snapshot,
+            temperature=variables.temperature,
+            pressure=variables.pressure,
+            crystal=variables.crystal,
+        )
+
+
 def read_all_files(
-    directory: Path, index: int = 0
+    directory: Path, index: int = 0, glob: str = "dump-*"
 ) -> List[Tuple[util.variables, HoomdFrame]]:
     directory = Path(directory)
     snapshots = []
-    for file in directory.glob("dump-*.gsd"):
-        with gsd.hoomd.open(str(file)) as trj:
-            snapshots.append((util.get_filename_vars(file), HoomdFrame(trj[index])))
+    for file in directory.glob(glob):
+        with gsd.hoomd.open(str(file), "rb") as trj:
+            try:
+                snap = HoomdFrame(trj[index])
+            except IndexError:
+                logger.warning(
+                    "Index %d in input file %s doesn't exist, continuing...",
+                    index,
+                    file.name,
+                )
+            snapshots.append(
+                SnapshotData.from_variables(snap, util.get_filename_vars(file))
+            )
     return snapshots
 
 
