@@ -6,8 +6,6 @@ channels:
 dependencies:
   # Running Simulations
   - python=3.6
-  - numba
-  - Cython
   - malramsay::sdrun=0.6.3
   - malramsay::sdanalysis=0.7.2
   - malramsay::experi=0.2.11
