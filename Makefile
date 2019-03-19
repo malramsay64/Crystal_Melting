@@ -12,13 +12,13 @@ melting: ## Compute melting rates of the simulations in the directory data/simul
 	python src/melting_rates.py -i data/simulations/interface/output -o data/analysis -s 100
 
 dynamics: ## Compute the dynamics quantites of the simulations in the directory data/simulations/dynamics
-	ls data/simulations/dynamics/trajectory-* | xargs sdanalysis comp_dynamics -o data/analysis
+	sdanalysis comp-dynamics -o data/analysis/ data/simulations/dynamics/output/trajectory-*
 
 relaxations: ## Compute the relaxation quantities of all values in the file data/analysis/dynamics.h5
-	sdanalysis comp_relaxations data/analysis/dynamics.h5
+	sdanalysis comp-relaxations data/analysis/dynamics.h5
 
 interface-dynamics: ## Compute the dynamics of a simulation with a liquid--crystal interface in data/simulations/2017-09-04-interface/
-	ls data/simulations/interface/output/dump-* | xargs -n1 sdanalysis comp_dynamics -o data/analysis/interface
+	sdanalysis comp-dynamics -o data/analysis/interface data/simulations/interface/output/dump-*
 
 test: ## Test the functionality of the helper modules in src
 	python -m pytest src
