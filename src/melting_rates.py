@@ -113,17 +113,35 @@ def _verbosity(ctx, param, value) -> None:  # pylint: disable=unused-argument
     logger.debug("Setting log level to %s", log_level)
 
 
-@click.command()
+@click.group()
+def main():
+    pass
+
+
+@main.command()
 @click.argument("infile", type=click.Path(exists=True))
 @click.argument("outfile", type=click.Path(dir_okay=False, file_okay=True))
 @click.option("-s", "--skip-frames", default=100, type=int)
 @click.option("-v", "--verbosity", callback=_verbosity, expose_value=False, count=True)
-def main(infile, outfile, skip_frames):
+def melting(infile, outfile, skip_frames):
     infile = Path(infile)
     outfile = Path(outfile)
 
-    oufile.parent.mkdir(parents=True, exist_ok=True)
+    outfile.parent.mkdir(parents=True, exist_ok=True)
     compute_crystal_growth(infile, outfile, skip_frames)
+
+
+@main.command()
+@click.argument("output", type=click.Path(file_okay=True, dir_okay=False))
+@click.argument(
+    "infiles", nargs=-1, type=click.Path(exists=True, file_okay=True, dir_okay=False)
+)
+def collate(output, infiles):
+    with pd.HDFStore(output, "w") as dst:
+        for file in infiles:
+            with pd.HDFStore(file) as src:
+                key = "fractions"
+                dst.append(key, src.get(key))
 
 
 if __name__ == "__main__":
