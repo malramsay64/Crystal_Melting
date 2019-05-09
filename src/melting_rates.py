@@ -9,28 +9,29 @@
 """
 
 import logging
-import os
 from collections import namedtuple
+from itertools import islice
 from pathlib import Path
-from typing import NamedTuple, Optional, Tuple
+from typing import NamedTuple, Optional
 
 import click
 import gsd.hoomd
-import numba
 import numpy as np
 import pandas as pd
 from scipy.spatial import ConvexHull
-from sdanalysis import order, process_file, read
+from sdanalysis import SimulationParams, order
 from sdanalysis.frame import HoomdFrame
+from sdanalysis.read import process_gsd
 from sdanalysis.util import get_filename_vars
-from sklearn import cluster
 from sklearn.externals import joblib
 
 from detection import spatial_clustering
 
 logger = logging.getLogger(__name__)
 
-KNNModel = joblib.load(Path(__file__).parent / "../models/knn-trimer.pkl")
+KNNModel = joblib.load(
+    Path(__file__).parent / "../models/knn-trimer.pkl"
+)  # pylint:disable=invalid-name
 
 
 class CrystalFractions(NamedTuple):
@@ -54,53 +55,53 @@ def compute_crystal_growth(
     order_list = []
     order_dimension = 5.0
 
-    with gsd.hoomd.open(str(infile)) as traj:
-        max_frames = len(traj)
-        for index in range(0, max_frames, skip_frames):
-            snap = HoomdFrame(traj[index])
-            ordering = order.compute_ml_order(
-                KNNModel, snap.box, snap.position, snap.orientation
-            )
-            labels = spatial_clustering(snap, ordering)
+    sim_params = SimulationParams(infile=infile, linear_steps=None)
 
-            if np.sum(labels == 1) > 5:
-                hull0 = ConvexHull(snap.position[labels == 0, :2])
-                hull1 = ConvexHull(snap.position[labels == 1, :2])
-                if hull0.volume > hull1.volume:
-                    hull = hull1
-                else:
-                    hull = hull0
+    for index, (_, snap) in enumerate(process_gsd(sim_params)):
+        if index % skip_frames != 0:
+            continue
 
+        ordering = order.compute_ml_order(
+            KNNModel, snap.box, snap.position, snap.orientation
+        )
+        labels = spatial_clustering(snap, ordering)
+
+        if np.sum(labels == 1) > 5:
+            hull0 = ConvexHull(snap.position[labels == 0, :2])
+            hull1 = ConvexHull(snap.position[labels == 1, :2])
+            if hull0.volume > hull1.volume:
+                hull = hull1
             else:
-                hull = namedtuple("hull", ["area", "volume"])
-                hull.area = 0
-                hull.volume = 0
-            states = CrystalFractions.from_ordering(ordering)
-            df = {
-                "temperature": float(fvars.temperature),
-                "pressure": float(fvars.pressure),
-                "crystal": fvars.crystal,
-                "liq": float(states.liquid),
-                "p2": float(states.p2),
-                "p2gg": float(states.p2gg),
-                "pg": float(states.pg),
-                "surface_area": float(hull.area),
-                "volume": float(hull.volume),
-                "time": float(snap.timestep),
-            }
+                hull = hull0
 
-            order_list.append(df)
+        else:
+            hull = namedtuple("hull", ["area", "volume"])
+            hull.area = 0
+            hull.volume = 0
+        states = CrystalFractions.from_ordering(ordering)
+        df = {
+            "temperature": float(fvars.temperature),
+            "pressure": float(fvars.pressure),
+            "crystal": fvars.crystal,
+            "liq": float(states.liquid),
+            "p2": float(states.p2),
+            "p2gg": float(states.p2gg),
+            "pg": float(states.pg),
+            "surface_area": float(hull.area),
+            "volume": float(hull.volume),
+            "time": float(snap.timestep),
+        }
+
+        order_list.append(df)
 
         order_df = pd.DataFrame.from_records(order_list)
         order_df.time = order_df.time.astype(np.uint32)
         logger.debug("Value of outfile is: %s", outfile)
-        if outfile is None:
-            return order_df
+    if outfile is None:
+        return order_df
 
-        order_df.to_hdf(
-            outfile, "fractions", format="table", append=True, min_itemsize=4
-        )
-        return None
+    order_df.to_hdf(outfile, "fractions", format="table", append=True, min_itemsize=4)
+    return None
 
 
 def _verbosity(ctx, param, value) -> None:  # pylint: disable=unused-argument
