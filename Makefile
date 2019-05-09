@@ -8,8 +8,19 @@
 #
 .DEFAULT_GOAL := help
 
-melting: ## Compute melting rates of the simulations in the directory data/simulations/melting
-	python src/melting_rates.py -i data/simulations/interface/output -o data/analysis -s 100
+melting_sim = data/simulations/interface/output
+melting_analysis = data/analysis/melting
+
+melting_trajectories = $(wildcard $(melting_sim)/dump-Trimer*.gsd)
+analysis_files = $(addprefix $(melting_analysis)/, $(notdir $(melting_trajectories:.gsd=.h5)))
+
+melting: data/analysis/melting.h5 ## Compute melting rates of the simulations in the directory data/simulations/melting
+
+data/analysis/melting.h5: $(analysis_files)
+	python3 src/melting_rates.py collate $@ $^
+
+$(melting_analysis)/dump-%.h5: $(melting_sim)/dump-%.gsd
+	python src/melting_rates.py melting $< $@ -s 1000
 
 dynamics: ## Compute the dynamics quantites of the simulations in the directory data/simulations/dynamics
 	sdanalysis comp-dynamics -o data/analysis/ data/simulations/dynamics/output/trajectory-*
