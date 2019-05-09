@@ -11,8 +11,6 @@
 import logging
 import os
 from collections import namedtuple
-from functools import partial
-from multiprocessing import Manager, Pool, Queue, cpu_count
 from pathlib import Path
 from typing import NamedTuple, Optional, Tuple
 
@@ -22,7 +20,7 @@ import numba
 import numpy as np
 import pandas as pd
 from scipy.spatial import ConvexHull
-from sdanalysis import order, read
+from sdanalysis import order, process_file, read
 from sdanalysis.frame import HoomdFrame
 from sdanalysis.util import get_filename_vars
 from sklearn import cluster
@@ -95,46 +93,14 @@ def compute_crystal_growth(
 
         order_df = pd.DataFrame.from_records(order_list)
         order_df.time = order_df.time.astype(np.uint32)
+        logger.debug("Value of outfile is: %s", outfile)
         if outfile is None:
             return order_df
+
         order_df.to_hdf(
             outfile, "fractions", format="table", append=True, min_itemsize=4
         )
-
-
-def file_writer(queue: Queue, outfile: Path):
-    logger.info("Started writer process")
-    with pd.HDFStore(outfile, "w") as dst:
-        while True:
-            group, dataset = queue.get()
-            logger.info("Writing: %s to %s", dataset.head(1), group)
-            if dataset is None:
-                break
-            dst.append(group, dataset)
-        dst.flush()
-    logger.info("Completed Writing")
-
-
-def process_crystal_growth(queue: Queue, infile: str, skip_frames: int = 100) -> None:
-    logger.info("Processing: %s", infile.name)
-    melting_data = compute_crystal_growth(infile, outfile=None, skip_frames=skip_frames)
-    logger.debug("Adding data to write queue\n%s", melting_data.head(1))
-    queue.put(("fractions", melting_data))
-
-
-def parallel_process_files(input_files: Tuple[str], outfile: Path) -> None:
-    manager = Manager()
-    queue = manager.Queue()
-
-    with Pool(cpu_count() + 1) as pool:
-        writer = pool.apply_async(file_writer, (queue, outfile))
-
-        pool.starmap(process_crystal_growth, ((queue, i) for i in input_files))
-        logger.info("Completed Processing")
-
-        queue.put((None, None))
-        writer.wait()
-        logger.info("Completed Writing")
+        return None
 
 
 def _verbosity(ctx, param, value) -> None:  # pylint: disable=unused-argument
@@ -147,30 +113,16 @@ def _verbosity(ctx, param, value) -> None:  # pylint: disable=unused-argument
 
 
 @click.command()
-@click.option(
-    "-i", "--input-path", default=None, type=click.Path(exists=True, file_okay=False)
-)
-@click.option("-o", "--output-path", default=None)
+@click.argument("infile", type=click.Path(exists=True))
+@click.argument("outfile", type=click.Path(dir_okay=False, file_okay=True))
 @click.option("-s", "--skip-frames", default=100, type=int)
 @click.option("-v", "--verbosity", callback=_verbosity, expose_value=False, count=True)
-def main(input_path, output_path, skip_frames):
-    if input_path is None:
-        input_path = Path.cwd()
-    if output_path is None:
-        output_path = Path.cwd()
-    input_path = Path(input_path)
-    output_path = Path(output_path)
-    file_list = list(input_path.glob("dump-*.gsd"))
-    if len(file_list) == 0:
-        raise FileNotFoundError(f"No gsd files found in {input_path}")
+def main(infile, outfile, skip_frames):
+    infile = Path(infile)
+    outfile = Path(outfile)
 
-    output_path.mkdir(parents=True, exist_ok=True)
-    outfile = Path(output_path) / "melting.h5"
-    if outfile.exists():
-        res = click.prompt("File already exists, append or replace {A,r}")
-        if res is "r":
-            os.remove(outfile)
-    parallel_process_files(tuple(file_list), outfile)
+    oufile.parent.mkdir(parents=True, exist_ok=True)
+    compute_crystal_growth(infile, outfile, skip_frames)
 
 
 if __name__ == "__main__":
