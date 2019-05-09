@@ -17,6 +17,7 @@ import gsd.hoomd
 import matplotlib.pyplot as plt
 import numpy as np
 import sklearn
+import sklearn.cluster
 from bokeh.plotting import gridplot
 from scipy.sparse import coo_matrix
 from sdanalysis import HoomdFrame, util
