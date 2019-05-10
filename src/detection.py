@@ -11,7 +11,7 @@
 import logging
 from itertools import product
 from pathlib import Path
-from typing import List, NamedTuple, Tuple
+from typing import List, NamedTuple
 
 import gsd.hoomd
 import matplotlib.pyplot as plt
@@ -70,7 +70,7 @@ class SnapshotData(NamedTuple):
 
 def read_all_files(
     directory: Path, index: int = 0, glob: str = "dump-*"
-) -> List[Tuple[util.variables, HoomdFrame]]:
+) -> List[SnapshotData]:
     directory = Path(directory)
     snapshots = []
     for file in directory.glob(glob):
