@@ -18,6 +18,7 @@ import click
 import gsd.hoomd
 import numpy as np
 import pandas as pd
+from pandas.api.types import CategoricalDtype
 from scipy.spatial import ConvexHull
 from sdanalysis import SimulationParams, order
 from sdanalysis.frame import HoomdFrame
@@ -141,7 +142,11 @@ def collate(output, infiles):
         for file in infiles:
             with pd.HDFStore(file) as src:
                 key = "fractions"
-                dst.append(key, src.get(key))
+                df = src.get(key)
+                df["crystal"] = df["crystal"].astype(
+                    CategoricalDtype(categories=["p2", "pg", "p2gg"])
+                )
+                dst.append(key, df)
 
 
 if __name__ == "__main__":
