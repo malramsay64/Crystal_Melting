@@ -11,7 +11,7 @@
 import logging
 from itertools import product
 from pathlib import Path
-from typing import List, NamedTuple
+from typing import List, NamedTuple, Union
 
 import gsd.hoomd
 import matplotlib.pyplot as plt
@@ -29,8 +29,8 @@ logger = logging.getLogger(__name__)
 
 def read_files(
     index: int = 0,
-    pressure: List[float] = 1.00,
-    temperature: List[float] = 0.40,
+    pressure: Union[float, List[float]] = 1.00,
+    temperature: Union[float, List[float]] = 0.40,
     crystals: List[str] = ["p2", "p2gg", "pg"],
 ) -> List[HoomdFrame]:
     if isinstance(pressure, float):
