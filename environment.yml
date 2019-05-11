@@ -27,3 +27,4 @@ dependencies:
   - pandoc
   - pip:
     - pandoc-fignos
+    - bootstrapped
