@@ -8,7 +8,7 @@ dependencies:
   - python=3.6
   - malramsay::sdrun=0.6.7
   - malramsay::sdanalysis=0.7.7
-  - malramsay::experi=0.3.0
+  - malramsay::experi=0.3.1
   # Dev tools
   - pytest
   - mypy
