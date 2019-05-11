@@ -8,25 +8,62 @@
 #
 .DEFAULT_GOAL := help
 
+#
+# Melting Rules
+#
+
 melting_sim = data/simulations/interface/output
-melting_analysis = data/analysis/melting
+melting_analysis_dir = data/analysis/melting
 
 melting_trajectories = $(wildcard $(melting_sim)/dump-Trimer*.gsd)
-analysis_files = $(addprefix $(melting_analysis)/, $(notdir $(melting_trajectories:.gsd=.h5)))
+melting_analysis = $(addprefix $(melting_analysis_dir)/, $(notdir $(melting_trajectories:.gsd=.h5)))
 
 melting: data/analysis/melting.h5 ## Compute melting rates of the simulations in the directory data/simulations/melting
 
 data/analysis/melting.h5: $(analysis_files)
 	python3 src/melting_rates.py collate $@ $^
 
-$(melting_analysis)/dump-%.h5: $(melting_sim)/dump-%.gsd
+$(melting_analysis_dir)/dump-%.h5: $(melting_sim)/dump-%.gsd
 	python src/melting_rates.py melting $< $@ -s 1000
 
-dynamics: ## Compute the dynamics quantites of the simulations in the directory data/simulations/dynamics
-	sdanalysis comp-dynamics -o data/analysis/ data/simulations/dynamics/output/trajectory-*
+#
+# Dynamics Rules
+#
+
+dynamics_sim = data/simulations/dynamics/output
+dynamics_analysis_dir = data/analysis/dynamics
+
+dynamics_trajectories = $(wildcard $(dynamics_sim)/trajectory-Trimer-*.gsd)
+dynamics_analysis = $(addprefix $(dynamics_analysis_dir)/, $(notdir $(dynamics_trajectories:.gsd=.h5)))
+
+dynamics = data/analysis/dynamics.h5
+dynamics_clean = data/analysis/dynamics_clean.h5
+
+dynamics: ${dynamics_clean} ## Compute dynamics quantities for all parameters of the trimer molecule
+	echo $(dynamics_analysis)
+
+bootstrap: ${dynamics_clean}
+	python src/dynamics_calc.py bootstrap $<
+
+${dynamics_clean}: ${dynamics}
+	# python src/dynamics_calc.py clean --min-samples 50 $<
+
+${dynamics}: $(dynamics_analysis)
+	echo $(dynamics_analysis)
+	python3 src/dynamics_calc.py collate $@ $^
+
+$(dynamics_analysis_dir)/trajectory-Trimer-P1.00-%.h5: $(dynamics_sim)/trajectory-Trimer-P1.00-%.gsd
+	sdanalysis --keyframe-interval 20_000 --wave-number 2.80 comp-dynamics $< $@
+
+$(dynamcis_analysis_dir)/trajectory-Trimer-P13.50-%.h5: $(dynamics_sim)/trajectory-Trimer-P13.50-%.gsd
+	sdanalysis --keyframe-interval 20_000 --wave-number 2.90 comp-dynamics $< $@
+
+#
+# Other Rules
+#
 
 relaxations: ## Compute the relaxation quantities of all values in the file data/analysis/dynamics.h5
-	sdanalysis comp-relaxations data/analysis/dynamics.h5
+	sdanalysis comp-relaxations data/analysis/dynamics_clean.h5
 
 interface-dynamics: ## Compute the dynamics of a simulation with a liquid--crystal interface in data/simulations/2017-09-04-interface/
 	sdanalysis comp-dynamics -o data/analysis/interface data/simulations/interface/output/dump-*
