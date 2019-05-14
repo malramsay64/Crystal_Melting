@@ -46,7 +46,7 @@ bootstrap: ${dynamics_clean}
 	python src/dynamics_calc.py bootstrap $<
 
 ${dynamics_clean}: ${dynamics}
-	# python src/dynamics_calc.py clean --min-samples 50 $<
+	python src/dynamics_calc.py clean --min-samples 50 $<
 
 ${dynamics}: $(dynamics_analysis)
 	echo $(dynamics_analysis)
