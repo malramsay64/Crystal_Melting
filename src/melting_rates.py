@@ -18,6 +18,7 @@ import click
 import gsd.hoomd
 import numpy as np
 import pandas as pd
+import scipy.stats
 from pandas.api.types import CategoricalDtype
 from scipy.spatial import ConvexHull
 from sdanalysis import SimulationParams, order
@@ -130,6 +131,56 @@ def melting(infile, outfile, skip_frames):
 
     outfile.parent.mkdir(parents=True, exist_ok=True)
     compute_crystal_growth(infile, outfile, skip_frames)
+
+
+@main.command()
+@click.argument("infile", type=click.Path(exists=True))
+def clean(infile):
+    infile = Path(infile)
+    df = pd.read_hdf(infile, "fractions")
+    df = df.query("volume > 2000").query("time > 0")
+    df.to_hdf(
+        infile.with_name(infile.stem + "_clean" + ".h5"), "fractions", format="table"
+    )
+
+
+@main.command()
+@click.argument("infile", type=click.Path(exists=True))
+def rates(infile):
+    infile = Path(infile)
+
+    def instantaneous_gradient(df):
+        if df.shape[0] > 3:
+            return np.gradient(df.volume, df.time) / df.surface_area
+        else:
+            return 0
+
+    df = pd.read_hdf(infile, "fractions")
+    df["temp_norm"] = 0
+
+    select_high_pressure = (df.pressure == 13.50).values
+    df.loc[select_high_pressure, "temp_norm"] = (
+        df.loc[select_high_pressure, "temperature"] / 1.35
+    )
+
+    select_low_pressure = (df.pressure == 1.00).values
+    df.loc[select_low_pressure, "temp_norm"] = (
+        df.loc[select_low_pressure, "temperature"] / 0.36
+    )
+
+    group_bys = ["temperature", "pressure", "crystal", "temp_norm"]
+    gradient_mean = df.groupby(group_bys).apply(
+        lambda x: np.nanmean(instantaneous_gradient(x))
+    )
+    gradient_error = df.groupby(group_bys).apply(
+        lambda x: scipy.stats.sem(instantaneous_gradient(x), nan_policy="omit")
+    )
+
+    gradient1 = pd.DataFrame(
+        {"mean": gradient_mean, "error": gradient_error}, index=gradient_mean.index
+    )
+    gradient1.reset_index(inplace=True)
+    gradient1.to_hdf(infile, "rates", format="table")
 
 
 @main.command()
