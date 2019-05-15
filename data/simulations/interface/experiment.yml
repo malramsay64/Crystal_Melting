@@ -50,11 +50,10 @@ jobs:
 
 variables:
   create_temp: 0.4
-  create_steps: 10_000_000
+  create_steps: 200_000_000
   equil_type: interface
-  equil_steps: 100_000_000
+  equil_steps: 200_000_000
   output: output
-  steps: 2_000_000_000
   zip:
     - space_group:
         - p2
