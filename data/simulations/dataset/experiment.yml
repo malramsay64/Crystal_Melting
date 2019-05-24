@@ -1,10 +1,10 @@
-name: Interface
+name: Dataset
 
 jobs:
   - command:
       creates: Trimer-P{pressure:.2f}-T{melt_temp:.2f}-{space_group}.gsd
       cmd: >
-        mpirun -np 12
+        mpirun -np 8
         sdrun
         --pressure {pressure}
         --init-temp {create_temp}
@@ -21,7 +21,7 @@ jobs:
       requires: Trimer-P{pressure:.2f}-T{melt_temp:.2f}-{space_group}.gsd
       creates: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
       cmd: >
-        mpirun -np 12
+        mpirun -np 8
         sdrun
         --pressure {pressure}
         --init-temp {melt_temp}
@@ -38,7 +38,7 @@ jobs:
       requires: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
       creates: output/dump-Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
       cmd: >
-        mpirun -np 12
+        mpirun -np 8
         sdrun
         --pressure {pressure}
         --temperature {temperature}
@@ -84,13 +84,13 @@ variables:
         - 0.46
         - 0.50
 
-# pbs:
-  # setup:
-    # - export PATH="$HOME/.miniconda/bin:$PATH"
-    # - source activate crystal
-  # cpus: 8
-  # memory: 16gb
-  # walltime: "504:00:00"
-  # project: PRJ-CrysGrowth
-  # o: logs
-  # j: oe
+pbs:
+  setup:
+    - export PATH="$HOME/.miniconda/bin:$PATH"
+    - source activate crystal
+  cpus: 8
+  memory: 16gb
+  walltime: "504:00:00"
+  project: PRJ-CrysGrowth
+  o: logs
+  j: oe
