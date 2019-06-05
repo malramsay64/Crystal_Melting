@@ -11,6 +11,7 @@ models/*
 
 # Never ignore experiment files
 !data/simulations/*/experiment.yml
+!data/simulations/*/README.md
 
 # Ignore json output from altair
 *.json
