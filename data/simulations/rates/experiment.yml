@@ -13,13 +13,14 @@ jobs:
         --lattice-lengths {cell_dims}
         --output {output}
         --num-steps {create_steps}
+        --iteration-id {iteration_id}
         create
         --interface
         {creates}
 
   - command:
       requires: Trimer-P{pressure:.2f}-T{melt_temp:.2f}-{space_group}.gsd
-      creates: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
+      creates: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}-ID{iteration_id}.gsd
       cmd: >
         mpirun -np 12
         sdrun
@@ -29,14 +30,16 @@ jobs:
         --space-group {space_group}
         --output {output}
         --num-steps {equil_steps}
+        --iteration-id {iteration_id}
+        --output-interval {output_interval}
         equil
         --equil-type {equil_type}
         {requires}
         {creates}
 
   - command:
-      requires: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
-      creates: output/dump-Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
+      requires: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}-ID{iteration_id}.gsd
+      creates: output/dump-Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}-ID{iteration_id}.gsd
       cmd: >
         mpirun -np 12
         sdrun
@@ -45,32 +48,48 @@ jobs:
         --space-group {space_group}
         --output {output}
         --num-steps {steps}
+        --iteration-id {iteration_id}
+        --output-interval {output_interval}
         prod
         {requires}
 
 variables:
   create_temp: 0.4
-  create_steps: 2_000_000
+  create_steps: 20_000
   equil_type: interface
-  equil_steps: 2_000_000
+  equil_steps: 20_000
   output: output
   space_group: p2
   cell_dims: 48 42
-  steps: 2_000_000
-  chain:
-    - pressure: 13.50
-      melt_temp: 5.00
-      temperature:
-        - 2.00
-        - 3.00
-        - 4.00
+  output_interval: 10
+  iteration_id:
+    - 1
+  zip:
+    cycle:
+      times: 2
+      zip:
+        steps:
+          - 50_000
+          - 30_000
+          - 20_000
+        output_interval:
+          - 100
+          - 20
+          - 10
+      chain:
+        - pressure: 13.50
+          melt_temp: 6.00
+          temperature:
+            - 2.00
+            - 2.50
+            - 3.00
 
-    - pressure: 1.00
-      melt_temp: 2.00
-      temperature:
-        - 0.75
-        - 1.00
-        - 1.50
+        - pressure: 1.00
+          melt_temp: 2.00
+          temperature:
+            - 0.60
+            - 0.70
+            - 0.75
 
 pbs:
   setup:

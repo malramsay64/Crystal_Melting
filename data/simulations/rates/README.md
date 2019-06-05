@@ -19,3 +19,13 @@ This experiment is being conducted at pressures of
 and the temperature and pressure ranges
 need to be replicated in the dynamics experiment
 so that a dynamics normalised melting rate can be found.
+
+## Conditions
+
+The conditions for this experiment have been tested extensively.
+Spontaneous melting occurs at a temperatures;
+
+ pressure |
+ ----------------
+1.00    | 1.00
+13.50   | 4.00
