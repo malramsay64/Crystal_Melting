@@ -61,25 +61,38 @@ variables:
   output: output
   space_group: p2
   cell_dims: 48 42
-  output_interval: 10
   iteration_id:
     - 1
+    - 2
+    - 3
+    - 4
+    - 5
   zip:
     cycle:
       times: 2
       zip:
         steps:
+          - 100_000_000
+          - 10_000_000
+          - 100_000
           - 50_000
           - 30_000
           - 20_000
         output_interval:
-          - 100
-          - 20
-          - 10
+          - 100_000
+          - 10_000
+          - 1000
+          - 500
+          - 300
+          - 200
+
       chain:
         - pressure: 13.50
           melt_temp: 6.00
           temperature:
+            - 1.50
+            - 1.60
+            - 1.80
             - 2.00
             - 2.50
             - 3.00
@@ -87,6 +100,9 @@ variables:
         - pressure: 1.00
           melt_temp: 2.00
           temperature:
+            - 0.40
+            - 0.50
+            - 0.55
             - 0.60
             - 0.70
             - 0.75
