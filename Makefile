@@ -8,11 +8,25 @@
 #
 .DEFAULT_GOAL := help
 
+
+#
+# Machine Learning Rules
+#
+
+ml_model = models/knn-trimer.pkl
+ml_data_dir = data/simulations/dataset/output
+
+.PHONY: model
+model: $(ml_model) ## Train the machine learning model
+
+$(ml_model):
+	python3 src/models.py train-models $(ml_data_dir)
+
 #
 # Melting Rules
 #
 
-melting_sim = data/simulations/interface/output
+melting_sim = data/simulations/rates/output
 melting_analysis_dir = data/analysis/melting
 
 melting_trajectories = $(wildcard $(melting_sim)/dump-Trimer*.gsd)
@@ -23,7 +37,7 @@ melting: data/analysis/melting.h5 ## Compute melting rates of the simulations in
 data/analysis/melting.h5: $(analysis_files)
 	python3 src/melting_rates.py collate $@ $^
 
-$(melting_analysis_dir)/dump-%.h5: $(melting_sim)/dump-%.gsd
+$(melting_analysis_dir)/dump-%.h5: $(melting_sim)/dump-%.gsd $(ml_model)
 	python src/melting_rates.py melting $< $@ -s 1000
 
 #
