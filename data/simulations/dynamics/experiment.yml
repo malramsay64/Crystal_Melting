@@ -2,9 +2,9 @@ name: Dynamics
 
 jobs:
   - command:
-      creates: Trimer-T{create_temp:.2f}-P{pressure:.2f}.gsd
+      creates: Trimer-P{pressure:.2f}-T{create_temp:.2f}.gsd
       cmd: >
-        mpirun -np 12
+        mpirun -np 8
         sdrun
         --pressure {pressure}
         --temperature {create_temp}
@@ -15,10 +15,10 @@ jobs:
         {creates}
 
   - command:
-      requires: Trimer-T{create_temp:.2f}-P{pressure:.2f}.gsd
-      creates: Trimer-T{temperature:.2f}-P{pressure:.2f}.gsd
+      requires: Trimer-P{pressure:.2f}-T{create_temp:.2f}.gsd
+      creates: Trimer-P{pressure:.2f}-T{temperature:.2f}.gsd
       cmd: >
-        mpirun -np 12
+        mpirun -np 8
         sdrun
         --pressure {pressure}
         --init-temp {create_temp}
@@ -31,10 +31,10 @@ jobs:
         {creates}
 
   - command:
-      requires: Trimer-T{temperature:.2f}-P{pressure:.2f}.gsd
-      creates: output/trajectory-Trimer-T{temperature:.2f}-P{pressure:.2f}.gsd
+      requires: Trimer-P{pressure:.2f}-T{temperature:.2f}.gsd
+      creates: output/trajectory-Trimer-P{pressure:.2f}-T{temperature:.2f}.gsd
       cmd: >
-        mpirun -np 12
+        mpirun -np 8
         sdrun
         --pressure {pressure}
         --temperature {temperature}
@@ -45,6 +45,7 @@ jobs:
         {requires}
 
 variables:
+  create_temp: 0.4
   create_steps: 1_000_000
   equil_type: liquid
   outdir: output
@@ -82,7 +83,7 @@ pbs:
   setup:
     - export PATH="$HOME/.miniconda/bin:$PATH"
     - source activate crystal
-  cpus: 12
+  cpus: 8
   memory: 16gb
   walltime: "504:00:00"
   project: PRJ-CrysGrowth
