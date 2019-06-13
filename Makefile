@@ -32,13 +32,16 @@ melting_analysis_dir = data/analysis/melting
 melting_trajectories = $(wildcard $(melting_sim)/dump-Trimer*.gsd)
 melting_analysis = $(addprefix $(melting_analysis_dir)/, $(notdir $(melting_trajectories:.gsd=.h5)))
 
-melting: data/analysis/melting.h5 ## Compute melting rates of the simulations in the directory data/simulations/melting
+melting: data/analysis/melting_clean.h5 ## Compute melting rates of the simulations in the directory data/simulations/melting
 
-data/analysis/melting.h5: $(analysis_files)
+data/analysis/melting_clean.h5: data/analysis/melting.h5
+	python3 src/melting_rates.py clean $<
+
+data/analysis/melting.h5: $(melting_analysis)
 	python3 src/melting_rates.py collate $@ $^
 
 $(melting_analysis_dir)/dump-%.h5: $(melting_sim)/dump-%.gsd $(ml_model)
-	python src/melting_rates.py melting $< $@ -s 1000
+	python src/melting_rates.py melting $< $@
 
 #
 # Dynamics Rules
