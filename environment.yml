@@ -6,7 +6,7 @@ channels:
 dependencies:
   # Running Simulations
   - python=3.6
-  - malramsay::sdrun=0.6.7
+  - malramsay::sdrun=0.6.8
   - malramsay::sdanalysis=0.8.0
   - malramsay::experi=0.3.1
   # Dev tools
