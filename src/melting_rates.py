@@ -10,22 +10,20 @@
 
 import logging
 from collections import namedtuple
-from itertools import islice
 from pathlib import Path
 from typing import NamedTuple, Optional
 
 import click
-import gsd.hoomd
 import numpy as np
 import pandas as pd
 import scipy.stats
+import joblib
 from pandas.api.types import CategoricalDtype
 from scipy.spatial import ConvexHull
 from sdanalysis import SimulationParams, order
 from sdanalysis.frame import HoomdFrame
 from sdanalysis.read import process_gsd
 from sdanalysis.util import get_filename_vars
-from sklearn.externals import joblib
 
 from detection import spatial_clustering
 
@@ -85,6 +83,7 @@ def compute_crystal_growth(
             "temperature": float(fvars.temperature),
             "pressure": float(fvars.pressure),
             "crystal": fvars.crystal,
+            "iter_id": int(fvars.iteration_id),
             "liq": float(states.liquid),
             "p2": float(states.p2),
             "p2gg": float(states.p2gg),
@@ -168,7 +167,7 @@ def rates(infile):
         df.loc[select_low_pressure, "temperature"] / 0.36
     )
 
-    group_bys = ["temperature", "pressure", "crystal", "temp_norm"]
+    group_bys = ["temperature", "pressure", "crystal", "temp_norm", "iter_id"]
     gradient_mean = df.groupby(group_bys).apply(
         lambda x: np.nanmean(instantaneous_gradient(x))
     )

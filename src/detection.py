@@ -27,27 +27,17 @@ from sdanalysis.order import compute_ml_order, compute_neighbours
 logger = logging.getLogger(__name__)
 
 
-def read_files(
+def read_file(
     index: int = 0,
-    pressure: Union[float, List[float]] = 1.00,
-    temperature: Union[float, List[float]] = 0.40,
-    crystals: List[str] = ["p2", "p2gg", "pg"],
-) -> List[HoomdFrame]:
-    if isinstance(pressure, float):
-        pressure = [pressure]
-    if isinstance(temperature, float):
-        temperature = [temperature]
-    if isinstance(crystals, str):
-        crystals = [crystals]
+    pressure: float = 1.00,
+    temperature: float = 0.40,
+    crystal: str = "p2",
+) -> HoomdFrame:
 
     data_dir = Path("../data/simulation/trimer")
-    snapshots = []
-    for press, temp, crys in product(pressure, temperature, crystals):
-        fname = f"dump-Trimer-P{press:.2f}-T{temp:.2f}-{crys}.gsd"
-        with gsd.hoomd.open(str(data_dir / fname), "rb") as trj:
-            snapshots.append(HoomdFrame(trj[index]))
-
-    return snapshots
+    fname = f"dump-Trimer-P{pressure:.2f}-T{temperature:.2f}-{crystal}.gsd"
+    with gsd.hoomd.open(str(data_dir / fname), "rb") as trj:
+        return HoomdFrame(trj[index])
 
 
 class SnapshotData(NamedTuple):
@@ -55,16 +45,18 @@ class SnapshotData(NamedTuple):
     temperature: str
     pressure: str
     crystal: str
+    iteration_id: str
 
     @classmethod
     def from_variables(
-        cls, snapshot: HoomdFrame, variables: util.variables
+        cls, snapshot: HoomdFrame, variables: util.Variables
     ) -> "SnapshotData":
         return cls(
             snapshot=snapshot,
             temperature=variables.temperature,
             pressure=variables.pressure,
             crystal=variables.crystal,
+            iteration_id=variables.iteration_id,
         )
 
 
