@@ -72,7 +72,7 @@ ${dynamics}: $(dynamics_analysis)
 $(dynamics_analysis_dir)/trajectory-Trimer-P1.00-%.h5: $(dynamics_sim)/trajectory-Trimer-P1.00-%.gsd
 	sdanalysis --keyframe-interval 20_000 --wave-number 2.80 comp-dynamics $< $@
 
-$(dynamcis_analysis_dir)/trajectory-Trimer-P13.50-%.h5: $(dynamics_sim)/trajectory-Trimer-P13.50-%.gsd
+$(dynamics_analysis_dir)/trajectory-Trimer-P13.50-%.h5: $(dynamics_sim)/trajectory-Trimer-P13.50-%.gsd
 	sdanalysis --keyframe-interval 20_000 --wave-number 2.90 comp-dynamics $< $@
 
 #
