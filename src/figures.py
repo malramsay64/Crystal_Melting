@@ -10,7 +10,8 @@
 
 from typing import Any, Dict
 
-import altair.vegalite.v2 as alt
+import altair as alt
+import pandas
 
 
 def my_theme() -> Dict[str, Any]:
@@ -32,18 +33,19 @@ def use_my_theme():
 
 def _add_line(chart: alt.Chart, value: float, line: alt.Chart) -> alt.Chart:
     data = chart.data
-    if data == alt.Undefined:
+    if isinstance(data, pandas.DataFrame):
+        return alt.layer(chart, line, data=data).transform_calculate(val=f"{value}")
+    else:
         try:
             for layer in chart.layer:
-                if layer.data is not alt.Undefined:
-                    data = layer.data
-                    break
+                if isinstance(layer.data, pandas.DataFrame):
+                    return alt.layer(chart, line, data=data).transform_calculate(
+                        val=f"{value}"
+                    )
             else:
                 raise RuntimeError("No data found in Chart object")
         except AttributeError:
             raise RuntimeError("No data found in Chart object")
-
-    return alt.layer(chart, line, data=data).transform_calculate(val=f"{value}")
 
 
 def hline(chart: alt.Chart, value: float) -> alt.Chart:
