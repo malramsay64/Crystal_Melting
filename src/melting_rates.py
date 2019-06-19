@@ -148,9 +148,24 @@ def clean(infile):
 def rates(infile):
     infile = Path(infile)
 
+    def gradient_regression_mean(df):
+        """Calculate the gradient using linear regression.
+
+        The y value of the gradient is of eah volume divided by the mean
+        of the surface area over the course of the simulation. This is an
+        adjustment to bring the accuracy of the resulting slope closer to
+        that calculated by other methods.
+
+        """
+        df = df.dropna()
+        slope, _, _, _, std_err = scipy.stats.linregress(
+            df.time, df.volume / df.surface_area.mean()
+        )
+        return slope, std_err
+
     def instantaneous_gradient(df):
         if df.shape[0] > 3:
-            return -np.gradient(df.volume, df.time) / df.surface_area
+            return np.gradient(df.volume, df.time) / df.surface_area
         return np.nan
 
     df = pd.read_hdf(infile, "fractions")
@@ -168,11 +183,11 @@ def rates(infile):
 
     group_bys = ["temperature", "pressure", "crystal", "temp_norm", "iter_id"]
     gradient_mean = df.groupby(group_bys).apply(
-        lambda x: np.nanmean(instantaneous_gradient(x))
+        lambda x: np.nanmean(gradient_regression_mean(x))
     )
     try:
         gradient_error = df.groupby(group_bys).apply(
-            lambda x: scipy.stats.sem(instantaneous_gradient(x), nan_policy="omit")
+            lambda x: scipy.stats.sem(gradient_regression_mean(x), nan_policy="omit")
         )
     except FloatingPointError:
         gradient_error = np.nan
