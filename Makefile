@@ -32,6 +32,9 @@ melting_analysis_dir = data/analysis/melting
 melting_trajectories = $(wildcard $(melting_sim)/dump-Trimer*.gsd)
 melting_analysis = $(addprefix $(melting_analysis_dir)/, $(notdir $(melting_trajectories:.gsd=.h5)))
 
+rates: data/analysis/melting_clean.h5 ## Compute the rate of melting
+	python3 src/melting_rates.py rates $<
+
 melting: data/analysis/melting_clean.h5 ## Compute melting rates of the simulations in the directory data/simulations/melting
 
 data/analysis/melting_clean.h5: data/analysis/melting.h5
