@@ -122,7 +122,7 @@ def main():
 @main.command()
 @click.argument("infile", type=click.Path(exists=True))
 @click.argument("outfile", type=click.Path(dir_okay=False, file_okay=True))
-@click.option("-s", "--skip-frames", default=100, type=int)
+@click.option("-s", "--skip-frames", default=1, type=int)
 @click.option("-v", "--verbosity", callback=_verbosity, expose_value=False, count=True)
 def melting(infile, outfile, skip_frames):
     infile = Path(infile)

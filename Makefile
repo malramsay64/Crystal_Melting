@@ -41,7 +41,7 @@ data/analysis/melting.h5: $(melting_analysis)
 	python3 src/melting_rates.py collate $@ $^
 
 $(melting_analysis_dir)/dump-%.h5: $(melting_sim)/dump-%.gsd $(ml_model)
-	python src/melting_rates.py melting $< $@
+	python src/melting_rates.py melting --skip-frames 1 $< $@
 
 #
 # Dynamics Rules
