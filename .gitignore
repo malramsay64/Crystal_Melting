@@ -9,6 +9,8 @@ data/analysis/*
 figures/*
 models/*
 
+!figures/*.svg
+
 # Never ignore experiment files
 !data/simulations/*/experiment.yml
 !data/simulations/*/README.md
