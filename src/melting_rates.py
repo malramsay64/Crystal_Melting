@@ -14,10 +14,10 @@ from pathlib import Path
 from typing import NamedTuple, Optional
 
 import click
+import joblib
 import numpy as np
 import pandas as pd
 import scipy.stats
-import joblib
 from pandas.api.types import CategoricalDtype
 from scipy.spatial import ConvexHull
 from sdanalysis import SimulationParams, order
@@ -150,9 +150,8 @@ def rates(infile):
 
     def instantaneous_gradient(df):
         if df.shape[0] > 3:
-            return np.gradient(df.volume, df.time) / df.surface_area
-        else:
-            return 0
+            return -np.gradient(df.volume, df.time) / df.surface_area
+        return np.nan
 
     df = pd.read_hdf(infile, "fractions")
     df["temp_norm"] = 0
@@ -171,9 +170,12 @@ def rates(infile):
     gradient_mean = df.groupby(group_bys).apply(
         lambda x: np.nanmean(instantaneous_gradient(x))
     )
-    gradient_error = df.groupby(group_bys).apply(
-        lambda x: scipy.stats.sem(instantaneous_gradient(x), nan_policy="omit")
-    )
+    try:
+        gradient_error = df.groupby(group_bys).apply(
+            lambda x: scipy.stats.sem(instantaneous_gradient(x), nan_policy="omit")
+        )
+    except FloatingPointError:
+        gradient_error = np.nan
 
     gradient1 = pd.DataFrame(
         {"mean": gradient_mean, "error": gradient_error}, index=gradient_mean.index
