@@ -4,7 +4,6 @@ jobs:
   - command:
       creates: Trimer-P{pressure:.2f}-T{melt_temp:.2f}-{space_group}.gsd
       cmd: >
-        mpirun -np 12
         sdrun
         --pressure {pressure}
         --init-temp {create_temp}
@@ -22,7 +21,6 @@ jobs:
       requires: Trimer-P{pressure:.2f}-T{melt_temp:.2f}-{space_group}.gsd
       creates: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}-ID{iteration_id}.gsd
       cmd: >
-        mpirun -np 12
         sdrun
         --pressure {pressure}
         --init-temp {melt_temp}
@@ -41,7 +39,6 @@ jobs:
       requires: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}-ID{iteration_id}.gsd
       creates: output/dump-Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}-ID{iteration_id}.gsd
       cmd: >
-        mpirun -np 12
         sdrun
         --pressure {pressure}
         --temperature {temperature}
@@ -51,6 +48,7 @@ jobs:
         --iteration-id {iteration_id}
         --output-interval {output_interval}
         prod
+        --no-dynamics
         {requires}
 
 variables:
@@ -72,40 +70,44 @@ variables:
       times: 2
       zip:
         steps:
-          - 100_000_000
-          - 10_000_000
-          - 100_000
           - 50_000
-          - 30_000
-          - 20_000
-        output_interval:
           - 100_000
-          - 10_000
-          - 1000
+          - 500_000
+          - 1_000_000
+          - 2_000_000
+          - 10_000_000
+          - 100_000_000
+        output_interval:
           - 500
-          - 300
-          - 200
+          - 1_000
+          - 5_000
+          - 10_000
+          - 20_000
+          - 100_000
+          - 1_000_000
 
-      chain:
-        - pressure: 13.50
-          melt_temp: 6.00
-          temperature:
-            - 1.50
-            - 1.60
-            - 1.80
-            - 2.00
-            - 2.50
-            - 3.00
+    chain:
+      - pressure: 13.50
+        melt_temp: 6.00
+        temperature:
+          - 3.00
+          - 2.50
+          - 2.00
+          - 1.80
+          - 1.60
+          - 1.50
+          - 1.40
 
-        - pressure: 1.00
-          melt_temp: 2.00
-          temperature:
-            - 0.40
-            - 0.50
-            - 0.55
-            - 0.60
-            - 0.70
-            - 0.75
+      - pressure: 1.00
+        melt_temp: 2.00
+        temperature:
+          - 0.75
+          - 0.70
+          - 0.60
+          - 0.55
+          - 0.50
+          - 0.45
+          - 0.40
 
 pbs:
   setup:
