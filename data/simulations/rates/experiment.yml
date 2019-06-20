@@ -4,6 +4,7 @@ jobs:
   - command:
       creates: Trimer-P{pressure:.2f}-T{melt_temp:.2f}-{space_group}.gsd
       cmd: >
+        mpirun -np 12
         sdrun
         --pressure {pressure}
         --init-temp {create_temp}
@@ -21,6 +22,7 @@ jobs:
       requires: Trimer-P{pressure:.2f}-T{melt_temp:.2f}-{space_group}.gsd
       creates: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}-ID{iteration_id}.gsd
       cmd: >
+        mpirun -np 12
         sdrun
         --pressure {pressure}
         --init-temp {melt_temp}
@@ -39,6 +41,7 @@ jobs:
       requires: Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}-ID{iteration_id}.gsd
       creates: output/dump-Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}-ID{iteration_id}.gsd
       cmd: >
+        mpirun -np 12
         sdrun
         --pressure {pressure}
         --temperature {temperature}
