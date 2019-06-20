@@ -19,7 +19,7 @@ dependencies:
   # Interactive analysis
   - ipykernel
   - ipywidgets
-  - altair>=2.0
+  - altair=2.*
   - nbdime>=1.0
   - matplotlib
   - selenium
