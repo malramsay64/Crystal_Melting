@@ -138,6 +138,7 @@ def clean(infile):
     infile = Path(infile)
     df = pd.read_hdf(infile, "fractions")
     df = df.query("volume > 2000").query("time > 0")
+    df["radius"] = np.sqrt(df["volume"].values) / np.pi
     df.to_hdf(
         infile.with_name(infile.stem + "_clean" + ".h5"), "fractions", format="table"
     )
@@ -151,21 +152,19 @@ def rates(infile):
     def gradient_regression_mean(df):
         """Calculate the gradient using linear regression.
 
-        The y value of the gradient is of eah volume divided by the mean
+        The y value of the gradient is of each volume divided by the mean
         of the surface area over the course of the simulation. This is an
         adjustment to bring the accuracy of the resulting slope closer to
         that calculated by other methods.
 
         """
         df = df.dropna()
-        slope, _, _, _, std_err = scipy.stats.linregress(
-            df.time, df.volume / df.surface_area.mean()
-        )
+        slope, _, _, _, std_err = scipy.stats.linregress(df.time, df.radius)
         return slope, std_err
 
     def instantaneous_gradient(df):
         if df.shape[0] > 3:
-            return np.gradient(df.volume, df.time) / df.surface_area
+            return np.gradient(df.radius, df.time)
         return np.nan
 
     df = pd.read_hdf(infile, "fractions")
