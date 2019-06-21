@@ -182,14 +182,11 @@ def rates(infile):
 
     group_bys = ["temperature", "pressure", "crystal", "temp_norm", "iter_id"]
     gradient_mean = df.groupby(group_bys).apply(
-        lambda x: np.nanmean(gradient_regression_mean(x))
+        lambda x: gradient_regression_mean(x)[0]
     )
-    try:
-        gradient_error = df.groupby(group_bys).apply(
-            lambda x: scipy.stats.sem(gradient_regression_mean(x), nan_policy="omit")
-        )
-    except FloatingPointError:
-        gradient_error = np.nan
+    gradient_error = df.groupby(group_bys).apply(
+        lambda x: gradient_regression_mean(x)[1]
+    )
 
     gradient1 = pd.DataFrame(
         {"mean": gradient_mean, "error": gradient_error}, index=gradient_mean.index
