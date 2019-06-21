@@ -33,19 +33,12 @@ def use_my_theme():
 
 def _add_line(chart: alt.Chart, value: float, line: alt.Chart) -> alt.Chart:
     data = chart.data
-    if isinstance(data, pandas.DataFrame):
-        return alt.layer(chart, line, data=data).transform_calculate(val=f"{value}")
-    else:
-        try:
-            for layer in chart.layer:
-                if isinstance(layer.data, pandas.DataFrame):
-                    return alt.layer(chart, line, data=data).transform_calculate(
-                        val=f"{value}"
-                    )
-            else:
-                raise RuntimeError("No data found in Chart object")
-        except AttributeError:
-            raise RuntimeError("No data found in Chart object")
+    if data is alt.Undefined:
+        for layer in chart.layer:
+            if layer.data is alt.Undefined:
+                continue
+            data = layer.data
+    return alt.layer(chart, line, data=data).transform_calculate(val=f"{value}")
 
 
 def hline(chart: alt.Chart, value: float) -> alt.Chart:
