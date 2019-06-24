@@ -137,7 +137,7 @@ def melting(infile, outfile, skip_frames):
 def clean(infile):
     infile = Path(infile)
     df = pd.read_hdf(infile, "fractions")
-    df = df.query("volume > 2000").query("time > 0")
+    df = df.query("volume > 100").query("time > 0")
     df["radius"] = np.sqrt(df["volume"].values) / np.pi
     df.to_hdf(
         infile.with_name(infile.stem + "_clean" + ".h5"), "fractions", format="table"
