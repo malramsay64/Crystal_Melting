@@ -192,6 +192,9 @@ def rates(infile):
         {"mean": gradient_mean, "error": gradient_error}, index=gradient_mean.index
     )
     gradient1.reset_index(inplace=True)
+
+    ## Temperatures above these are too high and the melting is more complicated.
+    gradient1 = gradient1.query("temp_norm < 1.7")
     gradient1.to_hdf(infile, "rates", format="table")
 
 
