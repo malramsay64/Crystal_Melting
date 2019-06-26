@@ -6,6 +6,7 @@ channels:
 dependencies:
   # Running Simulations
   - python=3.6
+  - numpy=1.15.*
   - malramsay::sdrun=0.6.8
   - malramsay::sdanalysis=0.8.0
   - malramsay::experi=0.3.1
@@ -22,7 +23,7 @@ dependencies:
   - ipykernel
   - ipywidgets
   - altair=2.*
-  - nbdime>=1.0
+  - nbdime=1.*
   - matplotlib
   - selenium
   # Writing tools
