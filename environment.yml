@@ -17,6 +17,8 @@ dependencies:
   - isort
   - pylint
   # Interactive analysis
+  - scikit-learn=0.21.*
+  - joblib
   - ipykernel
   - ipywidgets
   - altair=2.*
