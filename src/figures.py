@@ -11,7 +11,7 @@
 from typing import Any, Dict
 
 import altair as alt
-import pandas
+from bokeh.plotting import Figure
 
 
 def my_theme() -> Dict[str, Any]:
@@ -29,6 +29,23 @@ def use_my_theme():
     # register and enable the theme
     alt.themes.register("my_theme", my_theme)
     alt.themes.enable("my_theme")
+
+
+def style_snapshot(figure: Figure) -> Figure:
+    """Style a bokeh figure as a configuration snapshot.
+
+    This is collection of style changes to make the output of a snapshot consistent and
+    nice. Primarily it removes all the extra stuff which isn't helpful in defining the
+    configuration like the axes, and the interactive tools.
+
+    """
+    figure.axis.visible = False
+    figure.xgrid.visible = False
+    figure.ygrid.visible = False
+    figure.toolbar_location = None
+    figure.toolbar.logo = None
+
+    return figure
 
 
 def _add_line(chart: alt.Chart, value: float, line: alt.Chart) -> alt.Chart:
