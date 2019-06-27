@@ -10,6 +10,7 @@ figures/*
 models/*
 
 !figures/*.svg
+!figures/*.png
 
 # Never ignore experiment files
 !data/simulations/*/experiment.yml
