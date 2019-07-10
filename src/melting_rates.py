@@ -78,12 +78,17 @@ def compute_crystal_growth(
             hull = namedtuple("hull", ["area", "volume"])
             hull.area = 0
             hull.volume = 0
+
+        if fvars.iteration_id is None:
+            iter_id = 1
+        else:
+            iter_id = fvars.iteration_id
         states = CrystalFractions.from_ordering(ordering)
         df = {
             "temperature": float(fvars.temperature),
             "pressure": float(fvars.pressure),
             "crystal": fvars.crystal,
-            "iter_id": int(fvars.iteration_id),
+            "iter_id": int(iter_id),
             "liq": float(states.liquid),
             "p2": float(states.p2),
             "p2gg": float(states.p2gg),
