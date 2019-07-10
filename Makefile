@@ -23,17 +23,36 @@ $(ml_model):
 	python3 src/models.py train-models $(ml_data_dir)
 
 #
+# Rates Rules
+#
+
+rates_sim = data/simulations/rates/output
+rates_analysis_dir = data/analysis/rates
+
+rates_trajectories = $(wildcard $(rates_sim)/dump-Trimer*.gsd)
+rates_analysis = $(addprefix $(rates_analysis_dir)/, $(notdir $(rates_trajectories:.gsd=.h5)))
+
+rates: data/analysis/rates_clean.h5 ## Compute the rate of melting
+	python3 src/melting_rates.py rates $<
+
+data/analysis/rates_clean.h5: data/analysis/rates.h5
+	python3 src/melting_rates.py clean $<
+
+data/analysis/rates.h5: $(rates_analysis)
+	python3 src/melting_rates.py collate $@ $^
+
+$(rates_analysis_dir)/dump-%.h5: $(rates_sim)/dump-%.gsd $(ml_model)
+	python src/melting_rates.py melting --skip-frames 1 $< $@
+
+#
 # Melting Rules
 #
 
-melting_sim = data/simulations/rates/output
-melting_analysis_dir = data/analysis/melting
+melting_sim = data/simulations/interface/output
+melting_analysis_dir = data/analysis/interface
 
 melting_trajectories = $(wildcard $(melting_sim)/dump-Trimer*.gsd)
 melting_analysis = $(addprefix $(melting_analysis_dir)/, $(notdir $(melting_trajectories:.gsd=.h5)))
-
-rates: data/analysis/melting_clean.h5 ## Compute the rate of melting
-	python3 src/melting_rates.py rates $<
 
 melting: data/analysis/melting_clean.h5 ## Compute melting rates of the simulations in the directory data/simulations/melting
 
@@ -44,7 +63,7 @@ data/analysis/melting.h5: $(melting_analysis)
 	python3 src/melting_rates.py collate $@ $^
 
 $(melting_analysis_dir)/dump-%.h5: $(melting_sim)/dump-%.gsd $(ml_model)
-	python src/melting_rates.py melting --skip-frames 1 $< $@
+	python src/melting_rates.py melting --skip-frames 100 $< $@
 
 #
 # Dynamics Rules
@@ -59,8 +78,7 @@ dynamics_analysis = $(addprefix $(dynamics_analysis_dir)/, $(notdir $(dynamics_t
 dynamics = data/analysis/dynamics.h5
 dynamics_clean = data/analysis/dynamics_clean.h5
 
-dynamics: ${dynamics_clean} ## Compute dynamics quantities for all parameters of the trimer molecule
-	echo $(dynamics_analysis)
+dynamics: bootstrap ## Compute dynamics quantities for all parameters of the trimer molecule
 
 bootstrap: ${dynamics_clean}
 	python src/dynamics_calc.py bootstrap $<
