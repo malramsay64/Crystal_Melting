@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import NamedTuple, Optional
 
 import click
+import joblib
 import numpy as np
 import pandas as pd
 import scipy.stats
@@ -24,7 +25,6 @@ from sdanalysis.frame import HoomdFrame
 from sdanalysis.read import process_gsd
 from sdanalysis.util import get_filename_vars
 
-import joblib
 from detection import spatial_clustering
 
 logger = logging.getLogger(__name__)
