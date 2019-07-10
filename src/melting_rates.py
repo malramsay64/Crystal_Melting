@@ -159,7 +159,10 @@ def rates(infile):
 
         """
         df = df.dropna()
-        slope, _, _, _, std_err = scipy.stats.linregress(df.time, df.radius)
+        try:
+            slope, _, _, _, std_err = scipy.stats.linregress(df.time, df.radius)
+        except FloatingPointError:
+            slope, std_err = np.nan, np.nan
         return slope, std_err
 
     def instantaneous_gradient(df):
