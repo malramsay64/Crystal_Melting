@@ -45,49 +45,46 @@ jobs:
         --space-group {space_group}
         --output {output}
         --num-steps {steps}
+        --output-interval {output_interval}
         prod
+        --no-dynamics
         {requires}
 
 variables:
   create_temp: 0.4
-  create_steps: 200_000_000
+  create_steps: 20_000
   equil_type: interface
-  equil_steps: 200_000_000
+  equil_steps: 20_000_000
+  output_interval:
   output: output
+  steps: 100_000_000
+  output_interval: 10_000
   zip:
-    - space_group:
-        - p2
-        - pg
-        - p2gg
-      cell_dims:
-        - 48 42
-        - 48 42
-        - 48 21
-    - cycle:
-        times: 2
-        steps:
-          - 1_000_000_000
-          - 1_000_000_000
-          - 1_000_000_000
-          - 500_000_000
-          - 500_000_000
-      chain:
-        - pressure: 13.50
-          melt_temp: 2.80
-          temperature:
-            - 1.32
-            - 1.35
-            - 1.40
-            - 1.45
-            - 1.50
-        - pressure: 1.00
-          melt_temp: 0.80
-          temperature:
-            - 0.32
-            - 0.35
-            - 0.38
-            - 0.40
-            - 0.45
+    space_group:
+      - p2
+      - pg
+      - p2gg
+    cell_dims:
+      - 48 42
+      - 48 42
+      - 48 21
+  chain:
+    - pressure: 13.50
+      melt_temp: 6.00
+      temperature:
+        - 1.32
+        - 1.35
+        - 1.40
+        - 1.45
+        - 1.50
+    - pressure: 1.00
+      melt_temp: 2.00
+      temperature:
+        - 0.32
+        - 0.35
+        - 0.38
+        - 0.40
+        - 0.45
 
 pbs:
   setup:
