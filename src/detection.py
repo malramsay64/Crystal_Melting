@@ -11,9 +11,10 @@
 import logging
 from itertools import product
 from pathlib import Path
-from typing import List, NamedTuple, Union
+from typing import List, NamedTuple
 
 import gsd.hoomd
+import joblib
 import matplotlib.pyplot as plt
 import numpy as np
 import sklearn
@@ -148,9 +149,9 @@ def neighbour_connectivity(snapshot, max_neighbours=6, max_radius=5):
 
 def spatial_clustering(snapshot, classification: np.ndarray = None):
     if classification is None:
-        KnnModel = sklearn.externals.joblib.load("../models/knn-trimer.pkl")
+        knn_model = joblib.load("../models/knn-trimer.pkl")
         classification = compute_ml_order(
-            KnnModel, snapshot.box, snapshot.position, snapshot.orientation
+            knn_model, snapshot.box, snapshot.position, snapshot.orientation
         )
 
     connectivity = neighbour_connectivity(snapshot)
