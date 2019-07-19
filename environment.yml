@@ -22,7 +22,7 @@ dependencies:
   - joblib
   - ipykernel
   - ipywidgets
-  - altair=2.*
+  - altair=3.1.*
   - nbdime=1.*
   - matplotlib
   - selenium
