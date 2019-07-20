@@ -10,15 +10,16 @@
 
 import logging
 from typing import List
-import hoomd
 
+import hoomd
+import joblib
 import numpy as np
 from bokeh.layouts import gridplot
 from bokeh.plotting import Figure
 from hoomd.data import SnapshotParticleData, make_snapshot
 from sdanalysis import HoomdFrame
 from sdanalysis.figures import configuration
-from sdanalysis.order import compute_ml_order, knn_model
+from sdanalysis.order import compute_ml_order
 from sdrun import SimulationParams, initialise, simulation
 
 logger = logging.getLogger(__name__)
@@ -215,6 +216,10 @@ def remove_vertical_cell(
         counter += 2
     logger.debug("Molecules Removed: %s", counter)
     return snapshot
+
+
+def knn_model():
+    return joblib.load("../models/knn-trimer.pkl")
 
 
 def plot_snapshot(snapshot: SnapshotParticleData, order: bool = False):
