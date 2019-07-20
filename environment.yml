@@ -2,7 +2,6 @@ name: crystal
 channels:
   - defaults
   - conda-forge
-  - malramsay
 dependencies:
   # Running Simulations
   - python=3.6
@@ -11,20 +10,20 @@ dependencies:
   - malramsay::sdanalysis=0.8.3
   - malramsay::experi=0.3.1
   # Dev tools
-  - pytest
-  - mypy
-  - black
-  - pip
-  - isort
-  - pylint
+  - pytest=5.0.*
+  - mypy=0.720
+  - black=19.3b0
+  - pip=19.1
+  - isort=4.3.21
+  - pylint=2.3.1
   # Interactive analysis
   - scikit-learn=0.21.*
-  - joblib
+  - joblib=0.13.2
   - ipykernel
   - ipywidgets
   - altair=3.1.*
-  - nbdime=1.*
-  - matplotlib
+  - nbdime=1.0.*
+  - matplotlib=3.1.*
   - selenium
   # Writing tools
   - pandoc
