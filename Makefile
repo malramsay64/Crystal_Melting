@@ -112,10 +112,20 @@ test: ## Test the functionality of the helper modules in src
 pack-dataset: ## Pack the relevant files from dataset into a tarball
 	cd data/simulations/dataset/output && tar cvJf dataset.tar.xz dump-*.gsd && mv dataset.tar.xz ../../../
 
+#
+# Notebook rules
+#
+
+all_notebooks = $(wildcard notebooks/*.md)
+
+.PHONY: notebooks
+notebooks: $(all_notebooks:.md=.ipynb)
+
+%.ipynb: %.md
+	cd $(dir $<) && jupytext --to notebook --execute $(notdir $<)
+
 .PHONY: figures
-figures: ## Generate all the figures in the figures directory
-	@mkdir -p figures
-	jupyter nbconvert --to notebook --ExecutePreprocessor.timeout=-1 --execute notebooks/06_Defect_Creation.ipynb
+figures: notebooks ## Generate all the figures in the figures directory
 
 report_targets := $(wildcard reports/*.md)
 

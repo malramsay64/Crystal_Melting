@@ -24,7 +24,7 @@ models/*
 
 # Ignore generated files in notebook directory
 notebooks/*
-!notebooks/*.ipynb
+!notebooks/*.md
 
 # Ignore generated report files
 reports/*.pdf

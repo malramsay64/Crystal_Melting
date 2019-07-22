@@ -16,15 +16,18 @@ dependencies:
   - pip=19.1
   - isort=4.3.21
   - pylint=2.3.1
+  - jupytext=1.2.1
   # Interactive analysis
   - scikit-learn=0.21.*
   - joblib=0.13.2
-  - ipykernel
+  - ipykernel=5.1.1
   - ipywidgets
   - altair=3.1.*
   - nbdime=1.0.*
   - matplotlib=3.1.*
   - selenium
+  - jupyterlab=1.0.*
+  - geckodriver=0.24.0
   # Writing tools
   - pandoc
   - pip:
