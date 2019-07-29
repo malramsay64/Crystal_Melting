@@ -20,18 +20,15 @@ import pandas as pd
 import scipy.stats
 from pandas.api.types import CategoricalDtype
 from scipy.spatial import ConvexHull
-from sdanalysis import SimulationParams, order
-from sdanalysis.frame import HoomdFrame
-from sdanalysis.read import process_gsd
+from sdanalysis import order
+from sdanalysis.read import open_trajectory
 from sdanalysis.util import get_filename_vars
 
 from detection import spatial_clustering
 
 logger = logging.getLogger(__name__)
 
-KNNModel = joblib.load(
-    Path(__file__).parent / "../models/knn-trimer.pkl"
-)  # pylint:disable=invalid-name
+KNNModel = Path(__file__).parent / "../models/knn-trimer.pkl"
 
 
 class CrystalFractions(NamedTuple):
@@ -55,16 +52,13 @@ def compute_crystal_growth(
     order_list = []
     order_dimension = 5.0
 
-    sim_params = SimulationParams(infile=infile, linear_steps=None)
-
-    for index, (_, snap) in enumerate(process_gsd(sim_params)):
+    ml_order = order.create_ml_ordering(KNNModel)
+    for index, snap in enumerate(open_trajectory(infile)):
         if index % skip_frames != 0:
             continue
 
-        ordering = order.compute_ml_order(
-            KNNModel, snap.box, snap.position, snap.orientation
-        )
-        labels = spatial_clustering(snap, ordering)
+        classification = ml_order(snap)
+        labels = spatial_clustering(snap, classification)
 
         if np.sum(labels == 1) > 5:
             hull0 = ConvexHull(snap.position[labels == 0, :2])
@@ -83,7 +77,7 @@ def compute_crystal_growth(
             iter_id = 1
         else:
             iter_id = fvars.iteration_id
-        states = CrystalFractions.from_ordering(ordering)
+        states = CrystalFractions.from_ordering(classification)
         df = {
             "temperature": float(fvars.temperature),
             "pressure": float(fvars.pressure),
