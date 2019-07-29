@@ -1,6 +1,7 @@
 name: crystal
 channels:
   - defaults
+  - anaconda
   - conda-forge
 dependencies:
   # Running Simulations
