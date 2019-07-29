@@ -30,7 +30,6 @@ from sdanalysis import HoomdFrame, order
 from bokeh.io import output_notebook, show, export_svgs
 from bokeh.models import Range1d
 import gsd.hoomd
-import joblib
 
 import sys
 sys.path.append("../src")
@@ -46,10 +45,8 @@ with gsd.hoomd.open(gsd_file) as trj:
 ```
 
 ```python
-KNNModel = joblib.load("../models/knn-trimer.pkl")
-ordering = order.compute_ml_order(
-    KNNModel, snap.box, snap.position, snap.orientation
-)
+knn_order = order.create_ml_ordering("../models/knn-trimer.pkl")
+ordering = knn_order(snap)
 ```
 
 ```python
@@ -68,11 +65,9 @@ export_svgs(fig, "../figures/melting_disorder_P100-T075.svg")
 gsd_file = "../data/simulations/rates/output/dump-Trimer-P1.00-T0.60-p2-ID1.gsd"
 with gsd.hoomd.open(gsd_file) as trj:
     snap = HoomdFrame(trj[70])
-    
-ordering = order.compute_ml_order(
-    KNNModel, snap.box, snap.position, snap.orientation
-)
-    
+
+ordering = knn_order(snap)
+
 fig = figures.style_snapshot(configuration.plot_frame(snap, order_list=ordering))
 fig.x_range = Range1d(-50, 30)
 fig.y_range = Range1d(-50, 30)

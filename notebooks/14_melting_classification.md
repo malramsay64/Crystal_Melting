@@ -151,13 +151,12 @@ snap_end.timestep
 ```python
 import joblib
 import functools
-from sdanalysis.order import compute_ml_order
-knn = joblib.load("../models/knn-trimer.pkl")
+from sdanalysis.order import create_ml_ordering
+knn_order = create_ml_ordering("../models/knn-trimer.pkl")
 ```
 
 ```python
-categories = compute_ml_order(knn, snap_init.box, snap_init.position, snap_init.orientation)
-frame = plot_frame(snap_init, order_list=categories, categorical_colour=True)
+frame = plot_frame(snap_init, order_list=knn_order(snap_init), categorical_colour=True)
 frame = figures.style_snapshot(frame)
 show(frame)
 ```
@@ -167,10 +166,11 @@ frame.output_backend = "svg"
 export_svgs(frame, "../figures/configuration-P13.50-T1.37-p2gg_init.svg")
 ```
 
-# categories = compute_ml_order(knn, snap_process.box, snap_process.position, snap_process.orientation)
-frame = plot_frame(snap_process, order_list=categories, categorical_colour=True)
+```python
+frame = plot_frame(snap_process, order_list=knn_order(snap_process), categorical_colour=True)
 frame = figures.style_snapshot(frame)
 show(frame)
+```
 
 
 ```python
@@ -179,8 +179,7 @@ export_svgs(frame, "../figures/configuration-P13.50-T1.37-p2gg_process.svg")
 ```
 
 ```python
-categories = compute_ml_order(knn, snap_end.box, snap_end.position, snap_end.orientation)
-frame = plot_frame(snap_end, order_list=categories, categorical_colour=True)
+frame = plot_frame(snap_end, order_list=knn_order(snap_end), categorical_colour=True)
 frame = figures.style_snapshot(frame)
 show(frame)
 ```
@@ -226,8 +225,7 @@ snap_process.timestep
 ```
 
 ```python
-categories = compute_ml_order(knn, snap_init.box, snap_init.position, snap_init.orientation)
-frame = plot_frame(snap_init, order_list=categories, categorical_colour=True)
+frame = plot_frame(snap_init, order_list=knn_order(snap_init), categorical_colour=True)
 frame = figures.style_snapshot(frame)
 show(frame)
 ```
@@ -261,8 +259,7 @@ export_svgs(frame, "../figures/configuration-P13.50-T1.42-pg_bottom_0.svg")
 ```
 
 ```python
-categories = compute_ml_order(knn, snap_process.box, snap_process.position, snap_process.orientation)
-frame = plot_frame(snap_process, order_list=categories, categorical_colour=True)
+frame = plot_frame(snap_process, order_list=knn_order(snap_process), categorical_colour=True)
 frame = figures.style_snapshot(frame)
 show(frame)
 ```
@@ -277,8 +274,7 @@ show(frame)
 ```
 
 ```python
-categories = compute_ml_order(knn, snap_end.box, snap_end.position, snap_end.orientation)
-frame = plot_frame(snap_end, order_list=categories, categorical_colour=True)
+frame = plot_frame(snap_end, order_list=knn_order(snap_end), categorical_colour=True)
 frame = figures.style_snapshot(frame)
 show(frame)
 ```
