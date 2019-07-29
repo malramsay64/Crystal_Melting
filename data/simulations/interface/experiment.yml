@@ -86,7 +86,7 @@ variables:
         - 0.40
         - 0.45
 
-pbs:
+scheduler:
   setup:
     - export PATH="$HOME/.miniconda/bin:$PATH"
     - source activate crystal
@@ -94,7 +94,5 @@ pbs:
   memory: 16gb
   walltime: "504:00:00"
   project: PRJ-CrysGrowth
-  o: logs
-  j: oe
-  m: e
-  M: malramsay64+interface@gmail.com
+  logs: logs
+  mail: malramsay64+interface@gmail.com

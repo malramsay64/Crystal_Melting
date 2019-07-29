@@ -81,13 +81,13 @@ variables:
         - 0.60
         - 0.80
 
-# pbs:
-  # setup:
-    # - export PATH="$HOME/.miniconda/bin:$PATH"
-    # - source activate crystal
-  # cpus: 8
-  # memory: 16gb
-  # walltime: "504:00:00"
-  # project: PRJ-CrysGrowth
-  # o: logs
-  # j: oe
+scheduler:
+  setup:
+    - export PATH="$HOME/.miniconda/bin:$PATH"
+    - source activate crystal
+  cpus: 8
+  memory: 16gb
+  walltime: "504:00:00"
+  project: PRJ-CrysGrowth
+  logs: logs
+  mail: malramsay64+dataset@gmail.com
