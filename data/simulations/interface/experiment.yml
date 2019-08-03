@@ -24,7 +24,7 @@ jobs:
         mpirun -np 12
         sdrun
         --pressure {pressure}
-        --init-temp {melt_temp}
+        --init-temp {equil_temp}
         --temperature {temperature}
         --space-group {space_group}
         --output {output}
@@ -71,6 +71,7 @@ variables:
   chain:
     - pressure: 13.50
       melt_temp: 6.00
+      equil_temp: 2.00
       temperature:
         - 1.32
         - 1.35
@@ -79,6 +80,7 @@ variables:
         - 1.50
     - pressure: 1.00
       melt_temp: 2.00
+      equil_temp: 0.70
       temperature:
         - 0.32
         - 0.35
