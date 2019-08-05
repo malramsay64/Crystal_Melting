@@ -53,7 +53,7 @@ chart = alt.Chart(rates_df).encode(
     x=alt.X("temp_norm", scale=alt.Scale(zero=False)),
     y=alt.Y('mean', scale=alt.Scale(type='linear'), axis=alt.Axis(format='e')),
     color="pressure:N",
-    
+
 )
 
 chart.mark_point() + chart.mark_rule().encode(y="error_min", y2="error_max")
@@ -81,13 +81,13 @@ chart = alt.Chart(melt_df.reset_index()).encode(
 chart = (
     chart.mark_point().encode(
         y=alt.Y(
-            "value", 
-            title="Melting Rate", 
+            "value",
+            title="Melting Rate",
             axis=alt.Axis(format='e'),
         )
     ) +
     chart.mark_rule().encode(
-        y="error_min", 
+        y="error_min",
         y2="error_max"
     )
 )
@@ -174,23 +174,23 @@ def fit_curve(x_vals, y_vals, errors=None, delta_E=None):
         def theory(x, c):
             result = 1 - np.exp((1-x) * delta_E / x)
             return c * result
-    
+
     opt, err = scipy.optimize.curve_fit(
-        theory, 
-        x_vals, 
+        theory,
+        x_vals,
         y_vals,
         sigma=errors,
         maxfev=2000,
     )
-    
+
     return theory, opt, err
 ```
 
 ```python
 x = np.arange(0.95, 2.0, 0.05)
 
-p1_values = melt_values.query("pressure == 1.00")
-p13_values = melt_values.query("pressure == 13.50")
+p1_values = melt_values.query("pressure == 1.00 and temp_norm < 1.30")
+p13_values = melt_values.query("pressure == 13.50 and temp_norm < 1.30")
 
 theory1, opt1, err1 = fit_curve(p1_values["temp_norm"], p1_values["value"], p1_values["error"], -0.18034612159032992)
 theory13, opt13, err13 = fit_curve(p13_values["temp_norm"], p13_values["value"], p13_values["error"], -0.06561802006526474)
@@ -211,9 +211,9 @@ theory_df.loc[~mask, "theory"] = theory13(theory_df["temp_norm"], *opt13)
 
 ```python
 chart = alt.Chart(theory_df).encode(
-    x=alt.X("temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False)),
+    x=alt.X("temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False, domain=(0.95, 1.45))),
     color=alt.Color("pressure:N", title="Pressure"),
-)
+).transform_filter(alt.datum.temp_norm < 1.40)
 
 chart = (
     chart.mark_point().encode(y=alt.Y("value", title="Rotational Relaxation × Melting Rate")) +
@@ -235,13 +235,13 @@ p1_values_2 = melt_values.query("pressure == 1.00")
 p13_values_2 = melt_values.query("pressure == 13.50")
 
 theory1_2, opt1_2, err1_2 = fit_curve(
-    p1_values_2["temp_norm"], 
-    p1_values_2["value"], 
+    p1_values_2["temp_norm"],
+    p1_values_2["value"],
     p1_values_2["error"],
 )
 theory13_2, opt13_2, err13_2 = fit_curve(
-    p13_values_2["temp_norm"], 
-    p13_values_2["value"], 
+    p13_values_2["temp_norm"],
+    p13_values_2["value"],
     p13_values_2["error"],
 )
 ```

@@ -65,18 +65,18 @@ import sklearn
 import joblib
 
 import sys
-sys.path.append('../src')
+
+sys.path.append("../src")
 from detection import read_all_files, classify_mols, plot_confusion_matrix
 
 from bokeh.plotting import show, output_notebook
+
 output_notebook()
 ```
 
 ```python
 input_files = read_all_files(
-    '../data/simulations/dataset/output/',
-    index=100,
-    glob="trajectory-Trimer-*"
+    "../data/simulations/dataset/output/", index=100, glob="trajectory-Trimer-*"
 )
 len(input_files)
 ```
@@ -193,16 +193,22 @@ For a more exhastive list check out [the scikit-learn documentation](http://scik
 and feel free to add more to the list.
 
 ```python
-from sklearn import linear_model, discriminant_analysis, tree, neighbors, naive_bayes, svm, neural_network
+from sklearn import (
+    linear_model,
+    discriminant_analysis,
+    tree,
+    neighbors,
+    naive_bayes,
+    svm,
+    neural_network,
+)
 
 ml_models = {
-    'LR': linear_model.LogisticRegression(solver='lbfgs', multi_class='auto'),
-    'LDA': discriminant_analysis.LinearDiscriminantAnalysis(),
-    'DT': tree.DecisionTreeClassifier(),
-    'KNN': neighbors.KNeighborsClassifier(),
-    'NB': naive_bayes.GaussianNB(),
-    'SVM': svm.SVC(gamma='scale'),
-    'NN': neural_network.MLPClassifier()
+    "LR": linear_model.LogisticRegression(solver="lbfgs", multi_class="auto"),
+    "LDA": discriminant_analysis.LinearDiscriminantAnalysis(),
+    "DT": tree.DecisionTreeClassifier(),
+    "KNN": neighbors.KNeighborsClassifier(),
+    "NB": naive_bayes.GaussianNB(),
 }
 ```
 
@@ -243,7 +249,9 @@ so as not to bias the selection of data.
 validation_size = 0.20
 seed = 7
 
-selected = sklearn.model_selection.train_test_split(X, y, test_size=validation_size, random_state=seed)
+selected = sklearn.model_selection.train_test_split(
+    X, y, test_size=validation_size, random_state=seed
+)
 X_train, X_validation, y_train, y_validation = selected
 ```
 
@@ -259,24 +267,23 @@ For the purposes of this running in a reasonable amount of time,
 `n_splits` is set to 2.
 
 ```python
-scoring='accuracy'
-n_splits = 2
-# Typically n_splits would be 10 but it runs much slower
-#n_splits = 10
+scoring = "balanced_accuracy"
+n_splits = 10
 
 # Iterate through each model in our dictionary of models
 for name, model in ml_models.items():
     kfold = sklearn.model_selection.KFold(n_splits=n_splits, random_state=seed)
-    cv_results = sklearn.model_selection.cross_val_score(model, X_train, y_train, cv=kfold, scoring=scoring)
-    print(f'{name:5s}: {cv_results.mean():.5f} ± {cv_results.std():.5f}')
+    cv_results = sklearn.model_selection.cross_val_score(
+        model, X_train, y_train, cv=kfold, scoring=scoring
+    )
+    print(f"{name:5s}: {cv_results.mean():.5f} ± {cv_results.std():.5f}")
 ```
 
 Out of all the algorithms tested,
 there are three that stand out
 
 - K-Nearest Neighbours (KNN),
-- Support Vector Machine (SVM), and
-- Neural Network (NN)
+- Decision Tree (DT)
 
 with accuracies in excess of 95%.
 
@@ -304,28 +311,18 @@ to generate the confusion matrix.
 
 ```python
 classes = ["liq", "p2", "p2gg", "pg"]
-knn = ml_models['KNN']
+knn = ml_models["KNN"]
 knn.fit(X_train, y_train)
 predictions = knn.predict(X_validation)
-plot_confusion_matrix(sklearn.metrics.confusion_matrix(y_validation, predictions, labels=range(4)), classes, normalize=False)
+plot_confusion_matrix(
+    sklearn.metrics.confusion_matrix(y_validation, predictions, labels=range(4)),
+    classes,
+    normalize=True,
+)
 ```
 
 ```python
 predictions
-```
-
-```python
-svm = ml_models['SVM']
-svm.fit(X_train, y_train)
-predictions = svm.predict(X_validation)
-plot_confusion_matrix(sklearn.metrics.confusion_matrix(y_validation, predictions, labels=range(4)), classes, normalize=True)
-```
-
-```python
-nn = ml_models['NN']
-nn.fit(X_train, y_train)
-predictions = nn.predict(X_validation)
-plot_confusion_matrix(sklearn.metrics.confusion_matrix(y_validation, predictions, labels=range(4)), classes, normalize=True)
 ```
 
 It is interesting to note that all of the models
@@ -336,7 +333,7 @@ To make this model we have created persistent
 it needs to be saved which is done using `joblib`.
 
 ```python
-joblib.dump(ml_models['KNN'], '../models/knn-trimer.pkl')
+joblib.dump(ml_models["KNN"], "../models/knn-trimer.pkl")
 ```
 
 ML in Production
@@ -362,7 +359,7 @@ By reading the file `knn-model.pkl` from disk,
 we can load the trained K-Nearest Neighbours model.
 
 ```python
-model = joblib.load('../models/knn-trimer.pkl')
+model = joblib.load("../models/knn-trimer.pkl")
 model
 ```
 
