@@ -8,6 +8,7 @@
 
 """Helper functions for the dynamics calculations."""
 
+import logging
 from pathlib import Path
 
 import bootstrapped.bootstrap as bs
@@ -16,6 +17,9 @@ import click
 import numpy as np
 import pandas as pd
 from sdanalysis.relaxation import series_relaxation_value
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def _value(series: pd.Series):
@@ -61,7 +65,7 @@ def clean(infile: Path, min_samples: int):
     # We want to discard values where there are not enough to get decent statistics, in
     # this case I have chosen 10 as the magic number.
     df = df.assign(
-        count=df.groupby(["time", "temperature", "pressure"])["start_index"].transform(
+        count=df.groupby(["time", "temperature", "pressure"])["keyframe"].transform(
             "count"
         )
     )
@@ -77,7 +81,6 @@ def clean(infile: Path, min_samples: int):
     df.to_hdf(infile.with_name(infile.stem + "_clean" + ".h5"), "dynamics")
 
     df_mol = pd.read_hdf(infile, "molecular_relaxations")
-    df_mol.index.names = ("keyframe", "molecule")
     df_mol = df_mol.reset_index()
 
     # Replace invalid values (2**32 - 1) with NaN's
@@ -134,7 +137,7 @@ def bootstrap(infile):
 
     df_relax = (
         df.set_index("time")
-        .groupby(["temperature", "pressure", "start_index"])
+        .groupby(["temperature", "pressure", "keyframe"])
         .agg(series_relaxation_value)
     )
     df_relax["inv_diffusion"] = 1 / df_relax["msd"]
@@ -158,7 +161,15 @@ def collate(output, infiles):
         for file in infiles:
             with pd.HDFStore(file) as src:
                 for key in ["dynamics", "molecular_relaxations"]:
-                    dst.append(key, src.get(key))
+                    try:
+                        df = src.get(key)
+                    except KeyError:
+                        logger.warning(
+                            "Key: %s does not exist in dataframe: %s", key, file
+                        )
+                    df["temperature"] = df["temperature"].astype(float)
+                    df["pressure"] = df["pressure"].astype(float)
+                    dst.append(key, df)
 
 
 if __name__ == "__main__":
