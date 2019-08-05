@@ -58,7 +58,7 @@ show(fig)
 
 ```python
 fig.output_backend="svg"
-export_svgs(fig, "../figures/melting_disorder_P100-T075.svg")
+export_svgs(fig, "../figures/melting_disorder_P1.00-T0.75.svg")
 ```
 
 ```python
@@ -76,7 +76,7 @@ show(fig)
 
 ```python
 fig.output_backend="svg"
-export_svgs(fig, "../figures/melting_disorder_P100-T060.svg")
+export_svgs(fig, "../figures/melting_disorder_P1.00-T0.60.svg")
 ```
 
 ```python
