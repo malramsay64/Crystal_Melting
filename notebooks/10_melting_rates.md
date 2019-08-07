@@ -1,6 +1,7 @@
 ---
 jupyter:
   jupytext:
+    target_format: ipynb,md
     text_representation:
       extension: .md
       format_name: markdown
@@ -26,7 +27,7 @@ import numpy as np
 import pandas
 import altair as alt
 
-alt.data_transformers.enable('csv')
+alt.data_transformers.enable('json')
 
 import sys
 sys.path.append("../src")
@@ -58,10 +59,11 @@ with pandas.HDFStore('../data/analysis/rates_clean.h5') as store:
 I have plotted the volume of the crystal as a fucntion of time below. The important point to note is the high levels of noise in the data, which is a combination the thermal fluctuations and the inacuracy of the algorithm I am using for classification.
 
 ```python
-chart = alt.Chart(melting_df).mark_point().encode(
+chart = alt.Chart(melting_df).mark_line(opacity=0.7).encode(
     x=alt.X('time:Q', title="Timesteps", axis=alt.Axis(format='e'), scale=alt.Scale(type='linear')),
     color=alt.Color('temperature:N', title="Temperature"),
     row=alt.Row('pressure:N', title="Pressure"),
+    detail="iter_id",
     y=alt.Y('radius:Q', title="Estimated Radius"),
 )
 chart
