@@ -251,7 +251,7 @@ chart = (
         ),
         color=alt.Color("pressure:N", title="Pressure"),
     )
-    .transform_filter(alt.datum.temp_norm < 1.60)
+    .transform_filter(alt.datum.temp_norm < 1.35)
 )
 
 chart = (
