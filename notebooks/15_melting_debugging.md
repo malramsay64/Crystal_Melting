@@ -31,11 +31,12 @@ import altair as alt
 
 # def unlimited_transformer(data):
 #     return alt.pipe(data, alt.to_values)
-    
+
 # alt.data_transformers.register("unlimited", unlimited_transformer)
 # alt.data_transformers.enable("unlimited")
 
 import sys
+
 sys.path.append("../src")
 import figures
 
@@ -52,11 +53,11 @@ The data on the melting rates has been precalculated and saved to a file. The da
 
 Only the data from the low temperature melting is used in this analysis since at the time of writing the dataset is better and it is easier to only deal with a single set of pressures. I am also limiting the analysis to only the p2 crystal.
 
-By resampling the dataset to times of 1ms, the 
+By resampling the dataset to times of 1ms, the
 
 ```python
 # Read file with melting data
-with pandas.HDFStore('../data/analysis/rates_clean.h5') as store:
+with pandas.HDFStore("../data/analysis/rates_clean.h5") as store:
     melting_df = store.get("fractions")
 ```
 
@@ -65,11 +66,20 @@ with pandas.HDFStore('../data/analysis/rates_clean.h5') as store:
 I have plotted the volume of the crystal as a fucntion of time below. The important point to note is the high levels of noise in the data, which is a combination the thermal fluctuations and the inacuracy of the algorithm I am using for classification.
 
 ```python
-chart = alt.Chart(melting_df.loc[:, ["time", "temperature", "pressure", "radius"]]).mark_point().encode(
-    x=alt.X('time:Q', title="Timesteps", axis=alt.Axis(format='e'), scale=alt.Scale(type='linear')),
-    color=alt.Color('temperature:N', title="Temperature"),
-    row=alt.Row('pressure:N', title="Pressure"),
-    y=alt.Y('radius:Q', title="Estimated Radius"),
+chart = (
+    alt.Chart(melting_df.loc[:, ["time", "temperature", "pressure", "radius"]])
+    .mark_point()
+    .encode(
+        x=alt.X(
+            "time:Q",
+            title="Timesteps",
+            axis=alt.Axis(format="e"),
+            scale=alt.Scale(type="linear"),
+        ),
+        color=alt.Color("temperature:N", title="Temperature"),
+        row=alt.Row("pressure:N", title="Pressure"),
+        y=alt.Y("radius:Q", title="Estimated Radius"),
+    )
 )
 chart.save("../figures/melting_radius.svg", webdriver="firefox")
 ```

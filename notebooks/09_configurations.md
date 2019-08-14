@@ -22,6 +22,7 @@ from pathlib import Path
 import joblib
 import functools
 from bokeh.io import show, output_notebook
+
 output_notebook()
 ```
 

@@ -27,19 +27,27 @@ import sklearn
 import sklearn.cluster
 import scipy
 import joblib
-from sdanalysis.order import compute_neighbours, relative_orientations, relative_distances, create_ml_ordering
+from sdanalysis.order import (
+    compute_neighbours,
+    relative_orientations,
+    relative_distances,
+    create_ml_ordering,
+)
 from sdanalysis.figures import plot_frame
 
 import warnings
-warnings.filterwarnings('ignore')
+
+warnings.filterwarnings("ignore")
 
 # Import project tools
 import sys
-sys.path.append('../src')
+
+sys.path.append("../src")
 from detection import read_all_files, neighbour_connectivity
 
 # Configure Bokeh to output the figures to the notebook
 from bokeh.io import output_notebook, show
+
 output_notebook()
 ```
 
@@ -47,9 +55,7 @@ This creates a periodic distance algorithm using the minimum image convention
 which can be used as the distance metric for the clustering algorithm.
 
 ```python
-input_files = read_all_files(
-    '../data/simulations/dataset/output'
-)
+input_files = read_all_files("../data/simulations/dataset/output")
 len(input_files)
 ```
 
@@ -59,17 +65,19 @@ knn_order = create_ml_ordering("../models/knn-trimer.pkl")
 
 ordering = knn_order(snapshot)
 ordering = ordering > 0
-ordering = ordering.reshape(-1,1)
+ordering = ordering.reshape(-1, 1)
 ```
 
 ```python
 connectivity = neighbour_connectivity(snapshot)
-spatial_cluster = sklearn.cluster.AgglomerativeClustering(n_clusters=2, connectivity=connectivity)
+spatial_cluster = sklearn.cluster.AgglomerativeClustering(
+    n_clusters=2, connectivity=connectivity
+)
 y = spatial_cluster.fit_predict(ordering)
 ```
 
 ```python
-hull = scipy.spatial.ConvexHull(snapshot.position[y==1, :2])
+hull = scipy.spatial.ConvexHull(snapshot.position[y == 1, :2])
 ```
 
 ```python
@@ -87,14 +95,15 @@ import gsd.hoomd
 from sdanalysis import HoomdFrame
 from sdanalysis.read import open_trajectory
 from detection import spatial_clustering
-test_file = '../data/simulations/dataset/output/dump-Trimer-P1.00-T0.50-p2.gsd'
+
+test_file = "../data/simulations/dataset/output/dump-Trimer-P1.00-T0.50-p2.gsd"
 cluster_size = []
 cluster_area = []
 for index, snap in enumerate(open_trajectory(test_file)):
     clusters = spatial_clustering(snapshot)
     cluster_size.append(np.sum(clusters))
-    hull1 = scipy.spatial.ConvexHull(snapshot.position[y==1, :2])
-    hull0 = scipy.spatial.ConvexHull(snapshot.position[y==0, :2])
+    hull1 = scipy.spatial.ConvexHull(snapshot.position[y == 1, :2])
+    hull0 = scipy.spatial.ConvexHull(snapshot.position[y == 0, :2])
     cluster_area.append(min(hull0.volume, hull1.volume))
     if len(cluster_size) > 100:
         break
@@ -113,7 +122,7 @@ import matplotlib.pyplot as plt
 
 ```python
 # plt.plot(cluster_size)
-plt.plot(cluster_area);
+plt.plot(cluster_area)
 ```
 
 ```python

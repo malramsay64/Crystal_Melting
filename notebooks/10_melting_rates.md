@@ -28,9 +28,10 @@ import numpy as np
 import pandas
 import altair as alt
 
-alt.data_transformers.enable('json')
+alt.data_transformers.enable("json")
 
 import sys
+
 sys.path.append("../src")
 import figures
 
@@ -47,11 +48,11 @@ The data on the melting rates has been precalculated and saved to a file. The da
 
 Only the data from the low temperature melting is used in this analysis since at the time of writing the dataset is better and it is easier to only deal with a single set of pressures. I am also limiting the analysis to only the p2 crystal.
 
-By resampling the dataset to times of 1ms, the 
+By resampling the dataset to times of 1ms, the
 
 ```python
 # Read file with melting data
-with pandas.HDFStore('../data/analysis/rates_clean.h5') as store:
+with pandas.HDFStore("../data/analysis/rates_clean.h5") as store:
     melting_df = store.get("fractions")
 ```
 
@@ -60,12 +61,21 @@ with pandas.HDFStore('../data/analysis/rates_clean.h5') as store:
 I have plotted the volume of the crystal as a fucntion of time below. The important point to note is the high levels of noise in the data, which is a combination the thermal fluctuations and the inacuracy of the algorithm I am using for classification.
 
 ```python
-chart = alt.Chart(melting_df).mark_line(opacity=0.7).encode(
-    x=alt.X('time:Q', title="Timesteps", axis=alt.Axis(format='e'), scale=alt.Scale(type='linear')),
-    color=alt.Color('temperature:N', title="Temperature"),
-    row=alt.Row('pressure:N', title="Pressure"),
-    detail="iter_id",
-    y=alt.Y('radius:Q', title="Estimated Radius"),
+chart = (
+    alt.Chart(melting_df)
+    .mark_line(opacity=0.7)
+    .encode(
+        x=alt.X(
+            "time:Q",
+            title="Timesteps",
+            axis=alt.Axis(format="e"),
+            scale=alt.Scale(type="linear"),
+        ),
+        color=alt.Color("temperature:N", title="Temperature"),
+        row=alt.Row("pressure:N", title="Pressure"),
+        detail="iter_id",
+        y=alt.Y("radius:Q", title="Estimated Radius"),
+    )
 )
 chart
 ```
@@ -91,17 +101,21 @@ This documents my attempts at calculating this value with a small error.
 This is calculating the instantaneous gradient $\frac{1}{A(t)} \frac{V(t+\Delta t) - V(t)}{\Delta t}$ and averaging over all $t$. The errors being calculated as the standard deviation. The gradient is computed using the`np.gradient` function which documents the solver [here](https://docs.scipy.org/doc/numpy/reference/generated/numpy.gradient.html#numpy.gradient).
 
 ```python
-with pandas.HDFStore('../data/analysis/rates_clean.h5') as store:
+with pandas.HDFStore("../data/analysis/rates_clean.h5") as store:
     rates_df = store.get("rates")
 ```
 
 Plotting the melting rate with the calculated errors as a function of temperature.
 
 ```python
-chart = alt.Chart(rates_df).mark_point().encode(
-    x=alt.X('temp_norm:Q', title="T/Tₘ", scale=alt.Scale(zero=False)),
-    y=alt.Y('mean', title='Crystal Growth Rate', axis=alt.Axis(format='e')),
-    color=alt.Color("pressure:N", title="Pressure"),
+chart = (
+    alt.Chart(rates_df)
+    .mark_point()
+    .encode(
+        x=alt.X("temp_norm:Q", title="T/Tₘ", scale=alt.Scale(zero=False)),
+        y=alt.Y("mean", title="Crystal Growth Rate", axis=alt.Axis(format="e")),
+        color=alt.Color("pressure:N", title="Pressure"),
+    )
 )
 
 # Add horizontal line at y = 0

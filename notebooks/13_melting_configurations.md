@@ -34,6 +34,7 @@ from bokeh.models import Range1d
 import gsd.hoomd
 
 import sys
+
 sys.path.append("../src")
 %aimport figures
 
@@ -59,7 +60,7 @@ show(fig)
 ```
 
 ```python
-fig.output_backend="svg"
+fig.output_backend = "svg"
 export_svgs(fig, "../figures/melting_disorder_P1.00-T0.75.svg")
 ```
 
@@ -77,7 +78,7 @@ show(fig)
 ```
 
 ```python
-fig.output_backend="svg"
+fig.output_backend = "svg"
 export_svgs(fig, "../figures/melting_disorder_P1.00-T0.60.svg")
 ```
 

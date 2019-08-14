@@ -31,11 +31,12 @@ from sdanalysis import HoomdFrame
 from sdanalysis.figures import plot_frame, show, output_notebook
 
 import sys
-sys.path.append('../src')
+
+sys.path.append("../src")
 import detection
 import figures
 
-alt.data_transformers.enable('csv')
+alt.data_transformers.enable("csv")
 figures.use_my_theme()
 output_notebook()
 ```
@@ -70,12 +71,16 @@ This is highlighted by the image below.
 Here we have a
 
 ```python
-c = alt.Chart(
-    df.query("temperature == 1.37 and pressure == 13.50 and crystal == 'p2gg'")
-).mark_point().encode(
-    x=alt.X("time", title="Timesteps", axis=alt.Axis(format="e")),
-    y=alt.Y("value", title="Fraction"),
-    color=alt.Color("variable", title="Crystal"),
+c = (
+    alt.Chart(
+        df.query("temperature == 1.37 and pressure == 13.50 and crystal == 'p2gg'")
+    )
+    .mark_point()
+    .encode(
+        x=alt.X("time", title="Timesteps", axis=alt.Axis(format="e")),
+        y=alt.Y("value", title="Fraction"),
+        color=alt.Color("variable", title="Crystal"),
+    )
 )
 c
 ```
@@ -83,13 +88,17 @@ c
 
 ```python
 with alt.data_transformers.enable("default"):
-    c.save("../figures/solid_state_transition-P13.50-T1.37-p2gg.svg", webdriver="firefox")
+    c.save(
+        "../figures/solid_state_transition-P13.50-T1.37-p2gg.svg", webdriver="firefox"
+    )
 ```
 
 ```python
 with pandas.HDFStore("../data/analysis/dynamics_clean_agg.h5") as src:
     df_dynamics = src.get("relaxations")
-rot_relaxation = df_dynamics.query("temperature == 1.37 and pressure == 13.50")["rot2_value"]
+rot_relaxation = df_dynamics.query("temperature == 1.37 and pressure == 13.50")[
+    "rot2_value"
+]
 print(f"The rotational relaxation time is {rot_relaxation.values[0]:.2e}")
 ```
 
@@ -107,18 +116,23 @@ Here the solid state rearrangement takes place quickly,
 followed by a much slower and more gradual melting.
 
 ```python
-c = alt.Chart(df.query("temperature ==1.46 & pressure == 13.50 & crystal == 'p2gg'")
-).mark_point().encode(
-    x=alt.X("time", title="Timesteps", axis=alt.Axis(format="e")),
-    y=alt.Y("value", title="Fraction"),
-    color=alt.Color("variable", title="Crystal"),
+c = (
+    alt.Chart(df.query("temperature ==1.46 & pressure == 13.50 & crystal == 'p2gg'"))
+    .mark_point()
+    .encode(
+        x=alt.X("time", title="Timesteps", axis=alt.Axis(format="e")),
+        y=alt.Y("value", title="Fraction"),
+        color=alt.Color("variable", title="Crystal"),
+    )
 )
 c
 ```
 
 ```python
 with alt.data_transformers.enable("default"):
-    c.save("../figures/solid_state_transition-P13.50-T1.46-p2gg.svg", webdriver="firefox")
+    c.save(
+        "../figures/solid_state_transition-P13.50-T1.46-p2gg.svg", webdriver="firefox"
+    )
 ```
 
 One of the features of the solid state transition
@@ -133,7 +147,9 @@ To do this we need to look at
 the configurations themselves.
 
 ```python
-trajectory_file  = "../data/simulations/interface/output/dump-Trimer-P13.50-T1.37-p2gg.gsd"
+trajectory_file = (
+    "../data/simulations/interface/output/dump-Trimer-P13.50-T1.37-p2gg.gsd"
+)
 with gsd.hoomd.open(trajectory_file) as trj:
     snap_init = HoomdFrame(trj[0])
     snap_process = HoomdFrame(trj[400])
@@ -152,6 +168,7 @@ snap_end.timestep
 import joblib
 import functools
 from sdanalysis.order import create_ml_ordering
+
 knn_order = create_ml_ordering("../models/knn-trimer.pkl")
 ```
 
@@ -167,7 +184,9 @@ export_svgs(frame, "../figures/configuration-P13.50-T1.37-p2gg_init.svg")
 ```
 
 ```python
-frame = plot_frame(snap_process, order_list=knn_order(snap_process), categorical_colour=True)
+frame = plot_frame(
+    snap_process, order_list=knn_order(snap_process), categorical_colour=True
+)
 frame = figures.style_snapshot(frame)
 show(frame)
 ```
@@ -195,8 +214,8 @@ While the
 
 ```python
 groupbys = list(df.columns)
-groupbys.remove('variable')
-groupbys.remove('value')
+groupbys.remove("variable")
+groupbys.remove("value")
 ```
 
 ```python
@@ -205,15 +224,12 @@ df_melt = df.groupby(groupbys).sum().reset_index()
 
 ```python
 alt.Chart(df_melt.query("pressure==13.50 and temperature == 1.37")).mark_point().encode(
-    x="time",
-    y="value",
-    color="crystal",
-    row="temperature"
+    x="time", y="value", color="crystal", row="temperature"
 )
 ```
 
 ```python
-trajectory_file  = "../data/simulations/interface/output/dump-Trimer-P13.50-T1.42-pg.gsd"
+trajectory_file = "../data/simulations/interface/output/dump-Trimer-P13.50-T1.42-pg.gsd"
 with gsd.hoomd.open(trajectory_file) as trj:
     snap_init = HoomdFrame(trj[0])
     snap_process = HoomdFrame(trj[20_000])
@@ -237,6 +253,7 @@ export_svgs(frame, "../figures/configuration-P13.50-T1.42-pg_0.svg")
 
 ```python
 from bokeh.models import Range1d
+
 frame.x_range = Range1d(-15, 15)
 frame.y_range = Range1d(40, 65)
 show(frame)
@@ -259,7 +276,9 @@ export_svgs(frame, "../figures/configuration-P13.50-T1.42-pg_bottom_0.svg")
 ```
 
 ```python
-frame = plot_frame(snap_process, order_list=knn_order(snap_process), categorical_colour=True)
+frame = plot_frame(
+    snap_process, order_list=knn_order(snap_process), categorical_colour=True
+)
 frame = figures.style_snapshot(frame)
 show(frame)
 ```

@@ -27,7 +27,8 @@ from ipywidgets import interact, ToggleButtons, IntSlider
 from uncertainties import unumpy
 
 import sys
-sys.path.append('../src')
+
+sys.path.append("../src")
 import figures
 
 figures.use_my_theme()
@@ -49,7 +50,7 @@ with pandas.HDFStore("../data/analysis/dynamics_clean_agg.h5") as src:
 with pandas.HDFStore("../data/analysis/rates_clean.h5") as src:
     melting_df = src.get("rates")
 
-timescales_df = mol_relax_df.merge(melting_df, on=['temperature', 'pressure'])
+timescales_df = mol_relax_df.merge(melting_df, on=["temperature", "pressure"])
 ```
 
 ## Timescale normalised rates
@@ -71,12 +72,19 @@ we should get the distance the interface moves
 in the characteristic timescale.
 
 ```python
-c = alt.Chart(timescales_df).mark_point().encode(
-    x=alt.X('temp_norm', title='T/Tₘ', scale=alt.Scale(zero=False)),
-    y=alt.Y("scaling:Q", title='Melting Rate * Rotational Relaxation', axis=alt.Axis(format='e')),
-    color=alt.Color("pressure:N", title="Pressure"),
-).transform_calculate(
-    scaling = alt.datum.mean * alt.datum.tau_T2_value
+c = (
+    alt.Chart(timescales_df)
+    .mark_point()
+    .encode(
+        x=alt.X("temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False)),
+        y=alt.Y(
+            "scaling:Q",
+            title="Melting Rate * Rotational Relaxation",
+            axis=alt.Axis(format="e"),
+        ),
+        color=alt.Color("pressure:N", title="Pressure"),
+    )
+    .transform_calculate(scaling=alt.datum.mean * alt.datum.tau_T2_value)
 )
 
 c
@@ -89,20 +97,19 @@ import scipy.optimize
 ```python
 def fit_curve(x_vals, y_vals, errors=None, delta_E=None):
     if delta_E is None:
+
         def theory(x, c, d):
-            result = 1 - np.exp((1-x) * d / x)
+            result = 1 - np.exp((1 - x) * d / x)
             return c * result
+
     else:
+
         def theory(x, c):
-            result = 1 - np.exp((1-x) * delta_E / x)
+            result = 1 - np.exp((1 - x) * delta_E / x)
             return c * result
 
     opt, err = scipy.optimize.curve_fit(
-        theory,
-        x_vals,
-        y_vals,
-        sigma=errors,
-        maxfev=2000,
+        theory, x_vals, y_vals, sigma=errors, maxfev=2000
     )
 
     return theory, opt, err
@@ -112,10 +119,9 @@ def fit_curve(x_vals, y_vals, errors=None, delta_E=None):
 df_1 = timescales_df.query("pressure == 1.00")
 
 
-df_fit = pandas.DataFrame({
-    "temp_norm": df_1.temp_norm,
-    "scaling": df_1["mean"] * df_1["tau_T2_value"],
-})
+df_fit = pandas.DataFrame(
+    {"temp_norm": df_1.temp_norm, "scaling": df_1["mean"] * df_1["tau_T2_value"]}
+)
 
 theory, opt, err = fit_curve(df_fit["temp_norm"], df_fit["scaling"])
 
@@ -128,27 +134,28 @@ opt
 
 ```python
 c = alt.Chart(df_fit).encode(
-    x=alt.X('temp_norm', title='T/Tₘ', scale=alt.Scale(zero=False)),
+    x=alt.X("temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False))
 )
 
 c.mark_point().encode(y="scaling") + c.mark_line().encode(y="theory")
 ```
 
 ```python
-print(f"""
+print(
+    f"""
 The above plot uses the values computed from the curve fit with;
 - enthalpy: {opt[1]:.3f}, and
 - constant: {opt[0]:.3f}
-""")
+"""
+)
 ```
 
 ```python
 df_13 = timescales_df.query("pressure == 13.50")
 
-df_fit = pandas.DataFrame({
-    "temp_norm": df_13.temp_norm,
-    "scaling": df_13["mean"] * df_13["tau_T2_value"],
-})
+df_fit = pandas.DataFrame(
+    {"temp_norm": df_13.temp_norm, "scaling": df_13["mean"] * df_13["tau_T2_value"]}
+)
 
 theory, opt, err = fit_curve(df_fit["temp_norm"], df_fit["scaling"])
 # theory, opt, err = fit_curve(df_13)
@@ -158,18 +165,20 @@ df_fit["theory"] = theory(df_13.temp_norm, *opt)
 
 ```python
 c = alt.Chart(df_fit).encode(
-    x=alt.X('temp_norm', title='T/Tₘ', scale=alt.Scale(zero=False)),
+    x=alt.X("temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False))
 )
 
 c.mark_point().encode(y="scaling") + c.mark_line().encode(y="theory")
 ```
 
 ```python
-print(f"""
+print(
+    f"""
 The above plot uses the values computed from the curve fit with;
 - enthalpy: {opt[1]:.3f}, and
 - constant: {opt[0]:.3f}
-""")
+"""
+)
 ```
 
 ```python

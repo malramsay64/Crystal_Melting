@@ -34,8 +34,8 @@ alt.themes.enable("opaque")
 I have logged many thermodynamic quantities throughout the hoomd simulations. Although I have separated these from the main simulation data, I can still process the files. The data file I am investigating is from the calculation of dynamics, meaning all the quatities should be a equilibrium.
 
 ```python
-thermo_file = '../data/simulations/interface/output/thermo-Trimer-P13.50-T1.50-p2gg.log'
-df = pd.read_csv(thermo_file, sep='\t', index_col='timestep')
+thermo_file = "../data/simulations/interface/output/thermo-Trimer-P13.50-T1.50-p2gg.log"
+df = pd.read_csv(thermo_file, sep="\t", index_col="timestep")
 ```
 
 ```python
@@ -43,19 +43,19 @@ df.columns
 ```
 
 ```python
-c = alt.Chart(df.reset_index()).mark_line().encode(
-        x="timestep",
-)
+c = alt.Chart(df.reset_index()).mark_line().encode(x="timestep")
+
 
 @interact(quantity=list(df.columns))
 def plot_thermo(quantity):
-    return c.encode(y=quantity) 
-
+    return c.encode(y=quantity)
 ```
 
 ```python
-print(f"The temperature of the simulation is {df.temperature.mean():.4f} "
-      "which matches the intended temperature of 1.50")
+print(
+    f"The temperature of the simulation is {df.temperature.mean():.4f} "
+    "which matches the intended temperature of 1.50"
+)
 ```
 
 A feature I am particularly interested in is the calculation of the kinetic energy for each simulation
@@ -75,7 +75,11 @@ It is relatively simple to calculate the translational kinetic energy for a conf
 
 ```python
 mass = 3
-trans_KE = 0.5 * 3 * np.mean(np.sum(np.square(snap.frame.particles.velocity[:snap.num_mols]), axis=1))
+trans_KE = (
+    0.5
+    * 3
+    * np.mean(np.sum(np.square(snap.frame.particles.velocity[: snap.num_mols]), axis=1))
+)
 trans_KE
 ```
 

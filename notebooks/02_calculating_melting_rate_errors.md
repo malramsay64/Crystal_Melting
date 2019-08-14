@@ -24,7 +24,7 @@ import altair.vegalite.v2 as alt
 import scipy.stats
 
 alt.themes.enable("opaque")
-alt.data_transformers.enable('json')
+alt.data_transformers.enable("json")
 ```
 
 ## Load Data
@@ -41,13 +41,13 @@ By resampling the dataset to times of 1ms, the
 
 ```python
 # Read file with melting data
-norm_df = pandas.read_hdf('../data/analysis/melting.h5', 'fractions', mode='r')
+norm_df = pandas.read_hdf("../data/analysis/melting.h5", "fractions", mode="r")
 norm_df = norm_df.query('pressure == "1.00" and temperature < 0.8')
-norm_df = norm_df.query('volume > 2000')
-norm_df = norm_df.query('time > 0.')
+norm_df = norm_df.query("volume > 2000")
+norm_df = norm_df.query("time > 0.")
 # norm_df = norm_df.query('crystal != "p2gg"')
 norm_df = norm_df.query('crystal == "p2"')
-group_bys = ['crystal', 'temperature', 'pressure']
+group_bys = ["crystal", "temperature", "pressure"]
 time_df = norm_df.copy()
 time_df.index = pandas.TimedeltaIndex(norm_df.time)
 # time_df = time_df.groupby(group_bys).resample('1ms').mean().reset_index(drop=True)
@@ -59,11 +59,15 @@ time_df.dropna(inplace=True)
 I have plotted the volume of the crystal as a fucntion of time below. The important point to note is the high levels of noise in the data, which is a combination the thermal fluctuations and the inacuracy of the algorithm I am using for classification.
 
 ```python
-chart = alt.Chart(time_df).mark_point().encode(
-    x=alt.X('time:Q', axis=alt.Axis(format='e')),
-    color='temperature:N',
-    row='crystal:N',
-    y='radius:Q',
+chart = (
+    alt.Chart(time_df)
+    .mark_point()
+    .encode(
+        x=alt.X("time:Q", axis=alt.Axis(format="e")),
+        color="temperature:N",
+        row="crystal:N",
+        y="radius:Q",
+    )
 )
 chart
 ```
@@ -106,36 +110,39 @@ gradient_error = time_df.groupby(group_bys).apply(
     lambda x: np.nanstd(instantaneous_gradient(x))
 )
 
-gradient1 = pandas.DataFrame({'mean': gradient_mean, 'error': gradient_error}, index=gradient_mean.index)
+gradient1 = pandas.DataFrame(
+    {"mean": gradient_mean, "error": gradient_error}, index=gradient_mean.index
+)
 gradient1.reset_index(inplace=True)
 ```
 
 Plotting the melting rate with the calculated errors as a function of temperature.
 
 ```python
-chart = alt.Chart(gradient1).mark_point().transform_calculate(
-    ymin="datum.mean-datum.error/2",
-    ymax="datum.mean+datum.error/2"
-).encode(
-    alt.X('temperature:Q', scale=alt.Scale(zero=False))
+chart = (
+    alt.Chart(gradient1)
+    .mark_point()
+    .transform_calculate(
+        ymin="datum.mean-datum.error/2", ymax="datum.mean+datum.error/2"
+    )
+    .encode(alt.X("temperature:Q", scale=alt.Scale(zero=False)))
 )
 
-disp_chart = (
-    chart.encode(alt.Y('mean', axis=alt.Axis(format='e'))) +
-    chart.mark_rule().encode(y='ymin:Q', y2='ymax:Q')
-)
+disp_chart = chart.encode(
+    alt.Y("mean", axis=alt.Axis(format="e"))
+) + chart.mark_rule().encode(y="ymin:Q", y2="ymax:Q")
 disp_chart
 ```
 
 ```python
 # with alt.data_transformers.enable("default"):
-    # disp_chart.save("../figures/melting_rates_Trimer-P1.00-p2.png")
+# disp_chart.save("../figures/melting_rates_Trimer-P1.00-p2.png")
 ```
 
 This figure corresponds to the values in the table below, which also includes the fractional error. A value of the fractional error > 1 would indicate that the value is not distinguishable from 0.
 
 ```python
-gradient1['frac_error'] = np.abs(gradient1['error'] / gradient1['mean'])
+gradient1["frac_error"] = np.abs(gradient1["error"] / gradient1["mean"])
 gradient1
 ```
 
@@ -148,32 +155,33 @@ gradient_mean = time_df.groupby(group_bys).apply(
     lambda x: np.nanmean(instantaneous_gradient(x))
 )
 gradient_error = time_df.groupby(group_bys).apply(
-    lambda x: scipy.stats.sem(instantaneous_gradient(x), nan_policy='omit')
+    lambda x: scipy.stats.sem(instantaneous_gradient(x), nan_policy="omit")
 )
 
-gradient2 = pandas.DataFrame({'mean': gradient_mean, 'error': gradient_error})
+gradient2 = pandas.DataFrame({"mean": gradient_mean, "error": gradient_error})
 gradient2.reset_index(inplace=True)
 ```
 
 Plotting the data shows the errors significatnly reduced over the standard deviation error calculation although while the errors are small the values are also really small.
 
 ```python
-chart = alt.Chart(gradient2).mark_point().transform_calculate(
-    ymin="datum.mean-datum.error/2",
-    ymax="datum.mean+datum.error/2"
-).encode(
-    alt.X('temperature:Q', scale=alt.Scale(zero=False))
+chart = (
+    alt.Chart(gradient2)
+    .mark_point()
+    .transform_calculate(
+        ymin="datum.mean-datum.error/2", ymax="datum.mean+datum.error/2"
+    )
+    .encode(alt.X("temperature:Q", scale=alt.Scale(zero=False)))
 )
 
-disp_chart = (
-    chart.encode(y=alt.Y('mean', axis=alt.Axis(format='e'))) +
-    chart.mark_rule().encode(y='ymin:Q', y2='ymax:Q')
-)
+disp_chart = chart.encode(
+    y=alt.Y("mean", axis=alt.Axis(format="e"))
+) + chart.mark_rule().encode(y="ymin:Q", y2="ymax:Q")
 disp_chart
 ```
 
 ```python
-gradient2['frac_error'] = np.abs(gradient2['error'] / gradient2['mean'])
+gradient2["frac_error"] = np.abs(gradient2["error"] / gradient2["mean"])
 gradient2
 ```
 
@@ -195,11 +203,9 @@ def gradient_regression_first(df):
 
     """
     df = df.dropna()
-    slope, _, _, _, std_err = scipy.stats.linregress(
-        x=df.time,
-        y=df.radius
-    )
+    slope, _, _, _, std_err = scipy.stats.linregress(x=df.time, y=df.radius)
     return slope, std_err
+
 
 gradient_mean = time_df.groupby(group_bys).apply(
     lambda x: gradient_regression_first(x)[0]
@@ -208,7 +214,7 @@ gradient_error = time_df.groupby(group_bys).apply(
     lambda x: gradient_regression_first(x)[1]
 )
 
-gradient4 = pandas.DataFrame({'mean': gradient_mean, 'error': gradient_error})
+gradient4 = pandas.DataFrame({"mean": gradient_mean, "error": gradient_error})
 gradient4.reset_index(inplace=True)
 ```
 
@@ -226,6 +232,7 @@ def gradient_regression_mean(df):
     slope, _, _, _, std_err = scipy.stats.linregress(df.time, df.radius)
     return slope, std_err
 
+
 gradient_mean = time_df.groupby(group_bys).apply(
     lambda x: gradient_regression_mean(x)[0]
 )
@@ -233,26 +240,28 @@ gradient_error = time_df.groupby(group_bys).apply(
     lambda x: gradient_regression_mean(x)[1]
 )
 
-gradient5 = pandas.DataFrame({'mean': gradient_mean, 'error': gradient_error})
+gradient5 = pandas.DataFrame({"mean": gradient_mean, "error": gradient_error})
 gradient5.reset_index(inplace=True)
 ```
 
 ```python
-chart = alt.Chart(gradient4).mark_point().transform_calculate(
-    ymin="datum.mean-datum.error/2",
-    ymax="datum.mean+datum.error/2"
-).encode(
-    alt.X('temperature:Q', scale=alt.Scale(zero=False))
+chart = (
+    alt.Chart(gradient4)
+    .mark_point()
+    .transform_calculate(
+        ymin="datum.mean-datum.error/2", ymax="datum.mean+datum.error/2"
+    )
+    .encode(alt.X("temperature:Q", scale=alt.Scale(zero=False)))
 )
 
 (
-    chart.encode(y=alt.Y('mean', axis=alt.Axis(format='e'))) +
-    chart.mark_rule().encode(y='ymin:Q', y2='ymax:Q')
+    chart.encode(y=alt.Y("mean", axis=alt.Axis(format="e")))
+    + chart.mark_rule().encode(y="ymin:Q", y2="ymax:Q")
 )
 ```
 
 ```python
-gradient4['frac_error'] = np.abs(gradient4['error'] / gradient4['mean'])
+gradient4["frac_error"] = np.abs(gradient4["error"] / gradient4["mean"])
 gradient4
 ```
 
@@ -264,27 +273,26 @@ The errors in this approximation of the values is significantly smaller than any
 Taking all the calcualted values of the melting rates and making a comparison of the different techniques. This is to see how consistent the different methods are at calculating these derivatives.
 
 ```python
-gradient1['exp'] = 1
-gradient2['exp'] = 2
-gradient4['exp'] = 4
-gradient5['exp'] = 5
+gradient1["exp"] = 1
+gradient2["exp"] = 2
+gradient4["exp"] = 4
+gradient5["exp"] = 5
 gradients_all = pandas.concat([gradient4, gradient5], axis=0, sort=True)
 ```
 
 Plotting all the different approaches (labelled exp), on the same figure it is simple to compare them. The first approach to calculating the error is obviously wrong so I have excluded the results for clarity.
 
 ```python
-chart = alt.Chart(gradients_all).mark_point().transform_calculate(
-    ymin="datum.mean-datum.error",
-    ymax="datum.mean+datum.error"
-).encode(
-    alt.X('temperature:Q', scale=alt.Scale(zero=False)),
-    color='exp:N',
+chart = (
+    alt.Chart(gradients_all)
+    .mark_point()
+    .transform_calculate(ymin="datum.mean-datum.error", ymax="datum.mean+datum.error")
+    .encode(alt.X("temperature:Q", scale=alt.Scale(zero=False)), color="exp:N")
 )
 
 (
-    chart.encode(y=alt.Y('mean', axis=alt.Axis(format='e'))) +
-    chart.mark_rule().encode(y='ymin:Q', y2='ymax:Q')
+    chart.encode(y=alt.Y("mean", axis=alt.Axis(format="e")))
+    + chart.mark_rule().encode(y="ymin:Q", y2="ymax:Q")
 )
 ```
 
@@ -293,20 +301,21 @@ The second and third approach give very similar results, even when comparing the
 To be able to more easily compare the values a log plot would make more sense, however since some of the values are negative this is not possible without some manipulation of the data. The figure below shows the data from each approach where the lowest estimated range is above 5e-10. Additionally all the values are now the absolute magnitude to allow for the log plot.
 
 ```python
-chart = alt.Chart(gradients_all).mark_point().transform_calculate(
-    abs_mean='abs(datum.mean)',
-    ymin="datum.abs_mean-datum.error",
-    ymax="datum.abs_mean+datum.error"
-).transform_filter(
-    "datum.ymin > 1e-10"
-).encode(
-    alt.X('temperature:Q', scale=alt.Scale(zero=False)),
-    color='exp:N',
+chart = (
+    alt.Chart(gradients_all)
+    .mark_point()
+    .transform_calculate(
+        abs_mean="abs(datum.mean)",
+        ymin="datum.abs_mean-datum.error",
+        ymax="datum.abs_mean+datum.error",
+    )
+    .transform_filter("datum.ymin > 1e-10")
+    .encode(alt.X("temperature:Q", scale=alt.Scale(zero=False)), color="exp:N")
 )
 
 (
-    chart.encode(y=alt.Y('abs_mean:Q', scale=alt.Scale(type='log'))) +
-    chart.encode(y='ymin:Q', y2='ymax:Q').mark_rule()
+    chart.encode(y=alt.Y("abs_mean:Q", scale=alt.Scale(type="log")))
+    + chart.encode(y="ymin:Q", y2="ymax:Q").mark_rule()
 )
 ```
 
