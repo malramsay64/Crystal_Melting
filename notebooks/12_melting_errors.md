@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.1
+      jupytext_version: 1.2.0
   kernelspec:
     display_name: crystal
     language: python
@@ -94,6 +94,31 @@ with alt.data_transformers.enable("default"):
 ```
 
 ```python
+chart = alt.Chart(melt_df.reset_index()).encode(
+    x=alt.X("temperature", title="Temperature", scale=alt.Scale(zero=False)),
+    color=alt.Color("pressure:N", title="Pressure"),
+)
+
+chart = chart.mark_point().encode(
+    y=alt.Y("value", title="Melting Rate", axis=alt.Axis(format="e"))
+) + chart.mark_rule().encode(y="error_min", y2="error_max")
+
+chart = figures.hline(chart, 0)
+
+chart = chart.transform_filter(alt.datum.temp_norm < 1.10)
+
+(
+    chart.transform_filter(alt.datum.pressure == 1.00) & 
+    chart.transform_filter(alt.datum.pressure == 13.50)
+)
+```
+
+```python
+with alt.data_transformers.enable("default"):
+    chart.save("../figures/melting_point_rates.svg", webdriver="firefox")
+```
+
+```python
 mean = rates_df.groupby(["temperature", "pressure", "temp_norm"])["mean"].mean()
 err = rates_df.groupby(["temperature", "pressure", "temp_norm"])["mean"].std()
 ```
@@ -124,7 +149,7 @@ all_df = (
     .join(rot_df, lsuffix="_melt", rsuffix="_rot")
     .set_index("temp_norm", append=True)
 )
-all_df.head()
+all_df
 ```
 
 ```python
@@ -190,8 +215,8 @@ def fit_curve(x_vals, y_vals, errors=None, delta_E=None):
 ```python
 x = np.arange(0.95, 2.0, 0.05)
 
-p1_values = melt_values.query("pressure == 1.00 and temp_norm < 1.30")
-p13_values = melt_values.query("pressure == 13.50 and temp_norm < 1.30")
+p1_values = melt_values.query("pressure == 1.00 and 1.00 < temp_norm < 1.30")
+p13_values = melt_values.query("pressure == 13.50 and 1.00 < temp_norm < 1.30")
 
 theory1, opt1, err1 = fit_curve(
     p1_values["temp_norm"], p1_values["value"], p1_values["error"], -0.18034612159032992
@@ -226,7 +251,7 @@ chart = (
         ),
         color=alt.Color("pressure:N", title="Pressure"),
     )
-    .transform_filter(alt.datum.temp_norm < 1.40)
+    .transform_filter(alt.datum.temp_norm < 1.60)
 )
 
 chart = (
