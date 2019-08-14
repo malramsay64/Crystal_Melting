@@ -41,7 +41,7 @@ data/analysis/rates_clean.h5: data/analysis/rates.h5
 data/analysis/rates.h5: $(rates_analysis)
 	python3 src/melting_rates.py collate $@ $^
 
-$(rates_analysis_dir)/dump-%.h5: $(rates_sim)/dump-%.gsd $(ml_model)
+$(rates_analysis_dir)/dump-%.h5: $(rates_sim)/dump-%.gsd | $(ml_model)
 	python src/melting_rates.py melting --skip-frames 1 $< $@
 
 #
@@ -62,7 +62,7 @@ data/analysis/melting_clean.h5: data/analysis/melting.h5
 data/analysis/melting.h5: $(melting_analysis)
 	python3 src/melting_rates.py collate $@ $^
 
-$(melting_analysis_dir)/dump-%.h5: $(melting_sim)/dump-%.gsd $(ml_model)
+$(melting_analysis_dir)/dump-%.h5: $(melting_sim)/dump-%.gsd | $(ml_model)
 	python src/melting_rates.py melting --skip-frames 100 $< $@
 
 #
