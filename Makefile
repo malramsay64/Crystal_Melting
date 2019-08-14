@@ -121,6 +121,12 @@ all_notebooks = $(wildcard notebooks/*.md)
 .PHONY: notebooks
 notebooks: $(all_notebooks:.md=.ipynb)
 
+.PHONY: sync
+sync:
+	jupytext --set-formats ipynb,md notebooks/*.md
+	jupytext --set-formats ipynb,md notebooks/*.ipynb
+	jupytext --sync --pipe black notebooks/*.ipynb
+
 %.ipynb: %.md
 	cd $(dir $<) && jupytext --to notebook --execute $(notdir $<)
 
