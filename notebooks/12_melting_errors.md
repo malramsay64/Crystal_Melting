@@ -107,7 +107,7 @@ chart = figures.hline(chart, 0)
 
 chart = chart.transform_filter(alt.datum.temp_norm < 1.10)
 
-(
+chart = (
     chart.transform_filter(alt.datum.pressure == 1.00) & 
     chart.transform_filter(alt.datum.pressure == 13.50)
 )
