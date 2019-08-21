@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.0
+      jupytext_version: 1.2.1
   kernelspec:
     display_name: crystal
     language: python
@@ -107,10 +107,10 @@ chart = figures.hline(chart, 0)
 
 chart = chart.transform_filter(alt.datum.temp_norm < 1.10)
 
-chart = (
-    chart.transform_filter(alt.datum.pressure == 1.00) & 
-    chart.transform_filter(alt.datum.pressure == 13.50)
+chart = chart.transform_filter(alt.datum.pressure == 1.00) & chart.transform_filter(
+    alt.datum.pressure == 13.50
 )
+chart
 ```
 
 ```python
