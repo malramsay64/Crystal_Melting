@@ -35,9 +35,6 @@ import sys
 sys.path.append("../src")
 import figures
 
-figures.use_my_theme()
-alt.data_transformers.enable("csv")
-
 from sdanalysis.util import get_filename_vars
 ```
 

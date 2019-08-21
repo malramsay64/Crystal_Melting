@@ -28,14 +28,10 @@ import numpy as np
 import pandas
 import altair as alt
 
-alt.data_transformers.enable("json")
-
 import sys
 
 sys.path.append("../src")
 import figures
-
-figures.use_my_theme()
 ```
 
 ## Load Data

@@ -31,13 +31,10 @@ from sdanalysis import HoomdFrame
 from sdanalysis.figures import plot_frame, show, output_notebook
 
 import sys
-
 sys.path.append("../src")
 import detection
 import figures
 
-alt.data_transformers.enable("csv")
-figures.use_my_theme()
 output_notebook()
 ```
 

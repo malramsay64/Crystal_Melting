@@ -27,20 +27,10 @@ import numpy as np
 import pandas
 import altair as alt
 
-# alt.data_transformers.enable("json")
-
-# def unlimited_transformer(data):
-#     return alt.pipe(data, alt.to_values)
-
-# alt.data_transformers.register("unlimited", unlimited_transformer)
-# alt.data_transformers.enable("unlimited")
-
 import sys
 
 sys.path.append("../src")
 import figures
-
-figures.use_my_theme()
 ```
 
 ## Load Data

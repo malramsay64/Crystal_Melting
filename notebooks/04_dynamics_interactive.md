@@ -32,12 +32,6 @@ import sys
 
 sys.path.append("../src")
 import figures
-
-figures.use_my_theme()
-
-# We are dealing with datsets larger than the 5000 rows,
-# so save the data to a json file and read from that.
-alt.data_transformers.enable("json")
 ```
 
 <!-- #region -->

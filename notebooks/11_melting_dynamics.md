@@ -30,8 +30,6 @@ import sys
 
 sys.path.append("../src")
 import figures
-
-figures.use_my_theme()
 ```
 
 ## Input data

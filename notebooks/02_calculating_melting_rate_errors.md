@@ -20,7 +20,7 @@ I need a method of computing the melting rate of the crystal structures which wi
 ```python
 import numpy as np
 import pandas
-import altair.vegalite.v2 as alt
+import altair as alt
 import scipy.stats
 
 alt.themes.enable("opaque")
