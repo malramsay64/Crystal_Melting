@@ -8,6 +8,7 @@
 
 """Module containing function for theming and generating figures."""
 
+from pathlib import Path
 from typing import Any, Dict
 
 import altair as alt
@@ -37,6 +38,25 @@ def use_my_theme():
     # register and enable the theme
     alt.themes.register("my_theme", my_theme)
     alt.themes.enable("my_theme")
+
+
+def json_dir(data, data_dir="altairdata"):
+    data_dir = Path(data_dir)
+    data_dir.mkdir(exist_ok=True)
+    return alt.pipe(
+        data, alt.to_json(filename=str(data_dir / "{prefix}-{hash}.{extension}"))
+    )
+
+
+def use_data_transformer():
+    """Register and use an altair data transformer"""
+    alt.data_transformers.register("json_dir", json_dir)
+    alt.data_transformers.enable("json_dir")
+
+
+# This configures Altair to behave as expected when I load this module
+use_my_theme()
+use_data_transformer()
 
 
 def style_snapshot(figure: Figure) -> Figure:
