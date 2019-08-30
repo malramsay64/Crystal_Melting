@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import NamedTuple, Optional
 
 import click
+import freud
 import joblib
 import numpy as np
 import pandas as pd
@@ -53,6 +54,7 @@ def compute_crystal_growth(
     order_dimension = 5.0
 
     ml_order = order.create_ml_ordering(KNNModel)
+    voronoi = freud.voronoi.Voronoi(freud.box.Box(10, 10), buff=4)
     for index, snap in enumerate(open_trajectory(infile)):
         if index % skip_frames != 0:
             continue
@@ -60,14 +62,19 @@ def compute_crystal_growth(
         classification = ml_order(snap)
         labels = spatial_clustering(snap, classification)
 
-        if np.sum(labels == 1) > 5:
-            hull0 = ConvexHull(snap.position[labels == 0, :2])
-            hull1 = ConvexHull(snap.position[labels == 1, :2])
-            if hull0.volume > hull1.volume:
-                hull = hull1
-            else:
-                hull = hull0
+        # The crystal should always be smaller, so ensure it has label 1
+        if sum(labels) > len(labels) / 2:
+            labels = -labels + 1
 
+        # Compute Voroni cells and volumes
+        voronoi.compute(snap.position, box=snap.box)
+        voronoi.computeVolumes()
+        # Sum the volumes of the crystalline molecules
+        voronoi_volume = np.sum(voronoi.volumes[labels == 1])
+
+        # Only compute ConvexHull for at least 5 particles
+        if np.sum(labels == 1) > 5:
+            hull = ConvexHull(snap.position[labels == 1, :2])
         else:
             hull = namedtuple("hull", ["area", "volume"])
             hull.area = 0
@@ -89,6 +96,7 @@ def compute_crystal_growth(
             "pg": float(states.pg),
             "surface_area": float(hull.area),
             "volume": float(hull.volume),
+            "voronoi_volume": float(voronoi_volume),
             "time": float(snap.timestep),
         }
 
