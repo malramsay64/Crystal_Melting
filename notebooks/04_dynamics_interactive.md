@@ -16,7 +16,10 @@ jupyter:
 
 # Dynamics Summary
 
-This is a summary of the dynamics quantitites from a simulation presented in a way that is simple to check that the values are sensible before continuing with further analysis.
+This is a summary of the dynamics quantities
+from a simulation presented in a way
+that is simple to check that the values are sensible
+before continuing with further analysis.
 
 ```python
 import pandas as pd
@@ -29,13 +32,13 @@ from sdanalysis.util import get_filename_vars
 import matplotlib.pyplot as plt
 
 import sys
-
 sys.path.append("../src")
 import figures
 ```
 
 <!-- #region -->
-The processing of the dataset has to be performed before this notebook will display anything useful.
+The processing of the dataset
+has to be performed before this notebook will display anything useful.
 This processing can be performed using the command
 
 ```sh
@@ -76,7 +79,8 @@ df_plot = (
 ```
 
 This is the part where the generation of the figure takes place.
-The selection of the pressure and the dyanmic quantity is designed to be interactive,
+The selection of the pressure
+and the dynamic quantity is designed to be interactive,
 selecting the value of interest.
 
 ```python
@@ -127,10 +131,6 @@ dataset = parse_directory(
 ```
 
 ```python
-
-```
-
-```python
 pressure = widgets.ToggleButtons(description="Pressure", options=list(dataset.keys()))
 temperature = widgets.ToggleButtons(
     description="Temperature", options=list(dataset.get(pressure.value).keys())
@@ -164,9 +164,4 @@ def plot_figure(pressure, temperature, quantity):
     )
     c = c.mark_line() + c.mark_errorband().encode(yError=alt.YError("std"))
     return c
-```
-
-
-```python
-
 ```

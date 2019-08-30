@@ -13,15 +13,15 @@ jupyter:
     name: crystal
 ---
 
-Data Ingest
-======
+# Data Ingest
+
 
 The data is a key component of any machine learning algorithm.
 The ingest of the data,
 including the cleanup and labelling stages,
 is often the most time consuming.
 It requires taking the raw data,
-in our case Molecular Dyanmics trajectories, and
+in our case Molecular Dynamics trajectories, and
 computing or extracting the quantities which will be used
 for the Machine Learning.
 
@@ -35,10 +35,37 @@ a collection of data containing;
 - temperature
 
 
-The input files
---------------
+## Imports
 
-The input data for this tutorial is in the folder `data`,
+These are the packages required to run the notebook,
+with the importing done to make the functions simple to use.
+The detection module, is located in the directory `../src/`
+which is why that directory needs to be added to
+the list of directories python searches for modules.
+
+```python
+import numpy as np
+from sdanalysis.figures import plot_frame
+from sdanalysis.order import relative_orientations
+import sklearn
+import joblib
+
+# Utility functions I have written to make analysis simpler
+import sys
+
+sys.path.append("../src")
+from detection import read_all_files, classify_mols, plot_confusion_matrix
+
+# Show the configurations in the notebook
+from bokeh.plotting import show, output_notebook
+
+output_notebook()
+```
+
+## The input files
+
+
+The input data for this tutorial is in the folder `../data/simulations/dataset/output`,
 which contains a series of `.gsd` files.
 This is the default file format of [Hoomd-blue](http://glotzerlab.engin.umich.edu/hoomd-blue/)
 a molecular dynamics package designed to run on GPUs
@@ -48,64 +75,39 @@ To read these files we are going to use the [gsd](http://gsd.readthedocs.io/en/l
 that the glotzer group provide.
 To read files from other simulation packages [MDAnalysis](https://www.mdanalysis.org/)
 is a python package that will read nearly any file type.
-To read all the files that we want,
-we are going to use the [pathlib](https://docs.python.org/3/library/pathlib.html) module
-from python's (>= 3.4) standard library.
+
+This matches all the files in the directory
+that start with `trajectory-Trimer-`,
+reading the 100th configuration for each.
+The 100th is chosen to ensure there are
+thermal fluctuations of the positions.
+This is limited by the speed of spontaneous melting
+at high temperatures.
 
 ```python
-%load_ext autoreload
-%autoreload 2
-```
-
-```python
-import numpy as np
-from sdanalysis.figures import plot_frame
-from sdanalysis.order import relative_orientations
-import sklearn
-import joblib
-
-import sys
-
-sys.path.append("../src")
-from detection import read_all_files, classify_mols, plot_confusion_matrix
-
-from bokeh.plotting import show, output_notebook
-
-output_notebook()
-```
-
-```python
-input_files = read_all_files(
-    "../data/simulations/dataset/output/", index=100, glob="trajectory-Trimer-*"
-)
+directory = "../data/simulations/dataset/output"
+input_files = read_all_files(directory, index=100, glob="trajectory-Trimer-*")
 len(input_files)
 ```
 
-### Collate Simulation Data
-
-This code is enough to read all the input files,
-so the next step is to actually do something useful
-with each of the files.
-
-Within each of the filenames I have included
-the parameters of the simulation.
-
+The final line is a count of
+the number of configurations which were found.
+A check that I have found the files I am looking for.
 
 ### Labelling Data
 
-This has given us sufficient information about the simulation,
-we now need to work out the classification of each molecule.
+To perform supervised classification of the data,
+we need to provide labels for each local environment.
 The configurations that I have prepared consist of two phases,
 the middle 2/3 in the $x$ and $y$ directions is crystalline
-while the remainer of the simulation cell is liquid.
+while the remainder of the simulation cell is liquid.
 This is probably easiest to understand using a picture;
 
 ```python
 show(plot_frame(input_files[0].snapshot))
-print(input_files[4].pressure)
 ```
 
-#### We can define molecules that have an $x$ position in the range
+We can define molecules that have an $x$ position in the range
 $
 -L_x/3 < x < L_x/3
 $
@@ -116,7 +118,7 @@ $
 as being crystalline, with the crystal structure taken from the filename.
 The remaining molecules can be classed as the generic liquid.
 As before we can write a simple function
-that takes a snapshot and the cyrstal structure,
+that takes a snapshot and the crystal structure,
 returning the annotated classification of all molecules in the simulation.
 At the interface of the two phases
 the classification is not well defined,
@@ -134,7 +136,7 @@ crystals = [classify_mols(data.snapshot, data.crystal) for data in input_files]
 The final step is to compute the nearest neighbours for each of the molecules.
 Most of the work of this function is done
 using a function I wrote, `relative_orientations`.
-This function uses the the kdtree algorithm from scipy to compute the neighbours efficiently.
+This function uses the kdtree algorithm from scipy to compute the neighbours efficiently.
 A side effect of using this function is that the neighbours are returned in order of increasing distance.
 Then computes the relative orientation of the neighbour orientations using quaternion maths.
 
@@ -156,8 +158,8 @@ orientations = [
 ]
 ```
 
-Loading the Data
-----------------
+## Loading the Data
+
 
 Now with all the parts in place we can load all the data into a pandas DataFrame.
 Taking the code we had at the start to read in all the snapshots,
@@ -170,8 +172,8 @@ we can now apply the functions we have just written,
 to process the data into a succinct and usable form.
 
 
-Finding a Machine Learning Model
-=================
+## Finding a Machine Learning Model
+
 
 There are many different types of models we can use for classification,
 each of these models have types of problems they are well suited to.
@@ -187,9 +189,9 @@ An excellent property of scikit-learn is
 that all the algorithms have the same API,
 allowing us to treat them all in the same way.
 
-This is not an exhastive list of all the possible classifiers in scikit-learn,
+This is not an exhaustive list of all the possible classifiers in scikit-learn,
 just a smattering for comparison.
-For a more exhastive list check out [the scikit-learn documentation](http://scikit-learn.org/stable/supervised_learning.html#supervised-learning),
+For a more exhaustive list check out [the scikit-learn documentation](http://scikit-learn.org/stable/supervised_learning.html#supervised-learning),
 and feel free to add more to the list.
 
 ```python
@@ -212,13 +214,28 @@ ml_models = {
 }
 ```
 
-### Loading the training data
+The Support-Vector Machine and the Neural Network classifiers
+can also be included,
+however they take significantly longer to run
+and provide no increase in performance.
 
-We need to load in the training dataset we created in the first notebook.
-At this point we are interested in two sets of data,
+### Formatting the training data
 
-- $X$, the input data which is the orientation of the six nearest neighbours
-- $Y$, the true labelled classification of the data.
+Previously we loaded the data,
+however we need it in a format
+suitable for performing machine learning.
+The format we want is;
+
+- $X$, the input data (features) which is the orientation of the six nearest neighbours
+- $y$, the true labelled classification of the data.
+
+As part of this formatting,
+we need to remove molecules which are 'unclassified',
+that is the ones in the boundary
+from both the features and the classification.
+Here we are using concatenate
+to combine the array for each configuration
+into a single large array of all configurations.
 
 ```python
 y = np.concatenate(crystals)
@@ -240,7 +257,7 @@ we are going to break our training data into two groups,
 This division of the dataset gives us a set of data
 previously unseen by the algorithms,
 giving us a method of testing whether
-the algorithm is acutally learning the underlying features,
+the algorithm is actually learning the underlying features,
 or just 'memorising' the training data.
 This division of data will be through a random selection
 so as not to bias the selection of data.
@@ -280,7 +297,7 @@ for name, model in ml_models.items():
 ```
 
 Out of all the algorithms tested,
-there are three that stand out
+there are two that stand out
 
 - K-Nearest Neighbours (KNN),
 - Decision Tree (DT)
@@ -289,7 +306,7 @@ with accuracies in excess of 95%.
 
 So with these three algorithms it is likely worth
 tweaking the algorithms slightly from
-the defualt paramters in an effort to improve performance.
+the default parameters in an effort to improve performance.
 It is also worth understanding which classes
 each of these algorithms is strongest at classifying.
 For this additional data we are going to be using a [confusion matrix](http://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html).
@@ -299,7 +316,7 @@ while the off diagonal elements are the values
 which were incorrectly classified.
 
 Below we have a handy function from the scikit-learn documentation
-that will nicely plot the confusion matrix as a heatmap.
+that will nicely plot the confusion matrix as a heat map.
 
 
 It is this point where our breaking the data into
@@ -324,47 +341,3 @@ plot_confusion_matrix(
 ```python
 predictions
 ```
-
-It is interesting to note that all of the models
-have the most difficulty with the liquid/crystal characterisation,
-with the largest proportion of false positives being
-crystal incorrectly classified as liquid.
-To make this model we have created persistent
-it needs to be saved which is done using `joblib`.
-
-```python
-joblib.dump(ml_models["KNN"], "../models/knn-trimer.pkl")
-```
-
-ML in Production
-=========
-
-So far we have been looking at building a machine learning model,
-while this is nice we actually want to be able to use it
-to perform useful science.
-
-This notebook will demonstrate the application of the machine learning algorithm
-that we built in the first part of the tutorial to
-the classification of a previously unseen configuration.
-
-
-Loading the Model
-----------------
-
-At the end of the [previous notebook](02_Lets_Find_A_Model.ipynb)
-we saved the model as a python pickle using the `joblib` library.
-This converted the in memory object that represented the trained state
-of the machine learning algorithm into a form that could be saved to disk.
-By reading the file `knn-model.pkl` from disk,
-we can load the trained K-Nearest Neighbours model.
-
-```python
-model = joblib.load("../models/knn-trimer.pkl")
-model
-```
-
-With the model now loaded we need some data to apply it to.
-For this we need to load a configuration and
-compute the relative orientation of all the neareset neighbours.
-With the nearest neighbour orientations comptued,
-all that is left to do is use the model to predict the classes.

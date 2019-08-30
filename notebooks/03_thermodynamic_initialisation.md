@@ -16,7 +16,9 @@ jupyter:
 
 # Thermodynamics
 
-A thermodynamic analysis of the simulations. This is to develop the random initialisation of a configuration and to confirm the exising thermodynamic behaviour.
+A thermodynamic analysis of the simulations.
+This is to develop the random initialisation of a configuration
+and to confirm the existing thermodynamic behaviour.
 
 ```python
 import pandas as pd
@@ -25,13 +27,18 @@ import altair as alt
 
 from ipywidgets import interact
 
-alt.data_transformers.enable("csv")
-alt.themes.enable("opaque")
+import sys
+sys.path.append("../src")
+import figures
 ```
 
 ## Hoomd Output
 
-I have logged many thermodynamic quantities throughout the hoomd simulations. Although I have separated these from the main simulation data, I can still process the files. The data file I am investigating is from the calculation of dynamics, meaning all the quatities should be a equilibrium.
+I have logged many thermodynamic quantities throughout the Hoomd simulations.
+Although I have separated these from the main simulation data,
+I can still process the files.
+The data file I am investigating is from the calculation of dynamics,
+meaning all the quantities should be a equilibrium.
 
 ```python
 thermo_file = "../data/simulations/interface/output/thermo-Trimer-P13.50-T1.50-p2gg.log"
@@ -83,4 +90,7 @@ trans_KE = (
 trans_KE
 ```
 
-With the relationship $T=KE$, our kinetic energy is 3 times the expected value, and 3 times what hoomd is calculating. Which would mean it is using a mass of 1 for the molecules.
+With the relationship $T=KE$,
+our kinetic energy is 3 times the expected value,
+and 3 times what Hoomd is calculating.
+Which would mean it is using a mass of 1 for the molecules.
