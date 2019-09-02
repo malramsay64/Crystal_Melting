@@ -97,6 +97,32 @@ $(dynamics_analysis_dir)/trajectory-Trimer-P13.50-%.h5: $(dynamics_sim)/trajecto
 	sdanalysis --keyframe-interval 1_000_000 --linear-steps 100 --wave-number 2.90 comp-dynamics $< $@
 
 #
+# Energy Surface Analysis Rules
+#
+
+thermo_sim = data/simulations/thermodynamics/output
+dynamics_sim = data/simulations/dynamics/output
+energy_analysis_dir = data/analysis/thermodynamics
+
+energy_trajectories = $(wildcard $(thermo_sim)/dump-Trimer*.gsd) $(wildcard $(dynamics_sim)/dump-Trimer*.gsd)
+energy_analysis = $(addprefix $(energy_analysis_dir)/, $(notdir $(energy_trajectories:.gsd=.h5)))
+
+energy: data/analysis/energy.h5 ## Compute values for potential energy surfaces
+
+data/analysis/energy.h5: $(energy_analysis)
+	python3 src/fluctuations.py collate $@ $^
+
+$(energy_analysis_dir)/dump-%.h5: $(thermo_sim)/dump-%.gsd | $(energy_analysis_dir)
+	python3 src/fluctuations.py $< $@
+
+$(energy_analysis_dir)/dump-%.h5: $(dynamics_sim)/dump-%.gsd | $(energy_analysis_dir)
+	python3 src/fluctuations.py $< $@
+
+$(energy_analysis_dir):
+	mkdir -p $@
+
+
+#
 # Other Rules
 #
 
