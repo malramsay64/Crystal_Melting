@@ -29,10 +29,33 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-@click.command()
+@click.group()
+def main():
+    pass
+
+
+@main.command()
+@click.argument("output", type=click.Path(file_okay=True, dir_okay=False))
+@click.argument(
+    "infiles", nargs=-1, type=click.Path(exists=True, file_okay=True, dir_okay=False)
+)
+@click.argument()
+def collate(output, infiles):
+    with pd.HDFStore(output, "w") as dst:
+        for file in infiles:
+            with pd.HDFStore(file) as src:
+                key = "ordering"
+                df = src.get(key)
+                df["crystal"] = df["crystal"].astype(
+                    CategoricalDtype(categories=["p2", "pg", "p2gg", "liquid"])
+                )
+                dst.append(key, df)
+
+
+@main.command()
 @click.argument("infile")
 @click.argument("outfile")
-def main(infile, outfile):
+def analyse(infile, outfile):
     dataframes = []
     pressure, temperature, crystal, *_ = get_filename_vars(infile)
     if crystal is None:

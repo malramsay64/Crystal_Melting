@@ -113,10 +113,10 @@ data/analysis/energy.h5: $(energy_analysis)
 	python3 src/fluctuations.py collate $@ $^
 
 $(energy_analysis_dir)/dump-%.h5: $(thermo_sim)/dump-%.gsd | $(energy_analysis_dir)
-	python3 src/fluctuations.py $< $@
+	python3 src/fluctuations.py analyse $< $@
 
 $(energy_analysis_dir)/dump-%.h5: $(dynamics_sim)/dump-%.gsd | $(energy_analysis_dir)
-	python3 src/fluctuations.py $< $@
+	python3 src/fluctuations.py analyse $< $@
 
 $(energy_analysis_dir):
 	mkdir -p $@
