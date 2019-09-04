@@ -53,8 +53,8 @@ def collate(output, infiles):
 
 
 @main.command()
-@click.argument("infile")
-@click.argument("outfile")
+@click.argument("infile", type=click.Path(exists=True, file_okay=True, dir_okay=False))
+@click.argument("outfile", type=click.Path(file_okay=True, dir_okay=False))
 def analyse(infile, outfile):
     dataframes = []
     pressure, temperature, crystal, *_ = get_filename_vars(infile)
@@ -64,17 +64,17 @@ def analyse(infile, outfile):
         orientational_order = order.orientational_order(
             snap.box, snap.position, snap.orientation
         )
-        dataframes.append(
-            pd.DataFrame(
-                {
-                    "molecule": np.arange(snap.num_mols),
-                    "orientational_order": orientational_order,
-                    "temperature": temperature,
-                    "pressure": pressure,
-                    "crystal": crystal,
-                }
-            )
+        df = pd.DataFrame(
+            {
+                "molecule": np.arange(snap.num_mols),
+                "orientational_order": orientational_order,
+                "temperature": float(temperature),
+                "pressure": float(pressure),
+                "crystal": crystal,
+            }
         )
+        df["crystal"] = df["crystal"].astype("category")
+        dataframes.append(df)
     with pd.HDFStore(outfile) as dst:
         dst.append("ordering", pd.concat(dataframes))
 
