@@ -93,8 +93,9 @@ def collate(output, infiles):
 def analyse(infile, outfile):
     dataframes = []
     file_vars = get_filename_vars(infile)
-    if file_vars.crystal is None:
-        file_vars.crystal = "liquid"
+    crystal = file_vars.crystal
+    if crystal is None:
+        crystal = "liquid"
     for snap in open_trajectory(infile, progressbar=True):
         orientational_order = order.orientational_order(
             snap.box, snap.position, snap.orientation
@@ -105,7 +106,7 @@ def analyse(infile, outfile):
                 "orientational_order": orientational_order,
                 "temperature": float(file_vars.temperature),
                 "pressure": float(file_vars.pressure),
-                "crystal": file_vars.crystal,
+                "crystal": crystal,
             }
         )
         df["crystal"] = df["crystal"].astype("category")

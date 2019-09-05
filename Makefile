@@ -97,28 +97,28 @@ $(dynamics_analysis_dir)/trajectory-Trimer-P13.50-%.h5: $(dynamics_sim)/trajecto
 	sdanalysis --keyframe-interval 1_000_000 --linear-steps 100 --wave-number 2.90 comp-dynamics $< $@
 
 #
-# Energy Surface Analysis Rules
+# Fluctuation analysis results
 #
 
 thermo_sim = data/simulations/thermodynamics/output
 dynamics_sim = data/simulations/dynamics/output
-energy_analysis_dir = data/analysis/thermodynamics
+fluctuation_analysis_dir = data/analysis/fluctuation
 
-energy_trajectories = $(wildcard $(thermo_sim)/dump-Trimer*.gsd) $(wildcard $(dynamics_sim)/dump-Trimer*.gsd)
-energy_analysis = $(addprefix $(energy_analysis_dir)/, $(notdir $(energy_trajectories:.gsd=.h5)))
+fluctuation_trajectories = $(wildcard $(thermo_sim)/dump-Trimer*.gsd) $(wildcard $(dynamics_sim)/dump-Trimer*.gsd)
+fluctuation_analysis = $(addprefix $(energy_analysis_dir)/, $(notdir $(energy_trajectories:.gsd=.h5)))
 
-energy: data/analysis/energy.h5 ## Compute values for potential energy surfaces
+fluctuation: data/analysis/fluctuation.h5 ## Compute values for the fluctuation of the particles
 
-data/analysis/energy.h5: $(energy_analysis)
+data/analysis/fluctuation.h5: $(fluctuation_analysis)
 	python3 src/fluctuations.py collate $@ $^
 
-$(energy_analysis_dir)/dump-%.h5: $(thermo_sim)/dump-%.gsd | $(energy_analysis_dir)
+$(fluctuation_analysis_dir)/dump-%.h5: $(thermo_sim)/dump-%.gsd | $(fluctuation_analysis_dir)
 	python3 src/fluctuations.py analyse $< $@
 
-$(energy_analysis_dir)/dump-%.h5: $(dynamics_sim)/dump-%.gsd | $(energy_analysis_dir)
+$(fluctuation_analysis_dir)/dump-%.h5: $(dynamics_sim)/dump-%.gsd | $(fluctuation_analysis_dir)
 	python3 src/fluctuations.py analyse $< $@
 
-$(energy_analysis_dir):
+$(fluctuation_analysis_dir):
 	mkdir -p $@
 
 
