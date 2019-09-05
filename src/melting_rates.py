@@ -55,7 +55,7 @@ def compute_crystal_growth(
 
     ml_order = order.create_ml_ordering(KNNModel)
     voronoi = freud.voronoi.Voronoi(freud.box.Box(10, 10), buff=4)
-    for index, snap in enumerate(open_trajectory(infile)):
+    for index, snap in enumerate(open_trajectory(infile, progressbar=True)):
         if index % skip_frames != 0:
             continue
 
