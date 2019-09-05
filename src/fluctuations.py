@@ -92,7 +92,7 @@ def collate(output, infiles):
 @click.argument("outfile", type=click.Path(file_okay=True, dir_okay=False))
 def analyse(infile, outfile):
     dataframes = []
-    pressure, temperature, crystal, *_ = get_filename_vars(infile)
+    temperature, pressure, crystal, *_ = get_filename_vars(infile)
     if crystal is None:
         crystal = "liquid"
     for snap in open_trajectory(infile, progressbar=True):
