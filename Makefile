@@ -105,7 +105,7 @@ dynamics_sim = data/simulations/dynamics/output
 fluctuation_analysis_dir = data/analysis/fluctuation
 
 fluctuation_trajectories = $(wildcard $(thermo_sim)/dump-Trimer*.gsd) $(wildcard $(dynamics_sim)/dump-Trimer*.gsd)
-fluctuation_analysis = $(addprefix $(energy_analysis_dir)/, $(notdir $(energy_trajectories:.gsd=.h5)))
+fluctuation_analysis = $(addprefix $(fluctuation_analysis_dir)/, $(notdir $(fluctuation_trajectories:.gsd=.h5)))
 
 fluctuation: data/analysis/fluctuation.h5 ## Compute values for the fluctuation of the particles
 
