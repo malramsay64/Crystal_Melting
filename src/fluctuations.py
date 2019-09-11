@@ -98,7 +98,7 @@ def analyse(infile, outfile):
         crystal = "liquid"
     for snap in open_trajectory(infile, progressbar=True):
         orientational_order = order.orientational_order(
-            snap.box, snap.position, snap.orientation
+            snap.box, snap.position, snap.orientation, angle_factor=2.0
         )
         df = pd.DataFrame(
             {
