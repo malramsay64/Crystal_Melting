@@ -26,6 +26,7 @@ from sdanalysis.read import open_trajectory
 from sdanalysis.util import get_filename_vars
 
 from detection import spatial_clustering
+from util import normalised_temperature
 
 logger = logging.getLogger(__name__)
 
@@ -178,17 +179,9 @@ def rates(infile):
         return np.nan
 
     df = pd.read_hdf(infile, "fractions")
-    df["temp_norm"] = 0
 
-    select_high_pressure = (df.pressure == 13.50).values
-    df.loc[select_high_pressure, "temp_norm"] = (
-        df.loc[select_high_pressure, "temperature"] / 1.35
-    )
-
-    select_low_pressure = (df.pressure == 1.00).values
-    df.loc[select_low_pressure, "temp_norm"] = (
-        df.loc[select_low_pressure, "temperature"] / 0.36
-    )
+    # Normalise temperature based on melting point
+    df["temp_norm"] = normalised_temperature(df["temperature"], df["pressure"])
 
     group_bys = ["temperature", "pressure", "crystal", "temp_norm", "iter_id"]
     gradient_mean = df.groupby(group_bys).apply(
