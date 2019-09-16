@@ -121,6 +121,14 @@ $(fluctuation_analysis_dir)/dump-%.h5: $(dynamics_sim)/dump-%.gsd | $(fluctuatio
 $(fluctuation_analysis_dir):
 	mkdir -p $@
 
+#
+# Thermodynamics Analysis
+#
+
+thermo: data/analysis/thermodynamics.h5
+
+data/analysis/thermodynamics.h5: $(wildcard $(thermo_sim)/thermo*.log) $(wildcard $(dynamics_sim)/thermo*.log)
+	python3 src/fluctuations.py thermodynamics $@ $^
 
 #
 # Other Rules

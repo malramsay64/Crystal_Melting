@@ -121,10 +121,11 @@ def analyse(infile, outfile):
     "infiles", nargs=-1, type=click.Path(exists=True, file_okay=True, dir_okay=False)
 )
 def thermodynamics(outfile, infiles):
+    dfs = []
     for filename in infiles:
         fvars = get_filename_vars(filename)
 
-        df = pandas.read_csv(filename, sep="\t")
+        df = pd.read_csv(filename, sep="\t")
         # All the values are written to the same output file, so make sure there is only
         # a single trajectory worth of values.
         df = df.drop_duplicates("timestep", keep="last")
@@ -133,22 +134,25 @@ def thermodynamics(outfile, infiles):
 
         # Take the second half of the values to ensure there is no issue with
         # equilibration
-        df = df.iloc[df.N / 2 :, :]
+        df = df.iloc[len(df) // 2 :, :]
 
-        # Perform aggregations on the dataframe, making it much easier to work with.
-        df = df.agg(["mean", "std"])
+        # Calculate Total Energy
+        df["total_energy"] = df["kinetic_energy"] + df["potential_energy"]
 
         df["pressure"] = fvars.pressure
         if fvars.crystal is not None:
             df["crystal"] = fvars.crystal
         else:
             df["crystal"] = "liquid"
-
         df["temperature"] = fvars.temperature
         df = df.set_index(["pressure", "temperature", "crystal"])
+
+        # Perform aggregations on the dataframe, making it much easier to work with.
+        df = df.groupby(["pressure", "temperature", "crystal"]).agg(["mean", "std"])
+
         dfs.append(df)
 
-    pd.concat(dfs).to_hdf(outfile)
+    pd.concat(dfs).to_hdf(outfile, "thermo")
 
 
 if __name__ == "__main__":
