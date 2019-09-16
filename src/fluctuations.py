@@ -35,8 +35,8 @@ def main():
     pass
 
 
-bins = np.linspace(0, 1, 10001)
-bin_values = (bins[1:] + bins[:-1]) / 2
+BINS = np.linspace(-1, 1, 5001)
+BIN_VALUES = (BINS[1:] + BINS[:-1]) / 2
 
 
 def aggregate(values: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
@@ -53,9 +53,9 @@ def aggregate(values: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         counts: The count of each bin
 
     """
-    hist = np.histogram(values, bins=bins, density=True)[0]
+    hist = np.histogram(values, bins=BINS, density=True)[0]
     non_zero = np.nonzero(hist)
-    return bin_values[non_zero], hist[non_zero]
+    return BIN_VALUES[non_zero], hist[non_zero]
 
 
 @main.command()
@@ -79,6 +79,7 @@ def collate(output, infiles):
                         "crystal": df["crystal"].values[0],
                         "bins": bin_values,
                         "count": count,
+                        "probability": count * (BINS[1] - BINS[0]),
                     }
                 )
                 df["crystal"] = df["crystal"].astype(
