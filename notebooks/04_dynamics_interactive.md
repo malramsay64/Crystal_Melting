@@ -7,7 +7,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.1
+      jupytext_version: 1.2.0
   kernelspec:
     display_name: crystal
     language: python
@@ -32,6 +32,7 @@ from sdanalysis.util import get_filename_vars
 import matplotlib.pyplot as plt
 
 import sys
+
 sys.path.append("../src")
 import figures
 ```
@@ -126,7 +127,7 @@ with open(file) as src:
 from sdanalysis.figures.interactive_config import parse_directory
 
 dataset = parse_directory(
-    Path("../data/simulations/dynamics/output/"), glob="thermo*.log"
+    Path("../data/simulations/thermodynamics/output/"), glob="thermo*.log"
 )
 ```
 
@@ -135,33 +136,45 @@ pressure = widgets.ToggleButtons(description="Pressure", options=list(dataset.ke
 temperature = widgets.ToggleButtons(
     description="Temperature", options=list(dataset.get(pressure.value).keys())
 )
+crystals = widgets.ToggleButtons(
+    description="Crystal",
+    options=list(dataset.get(pressure.value).get(temperature.value).keys()),
+)
 quantities = widgets.ToggleButtons(description="Quantity", options=thermo_quantities)
 
 
 def update_temperatures(change):
-    temperature.options = dataset.get(change.new)
+    temperature.options = list(dataset.get(change.new).keys())
+
+
+def update_crystals(change):
+    crystals.options = list(dataset.get(pressure.value).get(change.new).keys())
 
 
 pressure.observe(update_temperatures, names="value")
+temperature.observe(update_crystals, names="value")
 
-
-@widgets.interact(pressure=pressure, temperature=temperature, quantity=quantities)
-def plot_figure(pressure, temperature, quantity):
-    filename = dataset.get(pressure).get(temperature).get("None").get("None")
+@widgets.interact(
+    pressure=pressure, temperature=temperature, crystal=crystals, quantity=quantities
+)
+def plot_figure(pressure, temperature, crystal, quantity):
+    print(pressure, temperature, crystal)
+    filename = dataset.get(pressure).get(temperature).get(crystal).get("None")
     df = pd.read_csv(
         filename, sep="\t", index_col="timestep", usecols=["timestep", quantity]
     )
 
     df = df[~df.index.duplicated(keep="first")].reset_index()
     df.index = pd.to_timedelta(df.timestep)
-    df = df.drop(columns="timestep").resample("10ms").agg(["mean", "std"])
+    df = df.drop(columns="timestep").resample("0.1ms").agg(["mean", "std"])
     df.columns = [col[-1] for col in df.columns.values]
     df = df.reset_index()
     df["timestep"] = df["timestep"].astype(int)
     c = alt.Chart(df).encode(
         x=alt.X("timestep", axis=alt.Axis(format="e")),
         y=alt.Y("mean", title=quantity, scale=alt.Scale(zero=False)),
+        yError=alt.YError("std"),
     )
-    c = c.mark_line() + c.mark_errorband().encode(yError=alt.YError("std"))
+    c = c.mark_line() + c.mark_errorband()
     return c
 ```
