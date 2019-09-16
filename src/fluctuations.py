@@ -140,12 +140,12 @@ def thermodynamics(outfile, infiles):
         # Calculate Total Energy
         df["total_energy"] = df["kinetic_energy"] + df["potential_energy"]
 
-        df["pressure"] = fvars.pressure
         if fvars.crystal is not None:
             df["crystal"] = fvars.crystal
         else:
             df["crystal"] = "liquid"
-        df["temperature"] = fvars.temperature
+        df["pressure"] = float(fvars.pressure)
+        df["temperature"] = float(fvars.temperature)
         df = df.set_index(["pressure", "temperature", "crystal"])
 
         # Perform aggregations on the dataframe, making it much easier to work with.
