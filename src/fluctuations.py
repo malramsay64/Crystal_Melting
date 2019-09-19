@@ -16,6 +16,7 @@ which are more flexible will be able to rapidly change configuration.
 """
 
 import logging
+from pathlib import Path
 from typing import Tuple
 
 import click
@@ -66,26 +67,40 @@ def aggregate(values: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
 def collate(output, infiles):
     with pd.HDFStore(output, "w") as dst:
         for file in infiles:
+            file = Path(file)
             print(file)
-            with pd.HDFStore(file) as src:
-                key = "ordering"
-                df = src.get(key)
-                bin_values, count = aggregate(df["orientational_order"])
+            if file.suffix == ".h5":
+                df = pd.read_hdf(file, "ordering")
+            elif file.suffix == ".csv":
+                df = pd.read_csv(file)
+                df.rename(columns={"orient_order": "orientational_order"})
+                fvars = get_filename_vars(file)
+                df["temperature"] = float(fvars.temperature)
+                df["pressure"] = float(fvars.pressure)
+                if fvars.crystal is None:
+                    crystal = "liquid"
+                else:
+                    crystal = fvars.crystal
+                df["crystal"] = crystal
+            else:
+                raise ValueError("Filetype is not supported")
 
-                df = pd.DataFrame(
-                    {
-                        "temperature": float(df["temperature"].values[0]),
-                        "pressure": float(df["pressure"].values[0]),
-                        "crystal": df["crystal"].values[0],
-                        "bins": bin_values,
-                        "count": count,
-                        "probability": count * (BINS[1] - BINS[0]),
-                    }
-                )
-                df["crystal"] = df["crystal"].astype(
-                    CategoricalDtype(categories=["p2", "p2gg", "pg", "liquid"])
-                )
-                dst.append(key, df)
+            bin_values, count = aggregate(df["orientational_order"])
+
+            df = pd.DataFrame(
+                {
+                    "temperature": float(df["temperature"].values[0]),
+                    "pressure": float(df["pressure"].values[0]),
+                    "crystal": df["crystal"].values[0],
+                    "bins": bin_values,
+                    "count": count,
+                    "probability": count * (BINS[1] - BINS[0]),
+                }
+            )
+            df["crystal"] = df["crystal"].astype(
+                CategoricalDtype(categories=["p2", "p2gg", "pg", "liquid"])
+            )
+            dst.append("ordering", df)
 
 
 @main.command()
