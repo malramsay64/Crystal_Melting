@@ -59,21 +59,33 @@ def aggregate(values: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     return BIN_VALUES[non_zero], hist[non_zero]
 
 
+def gaussian(x, A, mu, sigma):
+    return A * np.exp(-np.square(x - mu) / (2 * np.square(sigma)))
+
+
+def fit_gaussian(bins: np.ndarray, count: np.ndarray):
+    # Initial guess at parameter values
+    p0 = (1.0, 0.0, 1.0)
+    coeffs, _ = scipy.optimize.curve_fit(gaussian, bins, count, p0=p0, maxfev=2000)
+    return coeffs
+
+
 @main.command()
 @click.argument("output", type=click.Path(file_okay=True, dir_okay=False))
 @click.argument(
     "infiles", nargs=-1, type=click.Path(exists=True, file_okay=True, dir_okay=False)
 )
 def collate(output, infiles):
-    with pd.HDFStore(output, "w") as dst:
+    with pd.HDFStore(output) as dst:
         for file in infiles:
             file = Path(file)
             print(file)
             if file.suffix == ".h5":
-                df = pd.read_hdf(file, "ordering")
+                with pd.HDFStore(file) as src:
+                    df = src.get("ordering")
             elif file.suffix == ".csv":
                 df = pd.read_csv(file)
-                df.rename(columns={"orient_order": "orientational_order"})
+                df = df.rename(columns={"orient_order": "orientational_order"})
                 fvars = get_filename_vars(file)
                 df["temperature"] = float(fvars.temperature)
                 df["pressure"] = float(fvars.pressure)
