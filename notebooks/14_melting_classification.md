@@ -31,6 +31,7 @@ from sdanalysis import HoomdFrame
 from sdanalysis.figures import plot_frame, show, output_notebook
 
 import sys
+
 sys.path.append("../src")
 import detection
 import figures

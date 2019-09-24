@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.0
+      jupytext_version: 1.2.1
   kernelspec:
     display_name: crystal
     language: python
@@ -62,14 +62,14 @@ is the potential energy of each configuration
 which is shown below.
 
 ```python
-df.loc[: , ("potential_energy", "mean")]
+df.loc[:, ("potential_energy", "mean")]
 ```
 
 with the consequence of this result,
 I will export it to a csv file.
 
 ```python
-output_df = df.loc[: , ("potential_energy", "mean")].to_frame()
+output_df = df.loc[:, ("potential_energy", "mean")].to_frame()
 output_df.columns = ["Potential Energy"]
 output_df.to_csv("../results/potential_energy.csv")
 ```
@@ -111,7 +111,9 @@ so we can compare the free energy to that of the liquid.
 ```python
 crystal = "p2"
 for _, (pressure, temperature) in melting_points.iterrows():
-    print(f"For {crystal} at P={pressure} and T={temperature}, ΔE={energy_diff(df, pressure, temperature, crystal):.3f}")
+    print(
+        f"For {crystal} at P={pressure} and T={temperature}, ΔE={energy_diff(df, pressure, temperature, crystal):.3f}"
+    )
 ```
 
 ## Figures
@@ -134,7 +136,7 @@ def plot_thermo(df, quantity):
         y=alt.Y("mean", title=quantity, scale=alt.Scale(zero=False)),
         yError=alt.YError("std"),
         color="crystal:N",
-        shape="pressure:N"
+        shape="pressure:N",
     )
     return c.mark_errorbar() + c.mark_point()
 ```

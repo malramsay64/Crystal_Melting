@@ -28,6 +28,7 @@ import altair as alt
 from ipywidgets import interact
 
 import sys
+
 sys.path.append("../src")
 import figures
 ```

@@ -28,7 +28,7 @@ output_notebook()
 
 ```python
 data_dir = Path("../data/simulations/interface/output/")
-trj = read.open_trajectory(data_dir / "dump-Trimer-P1.00-T0.42-p2.gsd")
+trj = read.open_trajectory(data_dir / "dump-Trimer-P1.00-T0.45-p2.gsd")
 snap = next(trj)
 ```
 
