@@ -85,10 +85,9 @@ chart = (
 chart
 ```
 
-
 ```python
-# with alt.data_transformers.enable("default"):
-#    chart.save('../figures/melting_Trimer-P1.00-p2.svg')
+with alt.data_transformers.enable("default"):
+    chart.save("../figures/melting_Trimer-P1.00-p2.svg", webdriver="firefox")
 ```
 
 ## Calculating $\Delta V/ \Delta t$
@@ -155,8 +154,8 @@ disp_chart
 ```
 
 ```python
-# with alt.data_transformers.enable("default"):
-# disp_chart.save("../figures/melting_rates_Trimer-P1.00-p2.png")
+with alt.data_transformers.enable("default"):
+    disp_chart.save("../figures/melting_rates_Trimer-P1.00-p2.svg", webdriver="firefox")
 ```
 
 This figure corresponds to the values in the table below,

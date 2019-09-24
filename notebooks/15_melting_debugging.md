@@ -71,7 +71,8 @@ chart = (
         y=alt.Y("radius:Q", title="Estimated Radius"),
     )
 )
-chart.save("../figures/melting_radius.svg", webdriver="firefox")
+with alt.data_transformers.enable("default"):
+    chart.save("../figures/melting_radius.svg", webdriver="firefox")
 ```
 
 <img src="../figures/melting_radius.svg">
