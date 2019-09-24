@@ -32,6 +32,7 @@ dependencies:
   - geckodriver=0.24.0
   # Writing tools
   - pandoc
+  - pandoc-crossref
+  - cairosvg
   - pip:
-    - pandoc-fignos
     - bootstrapped
