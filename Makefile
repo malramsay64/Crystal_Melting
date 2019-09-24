@@ -118,6 +118,12 @@ $(fluctuation_analysis_dir)/dump-%.h5: $(thermo_sim)/dump-%.gsd | $(fluctuation_
 $(fluctuation_analysis_dir)/dump-%.h5: $(dynamics_sim)/dump-%.gsd | $(fluctuation_analysis_dir)
 	python3 src/fluctuations.py analyse $< $@
 
+$(fluctuation_analysis_dir)/dump-%.csv: $(thermo_sim)/dump-%.gsd | $(fluctuation_analysis_dir)
+	~/Projects/Crystal_Melting/bin/sdanalysis $< $@ -n 100
+
+$(fluctuation_analysis_dir)/dump-%.csv: $(dynamics_sim)/dump-%.gsd | $(fluctuation_analysis_dir)
+	~/Projects/Crystal_Melting/bin/sdanalysis $< $@ -n 100
+
 $(fluctuation_analysis_dir):
 	mkdir -p $@
 
@@ -168,12 +174,18 @@ sync:
 figures: notebooks ## Generate all the figures in the figures directory
 
 report_targets := $(wildcard reports/*.md)
+all_figures := $(wildcard figures/*.svg)
+
+convert_figures: $(all_figures:.svg=.pdf)
 
 reports: $(report_targets:.md=.pdf) ## Generate reports
 	echo $<
 
-%.pdf: %.md
-	cd $(dir $<); pandoc $(notdir $<) --filter pandoc-fignos -o $(notdir $@)
+%.pdf: %.md $(all_figures:.svg=.pdf)
+	cd $(dir $<); pandoc $(notdir $<) --filter pandoc-crossref -o $(notdir $@)
+
+%.pdf: %.svg
+	cairosvg $< -o $@
 
 .PHONY: help
 help:
