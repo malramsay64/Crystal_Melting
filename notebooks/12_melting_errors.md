@@ -270,45 +270,11 @@ with alt.data_transformers.enable("default"):
 ```
 
 ```python
-p1_values_2 = melt_values.query("pressure == 1.00")
-p13_values_2 = melt_values.query("pressure == 13.50")
-
-theory1_2, opt1_2, err1_2 = fit_curve(
-    p1_values_2["temp_norm"], p1_values_2["value"], p1_values_2["error"]
-)
-theory13_2, opt13_2, err13_2 = fit_curve(
-    p13_values_2["temp_norm"], p13_values_2["value"], p13_values_2["error"]
-)
+opt1
 ```
 
 ```python
-theory_df_2 = melt_values
-theory_df_2["theory"] = 0.0
-mask = theory_df["pressure"] == 1.00
-theory_df_2.loc[mask, "theory"] = theory1_2(theory_df_2["temp_norm"], *opt1_2)
-theory_df_2.loc[~mask, "theory"] = theory13_2(theory_df_2["temp_norm"], *opt13_2)
-```
-
-```python
-chart = alt.Chart(theory_df_2).encode(
-    x=alt.X("temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False)),
-    color=alt.Color("pressure:N", title="Pressure"),
-)
-
-chart = (
-    chart.mark_point().encode(
-        y=alt.Y("value", title="Rotational Relaxation × Melting Rate")
-    )
-    + chart.mark_rule().encode(y="error_min", y2="error_max")
-    + chart.mark_line().encode(y="theory")
-)
-
-chart = figures.hline(chart, 0.0)
-chart
-```
-
-```python
-opt13_2
+opt13
 ```
 
 ```python
