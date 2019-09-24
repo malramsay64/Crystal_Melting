@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.1
+      jupytext_version: 1.2.3
   kernelspec:
     display_name: crystal
     language: python
@@ -71,7 +71,7 @@ Here we have a
 ```python
 c = (
     alt.Chart(
-        df.query("temperature == 1.37 and pressure == 13.50 and crystal == 'p2gg'")
+        df.query("temperature == 1.35 and pressure == 13.50 and crystal == 'p2gg'")
     )
     .mark_point()
     .encode(
@@ -87,14 +87,14 @@ c
 ```python
 with alt.data_transformers.enable("default"):
     c.save(
-        "../figures/solid_state_transition-P13.50-T1.37-p2gg.svg", webdriver="firefox"
+        "../figures/solid_state_transition-P13.50-T1.35-p2gg.svg", webdriver="firefox"
     )
 ```
 
 ```python
 with pandas.HDFStore("../data/analysis/dynamics_clean_agg.h5") as src:
     df_dynamics = src.get("relaxations")
-rot_relaxation = df_dynamics.query("temperature == 1.37 and pressure == 13.50")[
+rot_relaxation = df_dynamics.query("temperature == 1.35 and pressure == 13.50")[
     "rot2_value"
 ]
 print(f"The rotational relaxation time is {rot_relaxation.values[0]:.2e}")
@@ -115,7 +115,7 @@ followed by a much slower and more gradual melting.
 
 ```python
 c = (
-    alt.Chart(df.query("temperature ==1.46 & pressure == 13.50 & crystal == 'p2gg'"))
+    alt.Chart(df.query("temperature ==1.40 & pressure == 13.50 & crystal == 'p2gg'"))
     .mark_point()
     .encode(
         x=alt.X("time", title="Timesteps", axis=alt.Axis(format="e")),
@@ -129,7 +129,7 @@ c
 ```python
 with alt.data_transformers.enable("default"):
     c.save(
-        "../figures/solid_state_transition-P13.50-T1.46-p2gg.svg", webdriver="firefox"
+        "../figures/solid_state_transition-P13.50-T1.40-p2gg.svg", webdriver="firefox"
     )
 ```
 
@@ -146,12 +146,12 @@ the configurations themselves.
 
 ```python
 trajectory_file = (
-    "../data/simulations/interface/output/dump-Trimer-P13.50-T1.37-p2gg.gsd"
+    "../data/simulations/interface/output/dump-Trimer-P13.50-T1.40-p2gg.gsd"
 )
 with gsd.hoomd.open(trajectory_file) as trj:
     snap_init = HoomdFrame(trj[0])
-    snap_process = HoomdFrame(trj[400])
-    snap_end = HoomdFrame(trj[-1])
+    snap_process = HoomdFrame(trj[200])
+    snap_end = HoomdFrame(trj[400])
 ```
 
 ```python
@@ -178,7 +178,7 @@ show(frame)
 
 ```python
 frame.output_backend = "svg"
-export_svgs(frame, "../figures/configuration-P13.50-T1.37-p2gg_init.svg")
+export_svgs(frame, "../figures/configuration-P13.50-T1.40-p2gg_init.svg")
 ```
 
 ```python
@@ -192,7 +192,7 @@ show(frame)
 
 ```python
 frame.output_backend = "svg"
-export_svgs(frame, "../figures/configuration-P13.50-T1.37-p2gg_process.svg")
+export_svgs(frame, "../figures/configuration-P13.50-T1.40-p2gg_process.svg")
 ```
 
 ```python
@@ -203,7 +203,7 @@ show(frame)
 
 ```python
 frame.output_backend = "svg"
-export_svgs(frame, "../figures/configuration-P13.50-T1.37-p2gg_end.svg")
+export_svgs(frame, "../figures/configuration-P13.50-T1.40-p2gg_end.svg")
 ```
 
 ## Melting pg Crystal
@@ -221,17 +221,17 @@ df_melt = df.groupby(groupbys).sum().reset_index()
 ```
 
 ```python
-alt.Chart(df_melt.query("pressure==13.50 and temperature == 1.37")).mark_point().encode(
+alt.Chart(df_melt.query("pressure==13.50 and temperature == 1.40")).mark_point().encode(
     x="time", y="value", color="crystal", row="temperature"
 )
 ```
 
 ```python
-trajectory_file = "../data/simulations/interface/output/dump-Trimer-P13.50-T1.42-pg.gsd"
+trajectory_file = "../data/simulations/interface/output/dump-Trimer-P13.50-T1.40-pg.gsd"
 with gsd.hoomd.open(trajectory_file) as trj:
     snap_init = HoomdFrame(trj[0])
-    snap_process = HoomdFrame(trj[20_000])
-    snap_end = HoomdFrame(trj[40_000])
+    snap_process = HoomdFrame(trj[30_000])
+    snap_end = HoomdFrame(trj[60_000])
 ```
 
 ```python
@@ -246,7 +246,7 @@ show(frame)
 
 ```python
 frame.output_backend = "svg"
-export_svgs(frame, "../figures/configuration-P13.50-T1.42-pg_0.svg")
+export_svgs(frame, "../figures/configuration-P13.50-T1.40-pg_0.svg")
 ```
 
 ```python
@@ -259,7 +259,7 @@ show(frame)
 
 ```python
 frame.output_backend = "svg"
-export_svgs(frame, "../figures/configuration-P13.50-T1.42-pg_top_0.svg")
+export_svgs(frame, "../figures/configuration-P13.50-T1.40-pg_top_0.svg")
 ```
 
 ```python
@@ -270,7 +270,7 @@ show(frame)
 
 ```python
 frame.output_backend = "svg"
-export_svgs(frame, "../figures/configuration-P13.50-T1.42-pg_bottom_0.svg")
+export_svgs(frame, "../figures/configuration-P13.50-T1.40-pg_bottom_0.svg")
 ```
 
 ```python
@@ -283,11 +283,7 @@ show(frame)
 
 ```python
 frame.output_backend = "svg"
-export_svgs(frame, "../figures/configuration-P13.50-T1.42-pg_1.svg")
-```
-
-```python
-show(frame)
+export_svgs(frame, "../figures/configuration-P13.50-T1.40-pg_1.svg")
 ```
 
 ```python
@@ -298,7 +294,7 @@ show(frame)
 
 ```python
 frame.output_backend = "svg"
-export_svgs(frame, "../figures/configuration-P13.50-T1.42-pg_2.svg")
+export_svgs(frame, "../figures/configuration-P13.50-T1.40-pg_2.svg")
 ```
 
 ```python
@@ -309,7 +305,7 @@ show(frame)
 
 ```python
 frame.output_backend = "svg"
-export_svgs(frame, "../figures/configuration-P13.50-T1.42-pg_top_2.svg")
+export_svgs(frame, "../figures/configuration-P13.50-T1.40-pg_top_2.svg")
 ```
 
 ```python
