@@ -7,7 +7,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.0
+      jupytext_version: 1.2.1
   kernelspec:
     display_name: crystal
     language: python
@@ -153,6 +153,7 @@ def update_crystals(change):
 
 pressure.observe(update_temperatures, names="value")
 temperature.observe(update_crystals, names="value")
+
 
 @widgets.interact(
     pressure=pressure, temperature=temperature, crystal=crystals, quantity=quantities
