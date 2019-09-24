@@ -8,6 +8,13 @@
 
 """Utility functions for analysis across the rest of the files."""
 
+from pathlib import Path
+from typing import Dict
+
+import numpy as np
+import pandas as pd
+
+
 def _read_temperatures(filename: Path) -> Dict[float, float]:
     """Read temperatures from a CSV file and format for simple translation.
 
@@ -42,11 +49,15 @@ def normalised_temperature(temperature: np.array, pressure: np.array) -> np.arra
     """
     # Ensure input is floating point values.
     if not isinstance(temperature, np.floating):
-        raise ValueError("The temperature needs to be specified as floating point values.")
+        raise ValueError(
+            "The temperature needs to be specified as floating point values."
+        )
     if not isinstance(pressure, np.floating):
         raise ValueError("The pressure needs to be specified as floating point values.")
 
-    melting_points = _read_temperatures(Path(__file__).parent / "results/melting_points.csv")
+    melting_points = _read_temperatures(
+        Path(__file__).parent / "results/melting_points.csv"
+    )
 
     # Initialise output array
     temp_norm = np.full_like(temperature, np.nan)
