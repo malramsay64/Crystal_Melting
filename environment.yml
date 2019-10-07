@@ -11,6 +11,7 @@ dependencies:
   - malramsay::sdanalysis=0.9.8
   - malramsay::experi=0.3.3
   - malramsay::packing=0.3.1
+  - malramsay::traj3dy=0.2.0
   - bokeh=1.2.*
   # Dev tools
   - pytest=5.0.*

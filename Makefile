@@ -44,6 +44,9 @@ data/analysis/rates.h5: $(rates_analysis)
 $(rates_analysis_dir)/dump-%.h5: $(rates_sim)/dump-%.gsd | $(ml_model)
 	python src/melting_rates.py melting --skip-frames 1 $< $@
 
+$(rates_analysis_dir)/dump-%.csv: $(rates_sim)/dump-%.gsd | $(ml_model)
+	trajedy --skip-frames 1 $< $@ --training $(wildcard data/simulations/dataset/output/*.gsd)
+
 #
 # Melting Rules
 #
@@ -56,6 +59,14 @@ melting_analysis = $(addprefix $(melting_analysis_dir)/, $(notdir $(melting_traj
 
 melting: data/analysis/melting_clean.h5 ## Compute melting rates of the simulations in the directory data/simulations/melting
 
+melting-rs: data/analysis/melting_rs_clean.h5
+
+data/analysis/melting_rs_clean.h5: data/analysis/melting_rs.h5
+	python3 src/melting_rates.py clean $<
+
+data/analysis/melting_rs.h5: $(melting_analysis:.h5=.csv)
+	python3 src/melting_rates.py collate $@ $^
+
 data/analysis/melting_clean.h5: data/analysis/melting.h5
 	python3 src/melting_rates.py clean $<
 
@@ -64,6 +75,9 @@ data/analysis/melting.h5: $(melting_analysis)
 
 $(melting_analysis_dir)/dump-%.h5: $(melting_sim)/dump-%.gsd | $(ml_model)
 	python src/melting_rates.py melting --skip-frames 100 $< $@
+
+$(melting_analysis_dir)/dump-%.csv: $(melting_sim)/dump-%.gsd | $(ml_model)
+	trajedy --skip-frames 100 $< $@ --training $(wildcard data/simulations/dataset/output/*.gsd)
 
 #
 # Dynamics Rules
@@ -106,8 +120,14 @@ fluctuation_analysis_dir = data/analysis/fluctuation
 
 fluctuation_trajectories = $(wildcard $(thermo_sim)/dump-Trimer*.gsd) $(wildcard $(dynamics_sim)/dump-Trimer*.gsd)
 fluctuation_analysis = $(addprefix $(fluctuation_analysis_dir)/, $(notdir $(fluctuation_trajectories:.gsd=.h5)))
+fluctuation_analysis_csv = $(addprefix $(fluctuation_analysis_dir)/, $(notdir $(fluctuation_trajectories:.gsd=.csv)))
 
 fluctuation: data/analysis/fluctuation.h5 ## Compute values for the fluctuation of the particles
+
+fluctuation-rs: data/analysis/fluctuation_rs.h5
+
+data/analysis/fluctuation_rs.h5: $(fluctuation_analysis_csv)
+	python3 src/fluctuations.py collate $@ $^
 
 data/analysis/fluctuation.h5: $(fluctuation_analysis)
 	python3 src/fluctuations.py collate $@ $^
@@ -119,10 +139,10 @@ $(fluctuation_analysis_dir)/dump-%.h5: $(dynamics_sim)/dump-%.gsd | $(fluctuatio
 	python3 src/fluctuations.py analyse $< $@
 
 $(fluctuation_analysis_dir)/dump-%.csv: $(thermo_sim)/dump-%.gsd | $(fluctuation_analysis_dir)
-	~/Projects/Crystal_Melting/bin/sdanalysis $< $@ -n 100
+	trajedy $< $@ -n 100
 
 $(fluctuation_analysis_dir)/dump-%.csv: $(dynamics_sim)/dump-%.gsd | $(fluctuation_analysis_dir)
-	~/Projects/Crystal_Melting/bin/sdanalysis $< $@ -n 100
+	trajedy $< $@ -n 100
 
 $(fluctuation_analysis_dir):
 	mkdir -p $@

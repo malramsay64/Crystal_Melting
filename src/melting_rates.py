@@ -208,14 +208,37 @@ def rates(infile):
 )
 def collate(output, infiles):
     with pd.HDFStore(output, "w") as dst:
+        key = "fractions"
         for file in infiles:
-            with pd.HDFStore(file) as src:
-                key = "fractions"
-                df = src.get(key)
-                df["crystal"] = df["crystal"].astype(
-                    CategoricalDtype(categories=["p2", "pg", "p2gg"])
+            print(file)
+            if file.endswith(".h5"):
+                with pd.HDFStore(file) as src:
+                    df = src.get(key)
+            elif file.endswith(".csv"):
+                try:
+                    df = pd.read_csv(file)
+                except pd.errors.EmptyDataError:
+                    logger.warn("File %s is empty.", file)
+                    continue
+
+                crystal_mask = df["class"] != "Liquid"
+                df = (
+                    df[crystal_mask]
+                    .query("area < 16")
+                    .groupby("timestep")
+                    .sum()
+                    .reset_index()
                 )
-                dst.append(key, df)
+                file_vars = get_filename_vars(file)
+                df = df.rename(columns={"area": "volume", "timestep": "time"})
+                df["crystal"] = file_vars.crystal
+                df["temperature"] = float(file_vars.temperature)
+                df["pressure"] = float(file_vars.pressure)
+
+            df["crystal"] = df["crystal"].astype(
+                CategoricalDtype(categories=["p2", "pg", "p2gg"])
+            )
+            dst.append(key, df)
 
 
 if __name__ == "__main__":
