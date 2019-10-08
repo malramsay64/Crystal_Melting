@@ -34,9 +34,15 @@ import figures
 
 ## Input data
 
-The data for this notebook is sourced from the calculations of the relaxation times which can be run using the makefile in the home directory of this repository. The command `make relaxations` will compute the relaxation values that are required for this analysis, although if not run previously the command `make dynamics` will also need to be run as I am yet to set up any dependencies in the Makefile.
+The data for this notebook is sourced from the calculations of
+the relaxation times which can be run using
+the Makefile in the home directory of this repository.
+The command `make relaxations` will compute the relaxation values
+required for this analysis.
 
-The calculation of the melting rates is performed in the [Crystal_Clustering](Crystal_Clustering.ipynb) notebook from calculations of crystal fractions from running `make melting`.
+The calculation of the melting rates is performed in
+the [Crystal_Clustering](Crystal_Clustering.ipynb) notebook
+from calculations of crystal fractions from running `make melting`.
 
 ```python
 with pandas.HDFStore("../data/analysis/dynamics_clean_agg.h5") as src:
@@ -177,8 +183,4 @@ The above plot uses the values computed from the curve fit with;
 - constant: {opt[0]:.3f}
 """
 )
-```
-
-```python
-
 ```

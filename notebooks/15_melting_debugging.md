@@ -15,7 +15,10 @@ jupyter:
 
 # Understanding Methods of Computing Melting Rates
 
-I need a method of computing the melting rate of the crystal structures which will provide a good estimation of both the melting rate and the error of the melting rate. Importantly I need an algorith able to detect the small melting rates at low temperatures.
+I need a method of computing the melting rate of the crystal structures
+which will provide a good estimation of both the melting rate and
+the error of the melting rate.
+Importantly I need an algorithm able to detect the small melting rates at low temperatures.
 
 ```python
 %load_ext autoreload
@@ -35,7 +38,7 @@ import figures
 
 ## Load Data
 
-The data on the melting rates has been precalculated and saved to a file. The data stored is the simulation conditions along with the values
+The data on the melting rates has been pre-calculated and saved to a file. The data stored is the simulation conditions along with the values
 - fraction: The fraction of the simulation cell which is crystalline in nature
 - surface_area: The perimeter (the 2D equivalent of surface area) of the crystalline cluster
 - volume: The area (2D equivalent of area) of the crystalline cluster
@@ -79,8 +82,4 @@ with alt.data_transformers.enable("default"):
 
 ```python
 melting_df[["radius", "pressure", "temperature"]]
-```
-
-```python
-
 ```

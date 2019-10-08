@@ -81,7 +81,3 @@ show(fig)
 fig.output_backend = "svg"
 export_svgs(fig, "../figures/melting_disorder_P1.00-T0.60.svg")
 ```
-
-```python
-
-```

@@ -162,7 +162,3 @@ with alt.data_transformers.enable("default"):
     c.save("../figures/thermodynamics_potential_energy_P1.00.svg", webdriver="firefox")
 c
 ```
-
-```python
-
-```

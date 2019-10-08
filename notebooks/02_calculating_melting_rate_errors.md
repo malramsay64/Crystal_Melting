@@ -224,7 +224,7 @@ however in this case the error
 is still half the value and so barely an indication of melting.
 
 
-## What error is Acceptible
+## What error is Acceptable
 
 Making the assumption that the perimeter doesn't change over the course of the simulation
 I can fit a straight line to the volume
@@ -269,7 +269,7 @@ gradient4.reset_index(inplace=True)
 def gradient_regression_mean(df):
     """Calculate the gradient using linear regression.
 
-    The y value of the gradient is of eah volume divided by the mean
+    The y value of the gradient is of each volume divided by the mean
     of the surface area over the course of the simulation. This is an
     adjustment to bring the accuracy of the resulting slope closer to
     that calculated by other methods.

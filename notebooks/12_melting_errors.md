@@ -276,7 +276,3 @@ opt1
 ```python
 opt13
 ```
-
-```python
-
-```

@@ -36,15 +36,15 @@ import figures
 
 ## Load Data
 
-The data on the melting rates has been precalculated and saved to a file. The data stored is the simulation conditions along with the values
+The data on the melting rates has been pre-calculated and saved to a file.
+The data stored is the simulation conditions along with the values
+
 - fraction: The fraction of the simulation cell which is crystalline in nature
 - surface_area: The perimeter (the 2D equivalent of surface area) of the crystalline cluster
 - volume: The area (2D equivalent of area) of the crystalline cluster
 - time: The timestep at which these values apply.
 
 Only the data from the low temperature melting is used in this analysis since at the time of writing the dataset is better and it is easier to only deal with a single set of pressures. I am also limiting the analysis to only the p2 crystal.
-
-By resampling the dataset to times of 1ms, the
 
 ```python
 # Read file with melting data
@@ -54,7 +54,10 @@ with pandas.HDFStore("../data/analysis/rates_clean.h5") as store:
 
 ## Volume Data
 
-I have plotted the volume of the crystal as a fucntion of time below. The important point to note is the high levels of noise in the data, which is a combination the thermal fluctuations and the inacuracy of the algorithm I am using for classification.
+I have plotted the volume of the crystal as a function of time below.
+The important point to note is the high levels of noise in the data,
+which is a combination the thermal fluctuations and
+the inaccuracy of the algorithm I am using for classification.
 
 ```python
 chart = (
@@ -94,7 +97,12 @@ This documents my attempts at calculating this value with a small error.
 
 ### Averaging Instantaneous gradient
 
-This is calculating the instantaneous gradient $\frac{1}{A(t)} \frac{V(t+\Delta t) - V(t)}{\Delta t}$ and averaging over all $t$. The errors being calculated as the standard deviation. The gradient is computed using the`np.gradient` function which documents the solver [here](https://docs.scipy.org/doc/numpy/reference/generated/numpy.gradient.html#numpy.gradient).
+This is calculating the instantaneous gradient
+$\frac{1}{A(t)} \frac{V(t+\Delta t) - V(t)}{\Delta t}$
+and averaging over all values of $t$.
+The errors being calculated using the standard deviation.
+The gradient is computed using the `np.gradient` function which
+documents the solver [here](https://docs.scipy.org/doc/numpy/reference/generated/numpy.gradient.html#numpy.gradient).
 
 ```python
 with pandas.HDFStore("../data/analysis/rates_clean.h5") as store:
@@ -118,8 +126,4 @@ chart = (
 chart = figures.hline(chart, 0)
 
 chart
-```
-
-```python
-
 ```

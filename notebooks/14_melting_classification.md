@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.3
+      jupytext_version: 1.2.1
   kernelspec:
     display_name: crystal
     language: python
@@ -306,8 +306,4 @@ show(frame)
 ```python
 frame.output_backend = "svg"
 export_svgs(frame, "../figures/configuration-P13.50-T1.40-pg_top_2.svg")
-```
-
-```python
-
 ```
