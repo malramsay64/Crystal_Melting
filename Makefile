@@ -32,10 +32,10 @@ rates_analysis_dir = data/analysis/rates
 rates_trajectories = $(wildcard $(rates_sim)/dump-Trimer*.gsd)
 rates_analysis = $(addprefix $(rates_analysis_dir)/, $(notdir $(rates_trajectories:.gsd=.h5)))
 
-rates: data/analysis/rates_clean.h5 ## Compute the rate of melting
+rates-py: data/analysis/rates_clean.h5 ## Compute the rate of melting using slow python version
 	python3 src/melting_rates.py rates $<
 
-rates-rs: data/analysis/rates_rs_clean.h5 ## Compute the rate of melting using rust for analysis
+rates: data/analysis/rates_rs_clean.h5 ## Compute the rate of melting using rust for analysis
 	python3 src/melting_rates.py rates $<
 
 data/analysis/rates_clean.h5: data/analysis/rates.h5
@@ -66,9 +66,9 @@ melting_analysis_dir = data/analysis/interface
 melting_trajectories = $(wildcard $(melting_sim)/dump-Trimer*.gsd)
 melting_analysis = $(addprefix $(melting_analysis_dir)/, $(notdir $(melting_trajectories:.gsd=.h5)))
 
-melting: data/analysis/melting_clean.h5 ## Compute melting of the interface for a range of crystals
+melting-py: data/analysis/melting_clean.h5 ## Compute melting of the interface for a range of crystals using the slow python version
 
-melting-rs: data/analysis/melting_rs_clean.h5 ## Compute melting of the interface for a range of crystals using rust
+melting: data/analysis/melting_rs_clean.h5 ## Compute melting of the interface for a range of crystals
 
 data/analysis/melting_rs_clean.h5: data/analysis/melting_rs.h5
 	python3 src/melting_rates.py clean $<
@@ -131,9 +131,9 @@ fluctuation_trajectories = $(wildcard $(thermo_sim)/dump-Trimer*.gsd) $(wildcard
 fluctuation_analysis = $(addprefix $(fluctuation_analysis_dir)/, $(notdir $(fluctuation_trajectories:.gsd=.h5)))
 fluctuation_analysis_csv = $(addprefix $(fluctuation_analysis_dir)/, $(notdir $(fluctuation_trajectories:.gsd=.csv)))
 
-fluctuation: data/analysis/fluctuation.h5 ## Compute values for the fluctuation of the particles
+fluctuation-py: data/analysis/fluctuation.h5 ## Compute values for the fluctuation of the particles using the slow python version
 
-fluctuation-rs: data/analysis/fluctuation_rs.h5 ## Compute values for the fluctuation of the particles using rust
+fluctuation: data/analysis/fluctuation_rs.h5 ## Compute values for the fluctuation of the particles
 
 data/analysis/fluctuation_rs.h5: $(fluctuation_analysis_csv)
 	python3 src/fluctuations.py collate $@ $^
