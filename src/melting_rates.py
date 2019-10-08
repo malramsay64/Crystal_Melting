@@ -223,8 +223,13 @@ def collate(output, infiles):
                     logger.warn("File %s is empty.", file)
                     continue
 
-                crystal_mask = df["class"] != "Liquid"
-                df = df[crystal_mask].groupby("timestep").sum().reset_index()
+                df = (
+                    df.groupby(["timestep", "class"])["area"].sum().to_frame().unstack()
+                )
+                df.columns = [c[1] for c in df.columns]
+                df["volume"] = df.loc[:, df.columns != "Liquid"].sum(axis=1)
+                df = df.reset_index()
+
                 file_vars = get_filename_vars(file)
                 df = df.rename(columns={"area": "volume", "timestep": "time"})
                 df["crystal"] = file_vars.crystal
