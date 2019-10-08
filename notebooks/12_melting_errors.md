@@ -38,7 +38,7 @@ The error of the melting rates will be calculated
 by taking the standard deviation of all the measurements
 
 ```python
-with pandas.HDFStore("../data/analysis/rates_clean.h5") as store:
+with pandas.HDFStore("../data/analysis/rates_rs_clean.h5") as store:
     rates_df = store.get("rates")
 ```
 

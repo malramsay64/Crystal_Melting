@@ -7,7 +7,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.1
+      jupytext_version: 1.2.4
   kernelspec:
     display_name: crystal
     language: python
@@ -51,7 +51,7 @@ with pandas.HDFStore("../data/analysis/dynamics_clean_agg.h5") as src:
 with pandas.HDFStore("../data/analysis/dynamics_clean_agg.h5") as src:
     relax_df = src.get("relaxations")
 
-with pandas.HDFStore("../data/analysis/rates_clean.h5") as src:
+with pandas.HDFStore("../data/analysis/rates_rs_clean.h5") as src:
     melting_df = src.get("rates")
 
 timescales_df = mol_relax_df.merge(melting_df, on=["temperature", "pressure"])

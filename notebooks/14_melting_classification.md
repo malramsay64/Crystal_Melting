@@ -41,13 +41,13 @@ output_notebook()
 
 ## Data Source
 
-The data is sources from the melting_clean.h5 file
+The data is sources from the melting_rs_clean.h5 file
 generated from the data in the `interface` simulations directory.
 This contains simulations over a long time period
 close to the melting points of the crystals.
 
 ```python
-with pandas.HDFStore("../data/analysis/melting_clean.h5") as src:
+with pandas.HDFStore("../data/analysis/melting_rs_clean.h5") as src:
     df = src.get("fractions")
 df.columns
 ```
@@ -71,7 +71,7 @@ Here we have a
 ```python
 c = (
     alt.Chart(
-        df.query("temperature == 1.35 and pressure == 13.50 and crystal == 'p2gg'")
+        df.query("temperature == 1.32 and pressure == 13.50 and crystal == 'p2gg'")
     )
     .mark_point()
     .encode(
