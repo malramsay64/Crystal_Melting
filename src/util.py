@@ -71,6 +71,6 @@ def normalised_temperature(temperature: np.array, pressure: np.array) -> np.arra
         # Find values with the same pressure
         mask = np.logical_and(pressure == p, zero_mask)
         # Calculate normalised temperature
-        temp_norm[mask] = t_m / temperature[mask]
+        temp_norm[mask] = temperature[mask] / t_m
 
     return temp_norm
