@@ -181,7 +181,9 @@ def rates(infile):
     df = pd.read_hdf(infile, "fractions")
 
     # Normalise temperature based on melting point
-    df["temp_norm"] = normalised_temperature(df["temperature"], df["pressure"])
+    df["temp_norm"] = normalised_temperature(
+        df["temperature"].values, df["pressure"].values
+    )
 
     group_bys = ["temperature", "pressure", "crystal", "temp_norm", "iter_id"]
     gradient_mean = df.groupby(group_bys).apply(
@@ -222,18 +224,14 @@ def collate(output, infiles):
                     continue
 
                 crystal_mask = df["class"] != "Liquid"
-                df = (
-                    df[crystal_mask]
-                    .query("area < 16")
-                    .groupby("timestep")
-                    .sum()
-                    .reset_index()
-                )
+                df = df[crystal_mask].groupby("timestep").sum().reset_index()
                 file_vars = get_filename_vars(file)
                 df = df.rename(columns={"area": "volume", "timestep": "time"})
                 df["crystal"] = file_vars.crystal
                 df["temperature"] = float(file_vars.temperature)
                 df["pressure"] = float(file_vars.pressure)
+                if file_vars.iteration_id is not None:
+                    df["iter_id"] = int(file_vars.iteration_id)
 
             df["crystal"] = df["crystal"].astype(
                 CategoricalDtype(categories=["p2", "pg", "p2gg"])
