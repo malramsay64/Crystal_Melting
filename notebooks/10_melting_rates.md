@@ -48,7 +48,7 @@ Only the data from the low temperature melting is used in this analysis since at
 
 ```python
 # Read file with melting data
-with pandas.HDFStore("../data/analysis/rates_clean.h5") as store:
+with pandas.HDFStore("../data/analysis/rates_rs_clean.h5") as store:
     melting_df = store.get("fractions")
 ```
 
@@ -105,7 +105,7 @@ The gradient is computed using the `np.gradient` function which
 documents the solver [here](https://docs.scipy.org/doc/numpy/reference/generated/numpy.gradient.html#numpy.gradient).
 
 ```python
-with pandas.HDFStore("../data/analysis/rates_clean.h5") as store:
+with pandas.HDFStore("../data/analysis/rates_rs_clean.h5") as store:
     rates_df = store.get("rates")
 ```
 
