@@ -204,3 +204,31 @@ np.sum(vor.volumes[y == 1])
 ```
 
 This gives a value very similar to that of the convex hull.
+
+
+## Check Rust Implementation
+
+For reasons of performance, the analysis of the trajectories is now performed with rust,
+using a K-Nearest Neighbours algorithm.
+Since this is a slightly different algorithm,
+this checks the results are consistent
+with those obtained in the Python implementation.
+
+This reads in the classifications which have been obtained
+using the rust implementation
+and applies those to the trajectory.
+
+```python
+test_file = "../data/simulations/interface/output/dump-Trimer-P13.50-T1.32-p2.gsd"
+classified = "../data/analysis/interface/dump-Trimer-P13.50-T1.32-p2.csv"
+
+df_classes = pd.read_csv(classified)
+trj = open_trajectory(test_file)
+index, group = df_classes.groupby("timestep").__iter__().__next__()
+
+show(plot_frame(snapshot, order_list=group["class"] != "Liquid"))
+```
+
+```python
+
+```
