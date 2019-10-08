@@ -219,6 +219,9 @@ using the rust implementation
 and applies those to the trajectory.
 
 ```python
+import pandas as pd
+from sdanalysis import open_trajectory
+
 test_file = "../data/simulations/interface/output/dump-Trimer-P13.50-T1.32-p2.gsd"
 classified = "../data/analysis/interface/dump-Trimer-P13.50-T1.32-p2.csv"
 
