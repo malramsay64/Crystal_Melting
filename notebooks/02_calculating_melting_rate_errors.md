@@ -68,10 +68,6 @@ which is a combination the thermal fluctuations
 and the inaccuracy of the algorithm I am using for classification.
 
 ```python
-time_df["radius"] = np.sqrt(time_df["volume"].values) / np.pi
-```
-
-```python
 chart = (
     alt.Chart(time_df)
     .mark_point()
