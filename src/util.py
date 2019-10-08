@@ -22,9 +22,9 @@ def _read_temperatures(filename: Path) -> Dict[float, float]:
         filename: An input file which contains the melting points for each pressure.
 
     """
-    df = pd.read_csv(infile)
+    df = pd.read_csv(filename)
     melting_points = {}
-    for row in df:
+    for _, row in df.iterrows():
         melting_points[float(row["Pressure"])] = float(row["MeltingPoint"])
     return melting_points
 
@@ -48,15 +48,15 @@ def normalised_temperature(temperature: np.array, pressure: np.array) -> np.arra
 
     """
     # Ensure input is floating point values.
-    if not isinstance(temperature, np.floating):
+    if not np.issubdtype(temperature.dtype, np.floating):
         raise ValueError(
             "The temperature needs to be specified as floating point values."
         )
-    if not isinstance(pressure, np.floating):
+    if not np.issubdtype(pressure.dtype, np.floating):
         raise ValueError("The pressure needs to be specified as floating point values.")
 
     melting_points = _read_temperatures(
-        Path(__file__).parent / "results/melting_points.csv"
+        Path(__file__).parent.parent / "results/melting_points.csv"
     )
 
     # Initialise output array
