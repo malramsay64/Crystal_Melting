@@ -46,17 +46,18 @@ The data on the melting rates has been pre-calculated and saved to a file. The d
 
 Only the data from the low temperature melting is used in this analysis since at the time of writing the dataset is better and it is easier to only deal with a single set of pressures. I am also limiting the analysis to only the p2 crystal.
 
-By resampling the dataset to times of 1ms, the
-
 ```python
 # Read file with melting data
-with pandas.HDFStore("../data/analysis/rates_clean.h5") as store:
+with pandas.HDFStore("../data/analysis/rates_rs_clean.h5") as store:
     melting_df = store.get("fractions")
 ```
 
 ## Volume Data
 
-I have plotted the volume of the crystal as a fucntion of time below. The important point to note is the high levels of noise in the data, which is a combination the thermal fluctuations and the inacuracy of the algorithm I am using for classification.
+I have plotted the volume of the crystal as a function of time below.
+The important point to note is the high levels of noise in the data,
+which is a combination the thermal fluctuations and
+the inaccuracy of the algorithm I am using for classification.
 
 ```python
 chart = (

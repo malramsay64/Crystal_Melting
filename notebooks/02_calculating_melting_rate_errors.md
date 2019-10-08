@@ -48,11 +48,11 @@ since at the time of writing the dataset is better
 and it is easier to only deal with a single set of pressures.
 This data is limited to the most stable polymorph, the p2 crystal.
 
-By resampling the dataset to times of 1ms, the
+By re-sampling the dataset to times of 1ms, the
 
 ```python
 # Read file with melting data
-time_df = pandas.read_hdf("../data/analysis/melting.h5", "fractions", mode="r")
+time_df = pandas.read_hdf("../data/analysis/rates_rs_clean.h5", "fractions", mode="r")
 time_df = time_df.query('pressure == "1.00" and temperature < 0.8')
 time_df.index = pandas.TimedeltaIndex(time_df.time)
 
