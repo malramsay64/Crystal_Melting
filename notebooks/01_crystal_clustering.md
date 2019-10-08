@@ -94,7 +94,7 @@ from all the input files,
 which we can use to test the spatial clustering.
 
 ```python
-snapshot, *_ = input_files[12]
+snapshot, *_ = input_files[3]
 ```
 
 ## Classification
@@ -112,7 +112,7 @@ into a single value
 by checking whether the ordering is > 0.
 
 ```python
-knn_order = create_ml_ordering("../models/KNN-trimer.pkl")
+knn_order = create_ml_ordering("../models/knn-trimer.pkl")
 ordering = knn_order(snapshot)
 ordering = ordering > 0
 ```
