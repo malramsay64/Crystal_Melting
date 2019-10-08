@@ -35,10 +35,19 @@ rates_analysis = $(addprefix $(rates_analysis_dir)/, $(notdir $(rates_trajectori
 rates: data/analysis/rates_clean.h5 ## Compute the rate of melting
 	python3 src/melting_rates.py rates $<
 
+rates-rs: data/analysis/rates_rs_clean.h5 ## Compute the rate of melting using rust for analysis
+	python3 src/melting_rates.py rates $<
+
 data/analysis/rates_clean.h5: data/analysis/rates.h5
 	python3 src/melting_rates.py clean $<
 
+data/analysis/rates_rs_clean.h5: data/analysis/rates_rs.h5
+	python3 src/melting_rates.py clean $<
+
 data/analysis/rates.h5: $(rates_analysis)
+	python3 src/melting_rates.py collate $@ $^
+
+data/analysis/rates_rs.h5: $(rates_analysis:.h5=.csv)
 	python3 src/melting_rates.py collate $@ $^
 
 $(rates_analysis_dir)/dump-%.h5: $(rates_sim)/dump-%.gsd | $(ml_model)
