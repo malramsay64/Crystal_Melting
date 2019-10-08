@@ -57,7 +57,7 @@ $(rates_analysis_dir)/dump-%.csv: $(rates_sim)/dump-%.gsd | $(ml_model)
 	trajedy --skip-frames 1 $< $@ --training $(wildcard data/simulations/dataset/output/*.gsd)
 
 #
-# Melting Rules
+# Melting Rules -> This is about understanding the interface for a range of crystals
 #
 
 melting_sim = data/simulations/interface/output
@@ -66,9 +66,9 @@ melting_analysis_dir = data/analysis/interface
 melting_trajectories = $(wildcard $(melting_sim)/dump-Trimer*.gsd)
 melting_analysis = $(addprefix $(melting_analysis_dir)/, $(notdir $(melting_trajectories:.gsd=.h5)))
 
-melting: data/analysis/melting_clean.h5 ## Compute melting rates of the simulations in the directory data/simulations/melting
+melting: data/analysis/melting_clean.h5 ## Compute melting of the interface for a range of crystals
 
-melting-rs: data/analysis/melting_rs_clean.h5
+melting-rs: data/analysis/melting_rs_clean.h5 ## Compute melting of the interface for a range of crystals using rust
 
 data/analysis/melting_rs_clean.h5: data/analysis/melting_rs.h5
 	python3 src/melting_rates.py clean $<
@@ -133,7 +133,7 @@ fluctuation_analysis_csv = $(addprefix $(fluctuation_analysis_dir)/, $(notdir $(
 
 fluctuation: data/analysis/fluctuation.h5 ## Compute values for the fluctuation of the particles
 
-fluctuation-rs: data/analysis/fluctuation_rs.h5
+fluctuation-rs: data/analysis/fluctuation_rs.h5 ## Compute values for the fluctuation of the particles using rust
 
 data/analysis/fluctuation_rs.h5: $(fluctuation_analysis_csv)
 	python3 src/fluctuations.py collate $@ $^
@@ -160,7 +160,7 @@ $(fluctuation_analysis_dir):
 # Thermodynamics Analysis
 #
 
-thermo: data/analysis/thermodynamics.h5
+thermo: data/analysis/thermodynamics.h5 ## Collate the thermodynamics into a single file
 
 data/analysis/thermodynamics.h5: $(wildcard $(thermo_sim)/thermo*.log) $(wildcard $(dynamics_sim)/thermo*.log)
 	python3 src/fluctuations.py thermodynamics $@ $^
@@ -169,7 +169,7 @@ data/analysis/thermodynamics.h5: $(wildcard $(thermo_sim)/thermo*.log) $(wildcar
 # Other Rules
 #
 
-relaxations: ## Compute the relaxation quantities of all values in the file data/analysis/dynamics.h5
+relaxations: dynamics ## Compute the relaxation quantities of all values in the file data/analysis/dynamics.h5
 	sdanalysis comp-relaxations data/analysis/dynamics_clean.h5
 
 interface-dynamics: ## Compute the dynamics of a simulation with a liquid--crystal interface in data/simulations/2017-09-04-interface/
@@ -188,10 +188,10 @@ pack-dataset: ## Pack the relevant files from dataset into a tarball
 all_notebooks = $(wildcard notebooks/*.md)
 
 .PHONY: notebooks
-notebooks: $(all_notebooks:.md=.ipynb)
+notebooks: $(all_notebooks:.md=.ipynb) ## Run all notebooks
 
 .PHONY: sync
-sync:
+sync: ## Synchronise and format the juptyer and markdown representations of the notebooks
 	jupytext --set-formats ipynb,md notebooks/*.md
 	jupytext --set-formats ipynb,md notebooks/*.ipynb
 	jupytext --sync --pipe black notebooks/*.ipynb
@@ -207,7 +207,7 @@ all_figures := $(wildcard figures/*.svg)
 
 convert_figures: $(all_figures:.svg=.pdf)
 
-reports: $(report_targets:.md=.pdf) ## Generate reports
+reports: $(report_targets:.md=.pdf) ## Generate pdf reports
 	echo $<
 
 %.pdf: %.md $(all_figures:.svg=.pdf)
