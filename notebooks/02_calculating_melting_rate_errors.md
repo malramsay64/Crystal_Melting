@@ -136,17 +136,14 @@ Plotting the melting rate with the calculated errors as a function of temperatur
 ```python
 chart = (
     alt.Chart(gradient1)
-    .mark_point()
-    .transform_calculate(
-        ymin="datum.mean-datum.error/2", ymax="datum.mean+datum.error/2"
+    .encode(
+        x = alt.X("temperature:Q", scale=alt.Scale(zero=False)),
+        y = alt.Y("mean", axis=alt.Axis(format="e")),
+        yError = alt.YError("error"),
     )
-    .encode(alt.X("temperature:Q", scale=alt.Scale(zero=False)))
 )
 
-disp_chart = chart.encode(
-    alt.Y("mean", axis=alt.Axis(format="e"))
-) + chart.mark_rule().encode(y="ymin:Q", y2="ymax:Q")
-disp_chart
+disp_chart = chart.mark_point() + chart.mark_errorbar()
 ```
 
 ```python
@@ -198,16 +195,14 @@ although while the errors are small the values are also really small.
 ```python
 chart = (
     alt.Chart(gradient2)
-    .mark_point()
-    .transform_calculate(
-        ymin="datum.mean-datum.error/2", ymax="datum.mean+datum.error/2"
+    .encode(
+        x=alt.X("temperature:Q", scale=alt.Scale(zero=False)),
+        y=alt.Y("mean", axis=alt.Axis(format="e")),
+        yError=alt.YError("error"),
     )
-    .encode(alt.X("temperature:Q", scale=alt.Scale(zero=False)))
 )
 
-disp_chart = chart.encode(
-    y=alt.Y("mean", axis=alt.Axis(format="e"))
-) + chart.mark_rule().encode(y="ymin:Q", y2="ymax:Q")
+disp_chart = chart.mark_point() + chart.mark_errorbar()
 disp_chart
 ```
 
@@ -293,17 +288,14 @@ gradient5.reset_index(inplace=True)
 ```python
 chart = (
     alt.Chart(gradient4)
-    .mark_point()
-    .transform_calculate(
-        ymin="datum.mean-datum.error/2", ymax="datum.mean+datum.error/2"
+    .encode(
+        x=alt.X("temperature:Q", scale=alt.Scale(zero=False)),
+        y=alt.Y("mean", axis=alt.Axis(format="e")),
+        yError=alt.YError("error"),
     )
-    .encode(alt.X("temperature:Q", scale=alt.Scale(zero=False)))
 )
 
-(
-    chart.encode(y=alt.Y("mean", axis=alt.Axis(format="e")))
-    + chart.mark_rule().encode(y="ymin:Q", y2="ymax:Q")
-)
+chart.mark_point() + chart.mark_errorbar()
 ```
 
 ```python
@@ -344,15 +336,15 @@ is obviously wrong so I have excluded the results for clarity.
 ```python
 chart = (
     alt.Chart(gradients_all)
-    .mark_point()
-    .transform_calculate(ymin="datum.mean-datum.error", ymax="datum.mean+datum.error")
-    .encode(alt.X("temperature:Q", scale=alt.Scale(zero=False)), color="exp:N")
+    .encode(
+        x=alt.X("temperature:Q", scale=alt.Scale(zero=False)),
+        color="exp:N",
+        y=alt.Y("mean", axis=alt.Axis(format="e")),
+        yError=alt.YError("error"),
+    )
 )
 
-(
-    chart.encode(y=alt.Y("mean", axis=alt.Axis(format="e")))
-    + chart.mark_rule().encode(y="ymin:Q", y2="ymax:Q")
-)
+chart.mark_point() + chart.mark_errorbar()
 ```
 
 The second and third approach give very similar results,
@@ -372,18 +364,15 @@ to allow for the log plot.
 ```python
 chart = (
     alt.Chart(gradients_all)
-    .mark_point()
-    .transform_calculate(
-        abs_mean="abs(datum.mean)",
-        ymin="datum.abs_mean-datum.error",
-        ymax="datum.abs_mean+datum.error",
+    .transform_calculate("abs_mean", alt.expr.abs(alt.datum.mean))
+    .transform_filter(alt.datum.abs_mean - alt.datum.error > 0)
+    .encode(
+        x = alt.X("temperature:Q", scale=alt.Scale(zero=False)),
+        y=alt.Y("abs_mean:Q", scale=alt.Scale(type="log")),
+        yError=alt.YError("error"),
+        color="exp:N",
     )
-    .transform_filter("datum.ymin > 1e-10")
-    .encode(alt.X("temperature:Q", scale=alt.Scale(zero=False)), color="exp:N")
 )
 
-(
-    chart.encode(y=alt.Y("abs_mean:Q", scale=alt.Scale(type="log")))
-    + chart.encode(y="ymin:Q", y2="ymax:Q").mark_rule()
-)
+chart.mark_point() + chart.mark_errorbar()
 ```

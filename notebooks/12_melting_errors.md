@@ -159,9 +159,7 @@ melt_values = (
     pandas.DataFrame(
         {
             "value": value,
-            "error": error,
-            "error_min": value - 2 * error,
-            "error_max": value + 2 * error,
+            "error": np.abs(error * 2),
         }
     )
     .reset_index()
@@ -172,12 +170,12 @@ melt_values = (
 ```python
 chart = alt.Chart(melt_values).encode(
     x=alt.X("temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False)),
+    y=alt.Y("value", title="Rotational Relaxation × Melting Rate"),
+    yError=alt.YError("error"),
     color=alt.Color("pressure:N", title="Pressure"),
 )
 
-c = chart.mark_point().encode(
-    y=alt.Y("value", title="Rotational Relaxation × Melting Rate")
-) + chart.mark_rule().encode(y="error_min", y2="error_max")
+c = chart.mark_point() + chart.mark_errorbar()
 
 c = figures.hline(c, 0)
 c
@@ -190,74 +188,82 @@ it is required to take into account
 the errors in the data.
 
 ```python
+import functools
+
+def rate_theory(x, c, delta_E):
+    result = 1 - np.exp((1 - x) * delta_E / x)
+    return c * result
+
 def fit_curve(x_vals, y_vals, errors=None, delta_E=None):
-    if delta_E is None:
-
-        def theory(x, c, d):
-            result = 1 - np.exp((1 - x) * d / x)
-            return c * result
-
-    else:
-
-        def theory(x, c):
-            result = 1 - np.exp((1 - x) * delta_E / x)
-            return c * result
-
+    rate = functools.partial(rate_theory, delta_E=delta_E)
+    
     opt, err = scipy.optimize.curve_fit(
-        theory, x_vals, y_vals, sigma=errors, maxfev=2000
+        rate, x_vals, y_vals, sigma=errors, maxfev=2000
     )
 
-    return theory, opt, err
+    return pandas.Series({"Rate Coefficient": opt[0], "Rate Error": err[0][0]})
 ```
 
 ```python
-x = np.arange(0.95, 2.0, 0.05)
+df_melting = pandas.read_csv("../results/melting_points.csv", index_col="Pressure")
+df_thermo = pandas.read_csv("../results/potential_energy.csv", index_col=["Pressure", "Temperature", "Crystal"])
+```
 
-p1_values = melt_values.query("pressure == 1.00 and 1.00 < temp_norm < 1.30")
-p13_values = melt_values.query("pressure == 13.50 and 1.00 < temp_norm < 1.30")
-
-theory1, opt1, err1 = fit_curve(
-    p1_values["temp_norm"], p1_values["value"], p1_values["error"], -0.18034612159032992
+```python
+df_energy = (
+    df_thermo.join(df_melting)
+    .reset_index()
+    .query("Temperature == MeltingPoint")
+    .set_index("Crystal")
+    .groupby("Pressure")
+    .apply(
+        lambda g: g.loc["liquid", "Potential Energy"] - g.loc["p2", "Potential Energy"]
+    )
+    .to_frame("Crystal Free Energy")
 )
-theory13, opt13, err13 = fit_curve(
-    p13_values["temp_norm"],
-    p13_values["value"],
-    p13_values["error"],
-    -0.06561802006526474,
+```
+
+```python
+df_rates = (
+    melt_values
+    .query("temp_norm < 1.20")
+    .rename(columns={"pressure": "Pressure"})
+    .set_index("Pressure")
+    .join(df_energy)
+    .groupby("Pressure")
+    .apply(lambda g: fit_curve(g["temp_norm"], g["value"], g["error"], g["Crystal Free Energy"]))
 )
 ```
 
 ```python
-y1 = theory1(x, *opt1)
-y13 = theory13(x, *opt13)
+df_theory = ( 
+    melt_values
+    .query("temp_norm < 1.20")
+    .rename(columns={"pressure": "Pressure"})
+    .set_index("Pressure")
+    .join(df_rates)
+    .join(df_energy)
+)
+df_theory["theory"] = rate_theory(df_theory["temp_norm"], df_theory["Rate Coefficient"], df_theory["Crystal Free Energy"])
 ```
 
 ```python
-theory_df = melt_values
-theory_df["theory"] = 0.0
-mask = theory_df["pressure"] == 1.00
-theory_df.loc[mask, "theory"] = theory1(theory_df["temp_norm"], *opt1)
-theory_df.loc[~mask, "theory"] = theory13(theory_df["temp_norm"], *opt13)
+df_theory
 ```
 
 ```python
 chart = (
-    alt.Chart(theory_df)
+    alt.Chart(df_theory.reset_index())
     .encode(
-        x=alt.X(
-            "temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False, domain=(0.95, 1.45))
-        ),
-        color=alt.Color("pressure:N", title="Pressure"),
+        x=alt.X( "temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False) ),
+        color=alt.Color("Pressure:N", title="Pressure"),
+        y=alt.Y("value", title="Rotational Relaxation × Melting Rate"),
+        yError=alt.YError("error"),
     )
-    .transform_filter(alt.datum.temp_norm < 1.35)
 )
 
 chart = (
-    chart.mark_point().encode(
-        y=alt.Y("value", title="Rotational Relaxation × Melting Rate")
-    )
-    + chart.mark_rule().encode(y="error_min", y2="error_max")
-    + chart.mark_line().encode(y="theory")
+    chart.mark_point() + chart.mark_errorbar() + chart.mark_line().encode(y="theory")
 )
 
 chart = figures.hline(chart, 0.0)
