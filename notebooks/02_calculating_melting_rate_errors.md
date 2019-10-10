@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.1
+      jupytext_version: 1.2.4
   kernelspec:
     display_name: crystal
     language: python
@@ -78,13 +78,13 @@ chart = (
         y="radius:Q",
     )
 )
-chart
-```
 
-```python
 with alt.data_transformers.enable("default"):
     chart.save("../figures/melting_Trimer-P1.00-p2.svg", webdriver="firefox")
 ```
+
+![Trimer Melting](../figures/melting_Trimer-P1.00-p2.svg)
+
 
 ## Calculating $\Delta V/ \Delta t$
 
@@ -153,6 +153,9 @@ disp_chart
 with alt.data_transformers.enable("default"):
     disp_chart.save("../figures/melting_rates_Trimer-P1.00-p2.svg", webdriver="firefox")
 ```
+
+![Melting Rates](../figures/melting_rates_Trimer-P1.00-p2.svg)
+
 
 This figure corresponds to the values in the table below,
 which also includes the fractional error.
@@ -233,8 +236,8 @@ The main idea of this approach is to give an indication
 of whether the errors are a result of the data or the methods I am using.
 
 There are two separate values I am using for the surface area.
-The initial surface area, with results in gradient4
-and the mean surface area with the results in gradient5.
+The initial surface area, with results in `gradient4`
+and the mean surface area with the results in `gradient5`.
 The use of the mean value is to better match the results from the other derivative methods.
 
 ```python

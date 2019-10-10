@@ -38,13 +38,17 @@ import figures
 
 ## Load Data
 
-The data on the melting rates has been pre-calculated and saved to a file. The data stored is the simulation conditions along with the values
+The data on the melting rates has been pre-calculated and saved to a file.
+The data stored is the simulation conditions along with the values
 - fraction: The fraction of the simulation cell which is crystalline in nature
 - surface_area: The perimeter (the 2D equivalent of surface area) of the crystalline cluster
 - volume: The area (2D equivalent of area) of the crystalline cluster
 - time: The timestep at which these values apply.
 
-Only the data from the low temperature melting is used in this analysis since at the time of writing the dataset is better and it is easier to only deal with a single set of pressures. I am also limiting the analysis to only the p2 crystal.
+Only the data from the low pressure melting is used in this analysis
+since at the time of writing the dataset is better and
+it is easier to only deal with a single set of pressures.
+I am also limiting the analysis to only the p2 crystal.
 
 ```python
 # Read file with melting data

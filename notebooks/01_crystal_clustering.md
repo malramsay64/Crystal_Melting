@@ -29,7 +29,7 @@ The tools I am going to use for this are
 ## Importing packages
 
 The spatial clustering algorithms
-are contained within the sklearn library,
+are contained within the scikit-learn library,
 while the convex hull algorithms
 are contained within scipy.
 
@@ -102,7 +102,7 @@ snapshot, *_ = input_files[3]
 With a snapshot chosen,
 we need to find the classification
 of each local configuration
-using the knn classification algorithm
+using the KNN classification algorithm
 I developed previously.
 Since I am interested in the separation
 of liquid and crystalline regions,
@@ -205,7 +205,6 @@ np.sum(vor.volumes[y == 1])
 
 This gives a value very similar to that of the convex hull.
 
-
 ## Check Rust Implementation
 
 For reasons of performance, the analysis of the trajectories is now performed with rust,
@@ -230,8 +229,4 @@ trj = open_trajectory(test_file)
 index, group = df_classes.groupby("timestep").__iter__().__next__()
 
 show(plot_frame(snapshot, order_list=group["class"] != "Liquid"))
-```
-
-```python
-
 ```

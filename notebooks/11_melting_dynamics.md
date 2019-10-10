@@ -16,7 +16,9 @@ jupyter:
 
 # Melting Dynamics
 
-This is a notebook to understand the dynamics of crystal melting, in particular how much of the slowdown of the melting can be attributed to the slow dynamics.
+This is a notebook to understand the dynamics of crystal melting,
+in particular how much of the slowdown of the melting
+can be attributed to the slow dynamics.
 
 ```python
 # Import required modules
@@ -64,12 +66,12 @@ is solely responsible for the drastic slowdown in melting rate that we observe.
 We have the melting rate,
 which is the distance the interface travels per unit time
 
-$ \frac{d}{t} $
+$$ \frac{d}{t} $$
 
 The other quantity is the rotational relaxation time
 which is the timescale on which the rotations take place.
 
-$ {t} $
+$$ t $$
 
 In multiplying these two quantities together
 we should get the distance the interface moves

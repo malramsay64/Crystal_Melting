@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.1
+      jupytext_version: 1.2.4
   kernelspec:
     display_name: crystal
     language: python
@@ -102,7 +102,7 @@ print(f"The rotational relaxation time is {rot_relaxation.values[0]:.2e}")
 
 Comparing this solid state transition
 with the rotational relaxation time,
-which is $~\num{5e6}$,
+which is $~5 \times 10^6$,
 the transition takes place remarkably quickly,
 on the order of only a few rotational relaxation times,
 which is orders of magnitude faster than the melting.

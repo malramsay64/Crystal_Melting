@@ -72,7 +72,7 @@ a molecular dynamics package designed to run on GPUs
 from the Glotzer group at the University of Michigan.
 
 To read these files we are going to use the [gsd](http://gsd.readthedocs.io/en/latest/) package
-that the glotzer group provide.
+that the Glotzer group provide.
 To read files from other simulation packages [MDAnalysis](https://www.mdanalysis.org/)
 is a python package that will read nearly any file type.
 
