@@ -325,7 +325,7 @@ gradient1["exp"] = 1
 gradient2["exp"] = 2
 gradient4["exp"] = 4
 gradient5["exp"] = 5
-gradients_all = pandas.concat([gradient4, gradient5], axis=0, sort=True)
+gradients_all = pandas.concat([gradient1, gradient2, gradient4, gradient5], axis=0, sort=True)
 ```
 
 Plotting all the different approaches (labelled exp),

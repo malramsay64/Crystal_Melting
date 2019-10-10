@@ -57,7 +57,7 @@ it needs to go through a restructuring,
 this is done using the `melt` function.
 
 ```python
-df = df.melt(id_vars=["crystal", "iter_id", "time", "temperature", "pressure"]).query(
+df = df.melt(id_vars=["crystal", "time", "temperature", "pressure"]).query(
     "variable in ['p2', 'p2gg', 'pg']"
 )
 ```

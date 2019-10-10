@@ -276,9 +276,5 @@ with alt.data_transformers.enable("default"):
 ```
 
 ```python
-opt1
-```
-
-```python
-opt13
+df_theory
 ```
