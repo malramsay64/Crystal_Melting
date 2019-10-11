@@ -25,7 +25,7 @@ def _read_temperatures(filename: Path) -> Dict[float, float]:
     df = pd.read_csv(filename)
     melting_points = {}
     for _, row in df.iterrows():
-        melting_points[float(row["Pressure"])] = float(row["MeltingPoint"])
+        melting_points[float(row["pressure"])] = float(row["melting_point"])
     return melting_points
 
 

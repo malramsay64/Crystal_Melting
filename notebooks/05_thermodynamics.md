@@ -70,7 +70,6 @@ I will export it to a csv file.
 
 ```python
 output_df = df.loc[:, ("potential_energy", "mean")].to_frame()
-output_df.columns = ["Potential Energy"]
 output_df.to_csv("../results/potential_energy.csv")
 ```
 
