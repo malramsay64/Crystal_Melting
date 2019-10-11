@@ -223,6 +223,9 @@ def collate(output, infiles):
                     logger.warn("File %s is empty.", file)
                     continue
 
+                df["class"] = df["class"].astype(
+                    pd.CategoricalDtype(categories=["Liquid", "P2", "P2GG", "PG"])
+                )
                 df = (
                     df.groupby(["timestep", "class"])["area"].sum().to_frame().unstack()
                 )
