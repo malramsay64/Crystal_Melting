@@ -76,12 +76,5 @@ thermo.loc[(13.50, 1.35, "p2"), ("potential_energy", "mean")]
 ```
 
 ```python
-df_single = pd.read_csv("../data/analysis/fluctuation/dump-Trimer-P1.00-T0.40-p2.csv")
-hist = fluctuations.aggregate(df_single["orient_order"])
-hist_df = pd.DataFrame({"bins": hist[0], "count": hist[1]})
-alt.Chart(hist_df).mark_line().encode(
-    x=alt.X("bins", title="Orientation Order"),
-    y=alt.Y("mean(count)", title="Distribution"),
-    color=alt.Color("class", title="Crystal"),
-)
+
 ```
