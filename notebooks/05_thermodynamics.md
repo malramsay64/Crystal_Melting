@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.1
+      jupytext_version: 1.2.4
   kernelspec:
     display_name: crystal
     language: python
@@ -70,6 +70,7 @@ I will export it to a csv file.
 
 ```python
 output_df = df.loc[:, ("potential_energy", "mean")].to_frame()
+output_df.columns = ["potential_energy"]
 output_df.to_csv("../results/potential_energy.csv")
 ```
 
