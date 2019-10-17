@@ -201,25 +201,25 @@ def fit_curve(x_vals, y_vals, errors=None, delta_E=None):
         rate, x_vals, y_vals, sigma=errors, maxfev=2000
     )
 
-    return pandas.Series({"Rate Coefficient": opt[0], "Rate Error": err[0][0]})
+    return pandas.Series({"rate_coefficient": opt[0], "rate_error": err[0][0]})
 ```
 
 ```python
-df_melting = pandas.read_csv("../results/melting_points.csv", index_col="Pressure")
-df_thermo = pandas.read_csv("../results/potential_energy.csv", index_col=["Pressure", "Temperature", "Crystal"])
+df_melting = pandas.read_csv("../results/melting_points.csv", index_col="pressure")
+df_thermo = pandas.read_csv("../results/potential_energy.csv", index_col=["pressure", "temperature", "crystal"])
 ```
 
 ```python
 df_energy = (
     df_thermo.join(df_melting)
     .reset_index()
-    .query("Temperature == MeltingPoint")
-    .set_index("Crystal")
-    .groupby("Pressure")
+    .query("temperature == melting_point")
+    .set_index("crystal")
+    .groupby("pressure")
     .apply(
-        lambda g: g.loc["liquid", "Potential Energy"] - g.loc["p2", "Potential Energy"]
+        lambda g: g.loc["liquid", "potential_energy"] - g.loc["p2", "potential_energy"]
     )
-    .to_frame("Crystal Free Energy")
+    .to_frame("crystal_free_energy")
 )
 ```
 
@@ -227,28 +227,26 @@ df_energy = (
 df_rates = (
     melt_values
     .query("temp_norm < 1.20")
-    .rename(columns={"pressure": "Pressure"})
-    .set_index("Pressure")
+    .set_index("pressure")
     .join(df_energy)
-    .groupby("Pressure")
-    .apply(lambda g: fit_curve(g["temp_norm"], g["value"], g["error"], g["Crystal Free Energy"]))
+    .groupby("pressure")
+    .apply(lambda g: fit_curve(g["temp_norm"], g["value"], g["error"], g["crystal_free_energy"]))
 )
+```
+
+```python
+df_rates.to_csv("../results/rate_constants.csv")
 ```
 
 ```python
 df_theory = ( 
     melt_values
     .query("temp_norm < 1.20")
-    .rename(columns={"pressure": "Pressure"})
-    .set_index("Pressure")
+    .set_index("pressure")
     .join(df_rates)
     .join(df_energy)
 )
-df_theory["theory"] = rate_theory(df_theory["temp_norm"], df_theory["Rate Coefficient"], df_theory["Crystal Free Energy"])
-```
-
-```python
-df_theory
+df_theory["theory"] = rate_theory(df_theory["temp_norm"], df_theory["rate_coefficient"], df_theory["crystal_free_energy"])
 ```
 
 ```python
@@ -256,7 +254,7 @@ chart = (
     alt.Chart(df_theory.reset_index())
     .encode(
         x=alt.X( "temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False) ),
-        color=alt.Color("Pressure:N", title="Pressure"),
+        color=alt.Color("pressure:N", title="Pressure"),
         y=alt.Y("value", title="Rotational Relaxation × Melting Rate"),
         yError=alt.YError("error"),
     )
@@ -273,8 +271,4 @@ chart
 ```python
 with alt.data_transformers.enable("default"):
     chart.save("../figures/normalised_melting_err.svg", webdriver="firefox")
-```
-
-```python
-df_theory
 ```

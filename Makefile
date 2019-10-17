@@ -54,7 +54,7 @@ $(rates_analysis_dir)/dump-%.h5: $(rates_sim)/dump-%.gsd | $(ml_model)
 	python src/melting_rates.py melting --skip-frames 1 $< $@
 
 $(rates_analysis_dir)/dump-%.csv: $(rates_sim)/dump-%.gsd | $(ml_model)
-	trajedy --skip-frames 1 $< $@ --training $(wildcard data/simulations/dataset/output/*.gsd)
+	trajedy --voronoi --skip-frames 1 $< $@ --training $(wildcard data/simulations/dataset/output/*.gsd)
 
 #
 # Melting Rules -> This is about understanding the interface for a range of crystals
@@ -86,7 +86,7 @@ $(melting_analysis_dir)/dump-%.h5: $(melting_sim)/dump-%.gsd | $(ml_model)
 	python src/melting_rates.py melting --skip-frames 100 $< $@
 
 $(melting_analysis_dir)/dump-%.csv: $(melting_sim)/dump-%.gsd | $(ml_model)
-	trajedy --skip-frames 100 $< $@ --training $(wildcard data/simulations/dataset/output/*.gsd)
+	trajedy --voronoi --skip-frames 100 $< $@ --training $(wildcard data/simulations/dataset/output/*.gsd)
 
 #
 # Dynamics Rules
