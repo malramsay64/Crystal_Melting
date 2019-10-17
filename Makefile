@@ -202,13 +202,17 @@ sync: ## Synchronise and format the juptyer and markdown representations of the 
 .PHONY: figures
 figures: notebooks ## Generate all the figures in the figures directory
 
-report_targets := $(wildcard reports/*.md)
+report_targets := $(patsubst %.ipynb, %.pdf, $(wildcard reports/*.md)) $(patsubst %.ipynb, %.pdf, $(wildcard notebooks/*.ipynb))
 all_figures := $(wildcard figures/*.svg)
 
 convert_figures: $(all_figures:.svg=.pdf)
 
-reports: $(report_targets:.md=.pdf) ## Generate pdf reports
+.PHONY: reports
+reports: $(report_targets) ## Generate pdf reports
 	echo $<
+
+%.pdf: %.ipynb
+	cd $(dir $<); jupyter nbconvert --to pdf --execute --no-input --ExecutePreprocessor.timeout=0 --output $(notdir $@) $(notdir $<)
 
 %.pdf: %.md $(all_figures:.svg=.pdf)
 	cd $(dir $<); pandoc $(notdir $<) --filter pandoc-crossref -o $(notdir $@)
