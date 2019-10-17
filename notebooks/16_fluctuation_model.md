@@ -137,7 +137,7 @@ as this is the canonical source of the melting point.
 ```python
 pressure = 13.50
 df_melt = pd.read_csv("../results/melting_points.csv")
-melting_point = df_melt.query("Pressure == @pressure")["MeltingPoint"][0]
+melting_point = df_melt.query("pressure == @pressure")["melting_point"][0]
 f"The melting point at a pressure of {pressure} is: {melting_point}"
 ```
 
@@ -149,10 +149,10 @@ is extracted for the solid, which is the p2 crystal
 and for the liquid.
 
 ```python
-df_pe = pd.read_csv("../results/potential_energy.csv", index_col=["Pressure", "Temperature", "Crystal"])
+df_pe = pd.read_csv("../results/potential_energy.csv", index_col=["pressure", "temperature", "crystal"])
 # Extract liquid and solid potential energies
-pe_liq = df_pe.loc[(pressure, melting_point, "liquid"), "Potential Energy"]
-pe_solid = df_pe.loc[(pressure, melting_point, "p2"), "Potential Energy"]
+pe_liq = df_pe.loc[(pressure, melting_point, "liquid"), "potential_energy"]
+pe_solid = df_pe.loc[(pressure, melting_point, "p2"), "potential_energy"]
 # Find the difference between them
 energy_difference = pe_liq - pe_solid
 f"The potential energy difference at the melting point of {melting_point} is {energy_difference:.4f}"
