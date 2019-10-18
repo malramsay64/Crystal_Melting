@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.4
+      jupytext_version: 1.2.1
   kernelspec:
     display_name: crystal
     language: python
@@ -156,12 +156,7 @@ err_frac = all_df["error_frac_melt"].abs() + all_df["error_frac_rot"].abs()
 error = value * err_frac
 
 melt_values = (
-    pandas.DataFrame(
-        {
-            "value": value,
-            "error": np.abs(error * 2),
-        }
-    )
+    pandas.DataFrame({"value": value, "error": np.abs(error * 2)})
     .reset_index()
     .dropna()
 )
@@ -190,23 +185,25 @@ the errors in the data.
 ```python
 import functools
 
+
 def rate_theory(x, c, delta_E):
     result = 1 - np.exp((1 - x) * delta_E / x)
     return c * result
 
+
 def fit_curve(x_vals, y_vals, errors=None, delta_E=None):
     rate = functools.partial(rate_theory, delta_E=delta_E)
-    
-    opt, err = scipy.optimize.curve_fit(
-        rate, x_vals, y_vals, sigma=errors, maxfev=2000
-    )
+
+    opt, err = scipy.optimize.curve_fit(rate, x_vals, y_vals, sigma=errors, maxfev=2000)
 
     return pandas.Series({"rate_coefficient": opt[0], "rate_error": err[0][0]})
 ```
 
 ```python
 df_melting = pandas.read_csv("../results/melting_points.csv", index_col="pressure")
-df_thermo = pandas.read_csv("../results/potential_energy.csv", index_col=["pressure", "temperature", "crystal"])
+df_thermo = pandas.read_csv(
+    "../results/potential_energy.csv", index_col=["pressure", "temperature", "crystal"]
+)
 ```
 
 ```python
@@ -225,12 +222,15 @@ df_energy = (
 
 ```python
 df_rates = (
-    melt_values
-    .query("temp_norm < 1.20")
+    melt_values.query("temp_norm < 1.20")
     .set_index("pressure")
     .join(df_energy)
     .groupby("pressure")
-    .apply(lambda g: fit_curve(g["temp_norm"], g["value"], g["error"], g["crystal_free_energy"]))
+    .apply(
+        lambda g: fit_curve(
+            g["temp_norm"], g["value"], g["error"], g["crystal_free_energy"]
+        )
+    )
 )
 ```
 
@@ -239,25 +239,25 @@ df_rates.to_csv("../results/rate_constants.csv")
 ```
 
 ```python
-df_theory = ( 
-    melt_values
-    .query("temp_norm < 1.20")
+df_theory = (
+    melt_values.query("temp_norm < 1.20")
     .set_index("pressure")
     .join(df_rates)
     .join(df_energy)
 )
-df_theory["theory"] = rate_theory(df_theory["temp_norm"], df_theory["rate_coefficient"], df_theory["crystal_free_energy"])
+df_theory["theory"] = rate_theory(
+    df_theory["temp_norm"],
+    df_theory["rate_coefficient"],
+    df_theory["crystal_free_energy"],
+)
 ```
 
 ```python
-chart = (
-    alt.Chart(df_theory.reset_index())
-    .encode(
-        x=alt.X( "temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False) ),
-        color=alt.Color("pressure:N", title="Pressure"),
-        y=alt.Y("value", title="Rotational Relaxation × Melting Rate"),
-        yError=alt.YError("error"),
-    )
+chart = alt.Chart(df_theory.reset_index()).encode(
+    x=alt.X("temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False)),
+    color=alt.Color("pressure:N", title="Pressure"),
+    y=alt.Y("value", title="Rotational Relaxation × Melting Rate"),
+    yError=alt.YError("error"),
 )
 
 chart = (

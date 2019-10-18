@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.4
+      jupytext_version: 1.2.1
   kernelspec:
     display_name: crystal
     language: python
@@ -57,8 +57,10 @@ it needs to go through a restructuring,
 this is done using the `melt` function.
 
 ```python
-df = df.melt(id_vars=["crystal", "time", "temperature", "pressure"]).query(
-    "variable in ['p2', 'p2gg', 'pg']"
+df_melt = (
+    df.melt(id_vars=["crystal", "time", "temperature", "pressure"])
+    .query("variable in ['P2', 'P2GG', 'PG']")
+    .set_index(["pressure", "temperature", "crystal"])
 )
 ```
 
@@ -70,15 +72,14 @@ Here we have a
 
 ```python
 c = (
-    alt.Chart(
-        df.query("temperature == 1.32 and pressure == 13.50 and crystal == 'p2gg'")
-    )
+    alt.Chart(df_melt.loc[(13.50, 1.32, "p2gg")].reset_index())
     .mark_point()
     .encode(
         x=alt.X("time", title="Timesteps", axis=alt.Axis(format="e")),
         y=alt.Y("value", title="Fraction"),
         color=alt.Color("variable", title="Crystal"),
     )
+    .transform_filter(alt.datum.time < 2e8)
 )
 c
 ```
@@ -115,13 +116,14 @@ followed by a much slower and more gradual melting.
 
 ```python
 c = (
-    alt.Chart(df.query("temperature ==1.40 & pressure == 13.50 & crystal == 'p2gg'"))
+    alt.Chart(df_melt.loc[(13.50, 1.40, "p2gg")].reset_index())
     .mark_point()
     .encode(
         x=alt.X("time", title="Timesteps", axis=alt.Axis(format="e")),
         y=alt.Y("value", title="Fraction"),
         color=alt.Color("variable", title="Crystal"),
     )
+    .transform_filter(alt.datum.time < 2e8)
 )
 c
 ```
@@ -211,19 +213,19 @@ export_svgs(frame, "../figures/configuration-P13.50-T1.40-p2gg_end.svg")
 While the
 
 ```python
-groupbys = list(df.columns)
+groupbys = list(df_melt.reset_index().columns)
 groupbys.remove("variable")
 groupbys.remove("value")
 ```
 
 ```python
-df_melt = df.groupby(groupbys).sum().reset_index()
+df_melt_agg = df_melt.reset_index().groupby(groupbys).sum().reset_index()
 ```
 
 ```python
-alt.Chart(df_melt.query("pressure==13.50 and temperature == 1.40")).mark_point().encode(
-    x="time", y="value", color="crystal", row="temperature"
-)
+alt.Chart(
+    df_melt_agg.query("pressure==13.50 and temperature == 1.40")
+).mark_point().encode(x="time", y="value", color="crystal", row="temperature")
 ```
 
 ```python

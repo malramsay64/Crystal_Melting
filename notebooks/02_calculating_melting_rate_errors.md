@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.4
+      jupytext_version: 1.2.1
   kernelspec:
     display_name: crystal
     language: python
@@ -134,13 +134,10 @@ gradient1.reset_index(inplace=True)
 Plotting the melting rate with the calculated errors as a function of temperature.
 
 ```python
-chart = (
-    alt.Chart(gradient1)
-    .encode(
-        x = alt.X("temperature:Q", scale=alt.Scale(zero=False)),
-        y = alt.Y("mean", axis=alt.Axis(format="e")),
-        yError = alt.YError("error"),
-    )
+chart = alt.Chart(gradient1).encode(
+    x=alt.X("temperature:Q", scale=alt.Scale(zero=False)),
+    y=alt.Y("mean", axis=alt.Axis(format="e")),
+    yError=alt.YError("error"),
 )
 
 disp_chart = chart.mark_point() + chart.mark_errorbar()
@@ -193,13 +190,10 @@ are significantly reduced over the standard deviation
 although while the errors are small the values are also really small.
 
 ```python
-chart = (
-    alt.Chart(gradient2)
-    .encode(
-        x=alt.X("temperature:Q", scale=alt.Scale(zero=False)),
-        y=alt.Y("mean", axis=alt.Axis(format="e")),
-        yError=alt.YError("error"),
-    )
+chart = alt.Chart(gradient2).encode(
+    x=alt.X("temperature:Q", scale=alt.Scale(zero=False)),
+    y=alt.Y("mean", axis=alt.Axis(format="e")),
+    yError=alt.YError("error"),
 )
 
 disp_chart = chart.mark_point() + chart.mark_errorbar()
@@ -286,13 +280,10 @@ gradient5.reset_index(inplace=True)
 ```
 
 ```python
-chart = (
-    alt.Chart(gradient4)
-    .encode(
-        x=alt.X("temperature:Q", scale=alt.Scale(zero=False)),
-        y=alt.Y("mean", axis=alt.Axis(format="e")),
-        yError=alt.YError("error"),
-    )
+chart = alt.Chart(gradient4).encode(
+    x=alt.X("temperature:Q", scale=alt.Scale(zero=False)),
+    y=alt.Y("mean", axis=alt.Axis(format="e")),
+    yError=alt.YError("error"),
 )
 
 chart.mark_point() + chart.mark_errorbar()
@@ -325,7 +316,9 @@ gradient1["exp"] = 1
 gradient2["exp"] = 2
 gradient4["exp"] = 4
 gradient5["exp"] = 5
-gradients_all = pandas.concat([gradient1, gradient2, gradient4, gradient5], axis=0, sort=True)
+gradients_all = pandas.concat(
+    [gradient1, gradient2, gradient4, gradient5], axis=0, sort=True
+)
 ```
 
 Plotting all the different approaches (labelled exp),
@@ -334,14 +327,11 @@ The first approach to calculating the error
 is obviously wrong so I have excluded the results for clarity.
 
 ```python
-chart = (
-    alt.Chart(gradients_all)
-    .encode(
-        x=alt.X("temperature:Q", scale=alt.Scale(zero=False)),
-        color="exp:N",
-        y=alt.Y("mean", axis=alt.Axis(format="e")),
-        yError=alt.YError("error"),
-    )
+chart = alt.Chart(gradients_all).encode(
+    x=alt.X("temperature:Q", scale=alt.Scale(zero=False)),
+    color="exp:N",
+    y=alt.Y("mean", axis=alt.Axis(format="e")),
+    yError=alt.YError("error"),
 )
 
 chart.mark_point() + chart.mark_errorbar()
@@ -367,7 +357,7 @@ chart = (
     .transform_calculate("abs_mean", alt.expr.abs(alt.datum.mean))
     .transform_filter(alt.datum.abs_mean - alt.datum.error > 0)
     .encode(
-        x = alt.X("temperature:Q", scale=alt.Scale(zero=False)),
+        x=alt.X("temperature:Q", scale=alt.Scale(zero=False)),
         y=alt.Y("abs_mean:Q", scale=alt.Scale(type="log")),
         yError=alt.YError("error"),
         color="exp:N",

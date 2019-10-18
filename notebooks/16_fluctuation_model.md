@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.4
+      jupytext_version: 1.2.1
   kernelspec:
     display_name: crystal
     language: python
@@ -149,7 +149,9 @@ is extracted for the solid, which is the p2 crystal
 and for the liquid.
 
 ```python
-df_pe = pd.read_csv("../results/potential_energy.csv", index_col=["pressure", "temperature", "crystal"])
+df_pe = pd.read_csv(
+    "../results/potential_energy.csv", index_col=["pressure", "temperature", "crystal"]
+)
 # Extract liquid and solid potential energies
 pe_liq = df_pe.loc[(pressure, melting_point, "liquid"), "potential_energy"]
 pe_solid = df_pe.loc[(pressure, melting_point, "p2"), "potential_energy"]
@@ -224,9 +226,13 @@ and the solid distribution will be centered on 1.
 
 ```python
 # Calculate the mean for the liquid and crystal
-weighted_means = df.groupby("crystal").apply(lambda g: np.average(g["bins"], weights=g["count"]))
+weighted_means = df.groupby("crystal").apply(
+    lambda g: np.average(g["bins"], weights=g["count"])
+)
 # Normalise the bins to be centered on 0 and 1
-df["bins"] = (df["bins"] - weighted_means["liquid"]) / (weighted_means["p2"] - weighted_means["liquid"])
+df["bins"] = (df["bins"] - weighted_means["liquid"]) / (
+    weighted_means["p2"] - weighted_means["liquid"]
+)
 ```
 
 With the values normalised
@@ -269,11 +275,15 @@ while the solid has an offset of 1.
 import scipy.optimize
 import functools
 
-def probability_distribition(x, curvature, offset):
-    return np.sqrt(curvature / 2 * np.pi) * np.exp(- curvature / 2 * np.square(x - offset))
 
-probability_distribution_liquid = functools.partial(probability_distribition, offset = 0)
-probability_distribution_solid = functools.partial(probability_distribition, offset = 1)
+def probability_distribition(x, curvature, offset):
+    return np.sqrt(curvature / 2 * np.pi) * np.exp(
+        -curvature / 2 * np.square(x - offset)
+    )
+
+
+probability_distribution_liquid = functools.partial(probability_distribition, offset=0)
+probability_distribution_solid = functools.partial(probability_distribition, offset=1)
 ```
 
 These functions can then be used
@@ -284,8 +294,12 @@ df_liquid = df.query("crystal == 'liquid'")
 df_solid = df.query("crystal == 'p2'")
 
 # Find the curvature which best fits the observed points
-curvature_liquid = scipy.optimize.curve_fit(probability_distribution_liquid, df_liquid["bins"], df_liquid["count"])[0][0]
-curvature_solid = scipy.optimize.curve_fit(probability_distribution_solid, df_solid["bins"], df_solid["count"])[0][0]
+curvature_liquid = scipy.optimize.curve_fit(
+    probability_distribution_liquid, df_liquid["bins"], df_liquid["count"]
+)[0][0]
+curvature_solid = scipy.optimize.curve_fit(
+    probability_distribution_solid, df_solid["bins"], df_solid["count"]
+)[0][0]
 
 f"The liquid curvature is {curvature_liquid:.2f}, and the solid curvature is {curvature_solid:.2f}"
 ```
@@ -319,7 +333,9 @@ plt.ylim((-0.5, 5))
 The value of $M_c$ can be found using a root finding function
 
 ```python
-roots = scipy.optimize.fsolve(lambda xy: np.array([xy[1] - omega1(xy[0]), xy[1] - omega2(xy[0])]), (0.9, 0.1))
+roots = scipy.optimize.fsolve(
+    lambda xy: np.array([xy[1] - omega1(xy[0]), xy[1] - omega2(xy[0])]), (0.9, 0.1)
+)
 f"The value of M_c is {roots[0]}"
 ```
 
@@ -347,6 +363,13 @@ $$ v = -\left[ \frac{2K\Gamma(\sqrt{\lambda_0} + \sqrt{\lambda_s})^2}{M_s^2(\lam
 the melting rate can be calculated
 
 ```python
-rate = np.square(np.sqrt(curvature_liquid) + np.sqrt(curvature_solid)) / (curvature_solid * np.sqrt(curvature_liquid) + curvature_liquid * np.sqrt(curvature_solid)) * energy_difference
+rate = (
+    np.square(np.sqrt(curvature_liquid) + np.sqrt(curvature_solid))
+    / (
+        curvature_solid * np.sqrt(curvature_liquid)
+        + curvature_liquid * np.sqrt(curvature_solid)
+    )
+    * energy_difference
+)
 f"The rate is {rate}"
 ```
