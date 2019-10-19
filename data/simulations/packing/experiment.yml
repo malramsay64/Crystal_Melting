@@ -1,0 +1,34 @@
+name: Crystal Packing
+
+jobs:
+  - command:
+      creates: Trimer-{crystal}-{potential}.json
+      cmd: >
+        packing
+        {crystal}
+        --kt-ratio {ratio}
+        --replications {replications}
+        --steps {steps}
+        --outfile {creates}
+        --potential {potential}
+        --convergence {convergence}
+        trimer
+        --angle {angle}
+        --distance {distance}
+        --radius {radius}
+
+variables:
+  ratio: 0.005
+  replications: 1024
+  steps: 40000
+  angle: 120
+  distance: 1
+  radius: 0.637556
+  convergence: 1e-6
+  crystal:
+    - p2
+    - p1g1
+    - p2gg
+  potential:
+    - Hard
+    - LJ
