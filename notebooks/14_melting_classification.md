@@ -223,10 +223,18 @@ df_melt_agg = df_melt.reset_index().groupby(groupbys).sum().reset_index()
 ```
 
 ```python
-alt.Chart(
+c = alt.Chart(
     df_melt_agg.query("pressure==13.50 and temperature == 1.40")
-).mark_point().encode(x="time", y="value", color="crystal", row="temperature")
+).mark_point().encode(
+    x=alt.X("time", title="Timesteps"), 
+    y=alt.Y("value", title="Volume"), 
+    color=alt.Color("crystal", title="Crystal"),
+)
+with alt.data_transformers.enable("default"):
+    c.save("../figures/melting_crystal_comparison.svg", webdriver="firefox")
 ```
+
+![](../figures/melting_crystal_comparison.svg)
 
 ```python
 trajectory_file = "../data/simulations/interface/output/dump-Trimer-P13.50-T1.40-pg.gsd"
