@@ -45,6 +45,7 @@ jobs:
         --output {output}
         --num-steps {steps}
         prod
+        --no-dynamics
         {requires}
 
 variables:
