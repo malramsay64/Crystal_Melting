@@ -13,7 +13,7 @@
 #
 
 .PHONY: analysis
-analysis: model rates dynamics relaxations melting fluctuation thermo ## Perform all the analysis steps
+analysis: model rates dynamics melting fluctuation thermo ## Perform all the analysis steps
 
 #
 # Machine Learning Rules
@@ -298,9 +298,6 @@ data/analysis/thermodynamics.h5: $(wildcard $(thermo_sim)/thermo*.log) $(wildcar
 #
 # Other Rules
 #
-
-relaxations: dynamics ## Compute the relaxation quantities of all values in the file data/analysis/dynamics.h5
-	sdanalysis comp-relaxations data/analysis/dynamics_clean.h5
 
 interface-dynamics: ## Compute the dynamics of a simulation with a liquid--crystal interface in data/simulations/2017-09-04-interface/
 	sdanalysis comp-dynamics -o data/analysis/interface data/simulations/interface/output/dump-*
