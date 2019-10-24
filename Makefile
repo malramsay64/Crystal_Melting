@@ -319,7 +319,7 @@ pack-dataset: ## Pack the relevant files from dataset into a tarball
 all_notebooks = $(wildcard notebooks/*.md)
 
 .PHONY: notebooks
-notebooks: $(all_notebooks:.md=.ipynb) ## Run all notebooks
+notebooks: analysis $(all_notebooks:.md=.ipynb) ## Run all notebooks
 
 .PHONY: sync
 sync: ## Synchronise and format the juptyer and markdown representations of the notebooks
