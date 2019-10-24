@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.1
+      jupytext_version: 1.2.0
   kernelspec:
     display_name: crystal
     language: python
@@ -62,16 +62,15 @@ is the potential energy of each configuration
 which is shown below.
 
 ```python
-df.loc[:, ("potential_energy", "mean")]
+df_U = df.loc[:, [("potential_energy", "mean"), ("kinetic_energy", "mean"), ("volume", "mean"), ("enthalpy", "mean")]]
+df_U.columns = ["potential_energy", "kinetic_energy", "volume", "enthalpy"]
 ```
 
 with the consequence of this result,
 I will export it to a csv file.
 
 ```python
-output_df = df.loc[:, ("potential_energy", "mean")].to_frame()
-output_df.columns = ["potential_energy"]
-output_df.to_csv("../results/potential_energy.csv")
+df_U.to_csv("../results/enthalpy.csv")
 ```
 
 Taking the analysis a step further,
@@ -86,7 +85,7 @@ melting_points
 ```
 
 ```python
-def energy_diff(df, pressure, temperature, crystal):
+def energy_diff(df, pressure, temperature, crystal, energy="potential_energy"):
     """Calculate the difference in energy between the crystal and liquid states.
 
     This uses the thermodynamic data in `df` to find the energy saved by the crystal configuration
@@ -97,11 +96,12 @@ def energy_diff(df, pressure, temperature, crystal):
         pressure: The desired pressure at which to find the values
         temperature: The desired temperature to use
         crystal: The crystal structure which is to be compared with the liquid.
+        energy: The name of the column which the energy is stored
 
     """
     return (
-        df.loc[(pressure, temperature, crystal), ("potential_energy", "mean")]
-        - df.loc[(pressure, temperature, "liquid"), ("potential_energy", "mean")]
+        df.loc[(pressure, temperature, crystal), energy]
+        - df.loc[(pressure, temperature, "liquid"), energy]
     )
 ```
 
@@ -112,7 +112,9 @@ so we can compare the free energy to that of the liquid.
 crystal = "p2"
 for _, (pressure, temperature) in melting_points.iterrows():
     print(
-        f"For {crystal} at P={pressure} and T={temperature}, ΔE={energy_diff(df, pressure, temperature, crystal):.3f}"
+        f"For {crystal} at P={pressure} and T={temperature}",
+        f"ΔE={energy_diff(df_U, pressure, temperature, crystal):.3f},",
+        f"ΔH={energy_diff(df_U, pressure, temperature, crystal, 'enthalpy'):.3f}"
     )
 ```
 
