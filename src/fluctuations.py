@@ -167,6 +167,15 @@ def thermodynamics(outfile, infiles):
         # Calculate Total Energy
         df["total_energy"] = df["kinetic_energy"] + df["potential_energy"]
 
+        # Calculate enthalpy.
+        # This is the total energy (potential + kinetic) + the configuration energy (pV)
+        # The multiplication by N is because the pressure was also divided by N above.
+        df["enthalpy"] = (
+            df["potential_energy"]
+            + df["kinetic_energy"]
+            + df["pressure"] * df["volume"] * df.N
+        )
+
         if fvars.crystal is not None:
             df["crystal"] = fvars.crystal
         else:
