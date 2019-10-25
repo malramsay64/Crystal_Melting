@@ -38,5 +38,3 @@ dependencies:
   - pandoc
   - pandoc-crossref
   - cairosvg
-  - pip:
-    - bootstrapped
