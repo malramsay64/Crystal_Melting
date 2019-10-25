@@ -7,7 +7,7 @@ dependencies:
   # Running Simulations
   - python=3.6
   - numpy=1.16.*
-  - malramsay::sdrun=0.6.9
+  - malramsay::sdrun=0.7.1
   - malramsay::sdanalysis=0.9.8
   - malramsay::experi=0.3.3
   - malramsay::packing=0.4.1
