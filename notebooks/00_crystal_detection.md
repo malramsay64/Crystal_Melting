@@ -206,7 +206,9 @@ from sklearn import (
 )
 
 ml_models = {
-    "LR": linear_model.LogisticRegression(solver="lbfgs", multi_class="auto"),
+    "LR": linear_model.LogisticRegression(
+        solver="lbfgs", multi_class="auto", max_iter=1000
+    ),
     "LDA": discriminant_analysis.LinearDiscriminantAnalysis(),
     "DT": tree.DecisionTreeClassifier(),
     "KNN": neighbors.KNeighborsClassifier(),
