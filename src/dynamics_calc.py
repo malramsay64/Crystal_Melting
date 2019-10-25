@@ -22,24 +22,6 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def _value(series: pd.Series):
-    return bs.bootstrap(
-        series.values, bs_stats.mean, alpha=0.5, num_iterations=1000
-    ).value
-
-
-def _lower(series: pd.Series):
-    return bs.bootstrap(
-        series.values, bs_stats.mean, alpha=0.5, num_iterations=1000
-    ).lower_bound
-
-
-def _upper(series: pd.Series):
-    return bs.bootstrap(
-        series.values, bs_stats.mean, alpha=0.1, num_iterations=1000
-    ).upper_bound
-
-
 @click.group()
 def main():
     pass
@@ -110,10 +92,9 @@ def bootstrap(infile):
     outfile = infile.with_name(infile.stem + "_agg" + ".h5")
     df = pd.read_hdf(infile, "dynamics")
 
-    df_agg = df.groupby(["temperature", "pressure", "time"]).agg(
-        [_value, _lower, _upper]
-    )
-    df_agg.columns = ["".join(col).strip() for col in df_agg.columns.values]
+    index = ["temperature", "pressure", "time"]
+    df_agg = df.groupby(index).agg(["mean", "std"])
+    df_agg.columns = ["_".join(x) for x in df_agg.columns]
     df_agg = df_agg.reset_index()
 
     df_agg.to_hdf(outfile, "dynamics")
@@ -127,10 +108,9 @@ def bootstrap(infile):
     # fast because others are slow.
     df_mol = df_mol.groupby(["temperature", "pressure", "keyframe"]).mean()
 
-    df_mol_agg = df_mol.groupby(["temperature", "pressure"]).agg(
-        [_value, _lower, _upper]
-    )
-    df_mol_agg.columns = ["".join(col).strip() for col in df_mol_agg.columns.values]
+    index = ["temperature", "pressure"]
+    df_mol_agg = df_mol.groupby(index).agg(["mean", "std"])
+    df_mol_agg.columns = ["_".join(x) for x in df_mol_agg.columns]
     df_mol_agg = df_mol_agg.reset_index()
 
     df_mol_agg.to_hdf(outfile, "molecular_relaxations")
@@ -141,11 +121,10 @@ def bootstrap(infile):
         .agg(series_relaxation_value)
     )
     df_relax["inv_diffusion"] = 1 / df_relax["msd"]
-    df_relax_agg = df_relax.groupby(["temperature", "pressure"]).agg(
-        [_value, _lower, _upper]
-    )
 
-    df_relax_agg.columns = ["".join(col).strip() for col in df_relax_agg.columns.values]
+    index = ["temperature", "pressure"]
+    df_relax_agg = df_relax.groupby(index).agg(["mean", "std"])
+    df_relax_agg.columns = ["_".join(x) for x in df_relax_agg.columns]
     df_relax_agg = df_relax_agg.reset_index()
 
     df_relax_agg.to_hdf(outfile, "relaxations")
