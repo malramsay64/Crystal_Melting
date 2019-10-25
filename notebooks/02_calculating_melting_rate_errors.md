@@ -54,7 +54,7 @@ By re-sampling the dataset to times of 1ms, the
 # Read file with melting data
 time_df = pandas.read_hdf("../data/analysis/rates_rs_clean.h5", "fractions", mode="r")
 time_df = time_df.query('pressure == "1.00" and temperature < 0.8')
-time_df.index = pandas.TimedeltaIndex(time_df.time)
+time_df.index = pandas.TimedeltaIndex(time_df["timestep"])
 
 group_bys = ["crystal", "temperature", "pressure"]
 ```
@@ -72,7 +72,7 @@ chart = (
     alt.Chart(time_df)
     .mark_point()
     .encode(
-        x=alt.X("time:Q", axis=alt.Axis(format="e")),
+        x=alt.X("time:Q", title="Time", axis=alt.Axis(format="e")),
         color="temperature:N",
         row="crystal:N",
         y="radius:Q",

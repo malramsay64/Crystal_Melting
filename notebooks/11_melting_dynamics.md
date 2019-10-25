@@ -90,10 +90,14 @@ c = (
         ),
         color=alt.Color("pressure:N", title="Pressure"),
     )
-    .transform_calculate(scaling=alt.datum.mean * alt.datum.tau_T2_value)
+    .transform_calculate(scaling=alt.datum.mean * alt.datum.tau_T2_mean)
 )
 
 c
+```
+
+```python
+timescales_df["mean"]
 ```
 
 ```python

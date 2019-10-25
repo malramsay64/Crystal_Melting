@@ -97,7 +97,8 @@ def compute_crystal_growth(
             "surface_area": float(hull.area),
             "volume": float(hull.volume),
             "voronoi_volume": float(voronoi_volume),
-            "time": float(snap.timestep),
+            "timestep": int(snap.timestep),
+            "time": int(snap.timestep) * 0.005,
         }
 
         order_list.append(df)
@@ -233,7 +234,7 @@ def collate(output, infiles):
                 df = df.reset_index()
 
                 file_vars = get_filename_vars(file)
-                df = df.rename(columns={"area": "volume", "timestep": "time"})
+                df = df.rename(columns={"area": "volume"})
                 df["crystal"] = file_vars.crystal
                 df["temperature"] = float(file_vars.temperature)
                 df["pressure"] = float(file_vars.pressure)
@@ -243,6 +244,7 @@ def collate(output, infiles):
             df["crystal"] = df["crystal"].astype(
                 CategoricalDtype(categories=["p2", "pg", "p2gg"])
             )
+            df["time"] = df["timestep"] * 0.005
             dst.append(key, df)
 
 

@@ -170,9 +170,10 @@ def plot_figure(pressure, temperature, crystal, quantity):
     df = df.drop(columns="timestep").resample("0.1ms").agg(["mean", "std"])
     df.columns = [col[-1] for col in df.columns.values]
     df = df.reset_index()
-    df["timestep"] = df["timestep"].astype(int)
+    df["time"] = df["timestep"].astype(int) * 0.005
+    df = df.drop(columns="timestep")
     c = alt.Chart(df).encode(
-        x=alt.X("timestep", axis=alt.Axis(format="e")),
+        x=alt.X("time", title="Time", axis=alt.Axis(format="e")),
         y=alt.Y("mean", title=quantity, scale=alt.Scale(zero=False)),
         yError=alt.YError("std"),
     )

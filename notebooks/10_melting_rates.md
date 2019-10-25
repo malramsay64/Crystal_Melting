@@ -69,7 +69,7 @@ chart = (
     .encode(
         x=alt.X(
             "time:Q",
-            title="Timesteps",
+            title="Time",
             axis=alt.Axis(format="e"),
             scale=alt.Scale(type="linear"),
         ),

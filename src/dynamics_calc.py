@@ -146,6 +146,17 @@ def collate(output, infiles):
                         logger.warning(
                             "Key: %s does not exist in dataframe: %s", key, file
                         )
+                    if key == "dynamics":
+                        # The timestep is given the time column, so convert that here
+                        df["timestep"] = df["time"]
+                        # This converts the timestep to the real time
+                        df["time"] = df["timestep"] * 0.005
+                    elif key == "molecular_relaxations":
+                        df = df.set_index(
+                            ["pressure", "temperature", "keyframe", "molecule"]
+                        )
+                        df *= 0.005
+                        df = df.reset_index()
                     df["temperature"] = df["temperature"].astype(float)
                     df["pressure"] = df["pressure"].astype(float)
                     dst.append(key, df)

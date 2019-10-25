@@ -43,7 +43,8 @@ meaning all the quantities should be a equilibrium.
 
 ```python
 thermo_file = "../data/simulations/interface/output/thermo-Trimer-P13.50-T1.50-p2gg.log"
-df = pd.read_csv(thermo_file, sep="\t", index_col="timestep")
+df = pd.read_csv(thermo_file, sep="\t")
+df["time"] = df["timestep"] * 0.005
 ```
 
 ```python
@@ -51,7 +52,7 @@ df.columns
 ```
 
 ```python
-c = alt.Chart(df.reset_index()).mark_line().encode(x="timestep")
+c = alt.Chart(df).mark_line().encode(x=alt.X("time", title="Time"))
 
 
 @interact(quantity=list(df.columns))

@@ -76,7 +76,7 @@ c = (
     alt.Chart(df_melt.loc[(13.50, 1.32, "p2gg")].reset_index())
     .mark_point()
     .encode(
-        x=alt.X("time", title="Timesteps", axis=alt.Axis(format="e")),
+        x=alt.X("time", title="Time", axis=alt.Axis(format="e")),
         y=alt.Y("value", title="Fraction"),
         color=alt.Color("variable", title="Crystal"),
     )
@@ -120,7 +120,7 @@ c = (
     alt.Chart(df_melt.loc[(13.50, 1.40, "p2gg")].reset_index())
     .mark_point()
     .encode(
-        x=alt.X("time", title="Timesteps", axis=alt.Axis(format="e")),
+        x=alt.X("time", title="Time", axis=alt.Axis(format="e")),
         y=alt.Y("value", title="Fraction"),
         color=alt.Color("variable", title="Crystal"),
     )
@@ -228,7 +228,7 @@ c = (
     alt.Chart(df_melt_agg.query("pressure==13.50 and temperature == 1.40"))
     .mark_point()
     .encode(
-        x=alt.X("time", title="Timesteps"),
+        x=alt.X("time", title="Time"),
         y=alt.Y("value", title="Volume"),
         color=alt.Color("crystal", title="Crystal"),
     )
