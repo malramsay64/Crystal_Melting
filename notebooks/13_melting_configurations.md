@@ -42,9 +42,9 @@ output_notebook()
 ```
 
 ```python
-gsd_file = "../data/simulations/rates/output/dump-Trimer-P1.00-T0.75-p2-ID1.gsd"
+gsd_file = "../data/simulations/rates/output/dump-Trimer-P1.00-T0.55-p2-ID1.gsd"
 with gsd.hoomd.open(gsd_file) as trj:
-    snap = HoomdFrame(trj[50])
+    snap = HoomdFrame(trj[18])
 ```
 
 ```python
@@ -61,13 +61,13 @@ show(fig)
 
 ```python
 fig.output_backend = "svg"
-export_svgs(fig, "../figures/melting_disorder_P1.00-T0.75.svg")
+export_svgs(fig, "../figures/melting_disorder_P1.00-T0.55.svg")
 ```
 
 ```python
-gsd_file = "../data/simulations/rates/output/dump-Trimer-P1.00-T0.60-p2-ID1.gsd"
+gsd_file = "../data/simulations/rates/output/dump-Trimer-P1.00-T0.50-p2-ID1.gsd"
 with gsd.hoomd.open(gsd_file) as trj:
-    snap = HoomdFrame(trj[50])
+    snap = HoomdFrame(trj[16])
 
 ordering = knn_order(snap)
 
@@ -79,5 +79,5 @@ show(fig)
 
 ```python
 fig.output_backend = "svg"
-export_svgs(fig, "../figures/melting_disorder_P1.00-T0.60.svg")
+export_svgs(fig, "../figures/melting_disorder_P1.00-T0.50.svg")
 ```
