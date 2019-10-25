@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.0
+      jupytext_version: 1.2.1
   kernelspec:
     display_name: crystal
     language: python
@@ -62,7 +62,15 @@ is the potential energy of each configuration
 which is shown below.
 
 ```python
-df_U = df.loc[:, [("potential_energy", "mean"), ("kinetic_energy", "mean"), ("volume", "mean"), ("enthalpy", "mean")]]
+df_U = df.loc[
+    :,
+    [
+        ("potential_energy", "mean"),
+        ("kinetic_energy", "mean"),
+        ("volume", "mean"),
+        ("enthalpy", "mean"),
+    ],
+]
 df_U.columns = ["potential_energy", "kinetic_energy", "volume", "enthalpy"]
 ```
 
@@ -110,11 +118,11 @@ so we can compare the free energy to that of the liquid.
 
 ```python
 crystal = "p2"
-for _, (pressure, temperature) in melting_points.iterrows():
+for _, row in melting_points.iterrows():
     print(
-        f"For {crystal} at P={pressure} and T={temperature}",
-        f"ΔE={energy_diff(df_U, pressure, temperature, crystal):.3f},",
-        f"ΔH={energy_diff(df_U, pressure, temperature, crystal, 'enthalpy'):.3f}"
+        f"For {crystal} at P={row.pressure} and T={row.melting_point}",
+        f"ΔE={energy_diff(df_U, row.pressure, row.melting_point, crystal):.3f},",
+        f"ΔH={energy_diff(df_U, row.pressure, row.melting_point, crystal, 'enthalpy'):.3f}",
     )
 ```
 

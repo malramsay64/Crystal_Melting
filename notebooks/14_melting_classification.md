@@ -61,6 +61,7 @@ df_melt = (
     df.melt(id_vars=["crystal", "time", "temperature", "pressure"])
     .query("variable in ['P2', 'P2GG', 'PG']")
     .set_index(["pressure", "temperature", "crystal"])
+    .sort_index()
 )
 ```
 
@@ -96,7 +97,7 @@ with alt.data_transformers.enable("default"):
 with pandas.HDFStore("../data/analysis/dynamics_clean_agg.h5") as src:
     df_dynamics = src.get("relaxations")
 rot_relaxation = df_dynamics.query("temperature == 1.35 and pressure == 13.50")[
-    "rot2_value"
+    "rot2_mean"
 ]
 print(f"The rotational relaxation time is {rot_relaxation.values[0]:.2e}")
 ```
@@ -223,12 +224,14 @@ df_melt_agg = df_melt.reset_index().groupby(groupbys).sum().reset_index()
 ```
 
 ```python
-c = alt.Chart(
-    df_melt_agg.query("pressure==13.50 and temperature == 1.40")
-).mark_point().encode(
-    x=alt.X("time", title="Timesteps"), 
-    y=alt.Y("value", title="Volume"), 
-    color=alt.Color("crystal", title="Crystal"),
+c = (
+    alt.Chart(df_melt_agg.query("pressure==13.50 and temperature == 1.40"))
+    .mark_point()
+    .encode(
+        x=alt.X("time", title="Timesteps"),
+        y=alt.Y("value", title="Volume"),
+        color=alt.Color("crystal", title="Crystal"),
+    )
 )
 with alt.data_transformers.enable("default"):
     c.save("../figures/melting_crystal_comparison.svg", webdriver="firefox")

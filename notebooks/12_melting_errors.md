@@ -58,8 +58,8 @@ chart.mark_point() + chart.mark_rule().encode(y="error_min", y2="error_max")
 ```
 
 ```python
-melt_value = rates_df.groupby(["temperature", "pressure", "temp_norm"])["mean"].mean()
-melt_err = rates_df.groupby(["temperature", "pressure", "temp_norm"])["mean"].sem()
+melt_value = rates_df.groupby(["pressure", "temperature", "temp_norm"])["mean"].mean()
+melt_err = rates_df.groupby(["pressure", "temperature", "temp_norm"])["mean"].sem()
 melt_frac_err = melt_err / melt_value
 melt_df = pandas.DataFrame(
     {
@@ -117,8 +117,8 @@ with alt.data_transformers.enable("default"):
 ```
 
 ```python
-mean = rates_df.groupby(["temperature", "pressure", "temp_norm"])["mean"].mean()
-err = rates_df.groupby(["temperature", "pressure", "temp_norm"])["mean"].std()
+mean = rates_df.groupby(["pressure", "temperature", "temp_norm"])["mean"].mean()
+err = rates_df.groupby(["pressure", "temperature", "temp_norm"])["mean"].std()
 ```
 
 ## Error in Rotational Relaxation
@@ -126,14 +126,12 @@ err = rates_df.groupby(["temperature", "pressure", "temp_norm"])["mean"].std()
 ```python
 with pandas.HDFStore("../data/analysis/dynamics_clean_agg.h5") as store:
     relax_df = store.get("relaxations")
+relax_df = relax_df.set_index(["pressure", "temperature"])
 ```
 
 ```python
-rot_value = relax_df.groupby(["temperature", "pressure"])["rot2_value"].mean()
-rot_err = np.maximum(
-    (relax_df["rot2_value"] - relax_df["rot2_lower"]).values,
-    (relax_df["rot2_upper"] - relax_df["rot2_value"]).values,
-)
+rot_value = relax_df["rot2_mean"]
+rot_err = relax_df["rot2_std"]
 rot_frac_err = rot_err / rot_value
 
 rot_df = pandas.DataFrame(
@@ -202,7 +200,7 @@ def fit_curve(x_vals, y_vals, errors=None, delta_E=None):
 ```python
 df_melting = pandas.read_csv("../results/melting_points.csv", index_col="pressure")
 df_thermo = pandas.read_csv(
-    "../results/potential_energy.csv", index_col=["pressure", "temperature", "crystal"]
+    "../results/enthalpy.csv", index_col=["pressure", "temperature", "crystal"]
 )
 ```
 
@@ -213,9 +211,7 @@ df_energy = (
     .query("temperature == melting_point")
     .set_index("crystal")
     .groupby("pressure")
-    .apply(
-        lambda g: g.loc["liquid", "potential_energy"] - g.loc["p2", "potential_energy"]
-    )
+    .apply(lambda g: g.loc["liquid", "enthalpy"] - g.loc["p2", "enthalpy"])
     .to_frame("crystal_free_energy")
 )
 ```

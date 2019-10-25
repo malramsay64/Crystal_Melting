@@ -7,7 +7,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.1
+      jupytext_version: 1.2.0
   kernelspec:
     display_name: crystal
     language: python
@@ -67,7 +67,7 @@ export_svgs(fig, "../figures/melting_disorder_P1.00-T0.75.svg")
 ```python
 gsd_file = "../data/simulations/rates/output/dump-Trimer-P1.00-T0.60-p2-ID1.gsd"
 with gsd.hoomd.open(gsd_file) as trj:
-    snap = HoomdFrame(trj[70])
+    snap = HoomdFrame(trj[50])
 
 ordering = knn_order(snap)
 

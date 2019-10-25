@@ -126,7 +126,7 @@ df_1 = timescales_df.query("pressure == 1.00")
 
 
 df_fit = pandas.DataFrame(
-    {"temp_norm": df_1.temp_norm, "scaling": df_1["mean"] * df_1["tau_T2_value"]}
+    {"temp_norm": df_1.temp_norm, "scaling": df_1["mean"] * df_1["tau_T2_mean"]}
 )
 
 theory, opt, err = fit_curve(df_fit["temp_norm"], df_fit["scaling"])
@@ -160,7 +160,7 @@ The above plot uses the values computed from the curve fit with;
 df_13 = timescales_df.query("pressure == 13.50")
 
 df_fit = pandas.DataFrame(
-    {"temp_norm": df_13.temp_norm, "scaling": df_13["mean"] * df_13["tau_T2_value"]}
+    {"temp_norm": df_13.temp_norm, "scaling": df_13["mean"] * df_13["tau_T2_mean"]}
 )
 
 theory, opt, err = fit_curve(df_fit["temp_norm"], df_fit["scaling"])

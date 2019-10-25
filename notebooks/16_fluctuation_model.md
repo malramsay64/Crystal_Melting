@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.1
+      jupytext_version: 1.2.0
   kernelspec:
     display_name: crystal
     language: python
@@ -142,7 +142,7 @@ f"The melting point at a pressure of {pressure} is: {melting_point}"
 ```
 
 The potential energy of each crystal structure
-as been pre-calculated and stored in the file `../results/potential_energy.csv`.
+as been pre-calculated and stored in the file `../results/enthalpy.csv`.
 The thermodynamic quantity,
 that is the potential energy per particle,
 is extracted for the solid, which is the p2 crystal
@@ -150,14 +150,14 @@ and for the liquid.
 
 ```python
 df_pe = pd.read_csv(
-    "../results/potential_energy.csv", index_col=["pressure", "temperature", "crystal"]
+    "../results/enthalpy.csv", index_col=["pressure", "temperature", "crystal"]
 )
-# Extract liquid and solid potential energies
-pe_liq = df_pe.loc[(pressure, melting_point, "liquid"), "potential_energy"]
-pe_solid = df_pe.loc[(pressure, melting_point, "p2"), "potential_energy"]
+# Extract liquid and solid enthalpies
+h_liq = df_pe.loc[(pressure, melting_point, "liquid"), "enthalpy"]
+h_solid = df_pe.loc[(pressure, melting_point, "p2"), "enthalpy"]
 # Find the difference between them
-energy_difference = pe_liq - pe_solid
-f"The potential energy difference at the melting point of {melting_point} is {energy_difference:.4f}"
+enthalpy_difference = h_liq - h_solid
+f"The potential energy difference at the melting point of {melting_point} is {enthalpy_difference:.4f}"
 ```
 
 ## Probability Distributions
@@ -307,12 +307,12 @@ f"The liquid curvature is {curvature_liquid:.2f}, and the solid curvature is {cu
 With the curvature found,
 it is now possible to plug these values
 back into our definitions for omega,
-and also adding the energy difference $\Delta$
+and also adding the enthalpy difference $\Delta H_m$
 which was computed earlier.
 
 ```python
 omega1 = lambda x: curvature_liquid / 2 * x ** 2
-omega2 = lambda x: curvature_solid / 2 * (x - 1) ** 2 + energy_difference
+omega2 = lambda x: curvature_solid / 2 * (x - 1) ** 2 + enthalpy_difference
 ```
 
 And plotted,
@@ -369,7 +369,7 @@ rate = (
         curvature_solid * np.sqrt(curvature_liquid)
         + curvature_liquid * np.sqrt(curvature_solid)
     )
-    * energy_difference
+    * enthalpy_difference
 )
 f"The rate is {rate}"
 ```
