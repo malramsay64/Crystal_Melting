@@ -1,0 +1,81 @@
+name: Disc Crystal Thermo
+
+jobs:
+  - command:
+      creates: Disc-P{pressure:.2f}-T{init_temp:.2f}-{space_group}.gsd
+      cmd: >
+        mpirun -np 12
+        sdrun
+        --pressure {pressure}
+        --temperature {init_temp}
+        --space-group {space_group}
+        --lattice-lengths {cell_dims}
+        --output {output}
+        --num-steps {create_steps}
+        create
+        {creates}
+
+  - command:
+      requires: Disc-P{pressure:.2f}-T{init_temp:.2f}-{space_group}.gsd
+      creates: Disc-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
+      cmd: >
+        mpirun -np 12
+        sdrun
+        --pressure {pressure}
+        --init-temp {init_temp}
+        --temperature {temperature}
+        --space-group {space_group}
+        --output {output}
+        --num-steps {create_steps}
+        equil
+        --equil-type crystal
+        {requires}
+        {creates}
+
+  - command:
+      requires: Disc-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
+      creates: output/dump-Trimer-P{pressure:.2f}-T{temperature:.2f}-{space_group}.gsd
+      cmd: >
+        mpirun -np 12
+        sdrun
+        --pressure {pressure}
+        --temperature {temperature}
+        --space-group {space_group}
+        --output {output}
+        --num-steps {steps}
+        prod
+        --no-dynamics
+        {requires}
+
+variables:
+  create_steps: 10_000
+  steps: 100_000
+  output: output
+  space_group: HexagonalCircle
+  cell_dims: 48 21
+  pressure: 1.00
+  init_temp: 0.1
+  temperature:
+    - 0.85
+    - 0.83
+    - 0.80
+    - 0.79
+    - 0.78
+    - 0.77
+    - 0.76
+    - 0.75
+    - 0.74
+    - 0.73
+    - 0.70
+    - 0.65
+
+scheduler:
+  setup:
+    - export PATH="$HOME/.miniconda/bin:$PATH"
+    - source activate crystal
+  cpus: 8
+  memory: 16gb
+  walltime: "24:00:00"
+  project: PRJ-CrysGrowth
+  logs: logs
+  mail: malramsay64+thermodynamics@gmail.com
