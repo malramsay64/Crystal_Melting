@@ -4,7 +4,7 @@ jobs:
   - command:
       creates: Disc-P{pressure:.2f}-T{init_temp:.2f}.gsd
       cmd: >
-        mpirun -np 12
+        mpirun -np 4
         sdrun
         --pressure {pressure}
         --temperature {init_temp}
@@ -20,13 +20,14 @@ jobs:
       requires: Disc-P{pressure:.2f}-T{init_temp:.2f}.gsd
       creates: Disc-P{pressure:.2f}-T{temperature:.2f}.gsd
       cmd: >
-        mpirun -np 12
+        mpirun -np 4
         sdrun
         --pressure {pressure}
         --init-temp {init_temp}
         --molecule disc
         --temperature {temperature}
         --output {output}
+        --output-interval {output_interval}
         --num-steps {steps}
         equil
         --equil-type liquid
@@ -37,12 +38,13 @@ jobs:
       requires: Disc-P{pressure:.2f}-T{temperature:.2f}.gsd
       creates: output/dump-Trimer-P{pressure:.2f}-T{temperature:.2f}.gsd
       cmd: >
-        mpirun -np 12
+        mpirun -np 4
         sdrun
         --pressure {pressure}
         --temperature {temperature}
         --molecule disc
         --output {output}
+        --output-interval {output_interval}
         --num-steps {steps}
         --keyframe-interval {keyframe_interval}
         prod
@@ -50,32 +52,32 @@ jobs:
 
 variables:
   create_steps: 10_000
-  steps: 10_000_000
+  steps: 100_000
   output: output
+  output_interval: 10
   space_group: SquareCircle
   cell_dims: 32 32
   pressure: 1.00
   init_temp: 0.1
   keyframe_interval: 20_000
   temperature:
-    - 0.85
-    - 0.83
-    - 0.80
-    - 0.79
-    - 0.78
-    - 0.77
-    - 0.76
-    - 0.75
-    - 0.74
-    - 0.73
-    - 0.70
-    - 0.65
+    - 0.40
+    - 0.45
+    - 0.48
+    - 0.50
+    - 0.51
+    - 0.52
+    - 0.53
+    - 0.54
+    - 0.55
+    - 0.57
+    - 0.60
 
 scheduler:
   setup:
     - export PATH="$HOME/.miniconda/bin:$PATH"
     - source activate crystal
-  cpus: 8
+  cpus: 4
   memory: 16gb
   walltime: "24:00:00"
   project: PRJ-CrysGrowth
