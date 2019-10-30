@@ -244,6 +244,13 @@ fluctuation_trajectories = $(wildcard $(thermo_sim)/dump-Trimer*.gsd) $(wildcard
 fluctuation_analysis = $(addprefix $(fluctuation_analysis_dir)/, $(notdir $(fluctuation_trajectories:.gsd=.h5)))
 fluctuation_analysis_csv = $(addprefix $(fluctuation_analysis_dir)/, $(notdir $(fluctuation_trajectories:.gsd=.csv)))
 
+disc_crystal_sim = data/simulations/disc_crystal/output
+disc_liquid_sim = data/simulations/disc_liquid/output
+fluctuation_disc_analysis_dir = data/analysis/fluctuation-disc
+
+fluctuation_disc_trajectories = $(wildcard $(disc_crystal_sim)/dump-Disc-*.gsd) $(wildcard $(disc_liquid_sim)/dump-Disc-*.gsd)
+fluctuation_disc_analysis_csv = $(addprefix $(fluctuation_disc_analysis_dir)/, $(notdir $(fluctuation_disc_trajectories:.gsd=.csv)))
+
 # Commands
 #
 # There are two sets of commands, the python and the rust version. This analysis is very
@@ -253,6 +260,8 @@ fluctuation_analysis_csv = $(addprefix $(fluctuation_analysis_dir)/, $(notdir $(
 .PHONY: fluctuation fluctuation-py
 fluctuation-py: data/analysis/fluctuation.h5 ## Compute values for the fluctuation of the particles using the slow python version
 fluctuation: data/analysis/fluctuation_rs.h5 ## Compute values for the fluctuation of the particles
+
+fluctuation-disc: data/analysis/fluctuation_disc.h5
 
 # Collation
 #
@@ -264,6 +273,9 @@ data/analysis/fluctuation_rs.h5: $(fluctuation_analysis_csv)
 
 data/analysis/fluctuation.h5: $(fluctuation_analysis)
 	python3 src/fluctuations.py collate $@ $^
+
+data/analysis/fluctuation_disc.h5: $(fluctuation_disc_analysis_csv)
+	python3 src/fluctuations.py collate-disc $@ $^
 
 # Analysis
 #
@@ -282,7 +294,16 @@ $(fluctuation_analysis_dir)/dump-%.csv: $(thermo_sim)/dump-%.gsd | $(fluctuation
 $(fluctuation_analysis_dir)/dump-%.csv: $(dynamics_sim)/dump-%.gsd | $(fluctuation_analysis_dir)
 	trajedy $< $@ -n 100
 
+$(fluctuation_disc_analysis_dir)/dump-%.csv: $(disc_crystal_sim)/dump-%.gsd | $(fluctuation_disc_analysis_dir)
+	trajedy $< $@ -n 100
+
+$(fluctuation_disc_analysis_dir)/dump-%.csv: $(disc_liquid_sim)/dump-%.gsd | $(fluctuation_disc_analysis_dir)
+	trajedy $< $@ -n 100
+
 $(fluctuation_analysis_dir):
+	mkdir -p $@
+
+$(fluctuation_disc_analysis_dir):
 	mkdir -p $@
 
 #
