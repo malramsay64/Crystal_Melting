@@ -75,6 +75,46 @@ def fit_gaussian(bins: np.ndarray, count: np.ndarray):
 @click.argument(
     "infiles", nargs=-1, type=click.Path(exists=True, file_okay=True, dir_okay=False)
 )
+def collate_disc(output, infiles):
+    with pd.HDFStore(output) as dst:
+        for file in infiles:
+            file = Path(file)
+            print(file)
+            df = pd.read_csv(file)
+            fvars = get_filename_vars(file)
+            df["temperature"] = float(fvars.temperature)
+            df["pressure"] = float(fvars.pressure)
+            if fvars.crystal is None:
+                crystal = "liquid"
+            else:
+                crystal = fvars.crystal
+            df["crystal"] = crystal
+
+            bin_values, count = aggregate(df["hexatic_order"])
+
+            df = pd.DataFrame(
+                {
+                    "temperature": float(df["temperature"].values[0]),
+                    "pressure": float(df["pressure"].values[0]),
+                    "crystal": df["crystal"].values[0],
+                    "bins": bin_values,
+                    "count": count,
+                    "probability": count * (BINS[1] - BINS[0]),
+                }
+            )
+            df["crystal"] = df["crystal"].astype(
+                CategoricalDtype(
+                    categories=["SquareCircle", "HexagonalCircle", "liquid"]
+                )
+            )
+            dst.append("ordering", df)
+
+
+@main.command()
+@click.argument("output", type=click.Path(file_okay=True, dir_okay=False))
+@click.argument(
+    "infiles", nargs=-1, type=click.Path(exists=True, file_okay=True, dir_okay=False)
+)
 def collate(output, infiles):
     with pd.HDFStore(output) as dst:
         for file in infiles:
