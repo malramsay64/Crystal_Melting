@@ -13,7 +13,7 @@
 #
 
 .PHONY: analysis
-analysis: model rates dynamics melting fluctuation thermo ## Perform all the analysis steps
+analysis: model rates dynamics melting fluctuation fluctuation-disc thermo ## Perform all the analysis steps
 
 #
 # Machine Learning Rules
