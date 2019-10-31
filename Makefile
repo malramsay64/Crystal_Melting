@@ -373,7 +373,7 @@ all_figures = $(wildcard figures/*.svg)
 
 .PHONY: figures reports
 figures: notebooks ## Generate all the figures in the figures directory
-reports: $(report_targets) analysis notebooks ## Generate pdf reports
+reports: analysis notebooks $(report_targets) ## Generate pdf reports
 
 # Conversions
 #
