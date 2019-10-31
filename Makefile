@@ -363,7 +363,7 @@ sync: ## Synchronise and format the juptyer and markdown representations of the 
 # Additionally where there are figures which need converting from svg to pdf, this takes
 # finds the targets.
 
-report_targets = $(patsubst %.ipynb, %.pdf, $(wildcard reports/*.md)) $(patsubst %.ipynb, %.pdf, $(wildcard notebooks/*.ipynb))
+report_targets = $(patsubst %.md, %.pdf, $(wildcard reports/*.md)) $(patsubst %.md, %.pdf, $(wildcard notebooks/*.md))
 all_figures = $(wildcard figures/*.svg)
 
 # Commands
@@ -373,20 +373,14 @@ all_figures = $(wildcard figures/*.svg)
 
 .PHONY: figures reports
 figures: notebooks ## Generate all the figures in the figures directory
-reports: $(report_targets) analysis ## Generate pdf reports
+reports: $(report_targets) analysis notebooks ## Generate pdf reports
 
 # Conversions
 #
 # These are the rules to convert the different filetypes to a pdf
 
-%.pdf: %.ipynb
-	cd $(dir $<); jupyter nbconvert --to pdf --execute --no-input --ExecutePreprocessor.timeout=0 --output $(notdir $@) $(notdir $<)
-
-%.pdf: %.md $(all_figures:.svg=.pdf)
-	cd $(dir $<); pandoc $(notdir $<) --filter pandoc-crossref -o $(notdir $@)
-
-%.pdf: %.svg
-	cairosvg $< -o $@
+%.pdf: %.md
+	cd $(dir $<); pandoc $(notdir $<) --pdf-engine=tectonic --filter ../src/pandoc-svg.py --filter pandoc-crossref -o $(notdir $@)
 
 #
 # Help

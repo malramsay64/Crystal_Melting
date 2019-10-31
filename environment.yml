@@ -38,3 +38,4 @@ dependencies:
   - pandoc
   - pandoc-crossref
   - cairosvg
+  - tectonic
