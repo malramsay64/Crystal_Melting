@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.0
+      jupytext_version: 1.2.1
   kernelspec:
     display_name: crystal
     language: python
@@ -156,7 +156,7 @@ df_pe = pd.read_csv(
 h_liq = df_pe.loc[(pressure, melting_point, "liquid"), "enthalpy"]
 h_solid = df_pe.loc[(pressure, melting_point, "p2"), "enthalpy"]
 # Find the difference between them
-enthalpy_difference = h_liq - h_solid
+enthalpy_difference = h_solid - h_liq
 f"The potential energy difference at the melting point of {melting_point} is {enthalpy_difference:.4f}"
 ```
 
@@ -207,10 +207,10 @@ c = (
     )
 )
 with alt.data_transformers.enable("default"):
-    c.save("fluctuation.png", webdriver="firefox")
+    c.save("figures/fluctuation.svg", webdriver="firefox")
 ```
 
-![](fluctuation.png)
+![](figures/fluctuation.svg)
 
 
 Most noticeable about this figure
@@ -250,10 +250,10 @@ c = (
     )
 )
 with alt.data_transformers.enable("default"):
-    c.save("fluctuation_normalised.png")
+    c.save("figures/fluctuation_normalised.svg")
 ```
 
-![](fluctuation_normalised.png)
+![](figures/fluctuation_normalised.svg)
 
 
 With these quantities now having the appropriate range,
@@ -372,4 +372,130 @@ rate = (
     * enthalpy_difference
 )
 f"The rate is {rate}"
+```
+
+## Comparison with Lennard Jones
+
+For the Lennard-Jones model,
+the order parameter being used is the hexatic order parameter
+
+$$ \Psi_6 = |\frac{1}{6} \sum_{k=1}^6 \exp{6 i \theta{k}}| $$
+
+It should be noted that many definitions forgo
+the norm || of the complex quantity in the definition,
+then fail to mention how the complex quantity in transformed
+into a real number.
+For the purpose of clarity,
+I have included this as part of the definition.
+
+```python
+df_disc = pd.read_hdf("../data/analysis/fluctuation_disc.h5", "ordering")
+df_disc.loc[df_disc.crystal.isna(), "crystal"] = "liquid"
+df_disc = df_disc.query("temperature == 0.53")
+df_disc["crystal"] = df_disc["crystal"].cat.remove_unused_categories()
+```
+
+```python
+alt.Chart(df_disc).mark_line().encode(x="bins", y="count", color="crystal")
+```
+
+```python
+# Calculate the mean for the liquid and crystal
+weighted_means = df_disc.groupby("crystal").apply(
+    lambda g: np.average(g["bins"], weights=g["count"])
+)
+# Normalise the bins to be centered on 0 and 1
+df_disc["bins"] = (df_disc["bins"] - weighted_means["liquid"]) / (
+    weighted_means["HexagonalCircle"] - weighted_means["liquid"]
+)
+```
+
+```python
+c = (
+    alt.Chart(df_disc)
+    .mark_line()
+    .encode(
+        x=alt.X("bins", title="Orientation Order"),
+        y=alt.Y("mean(count)", title="Distribution"),
+        color=alt.Color("crystal", title="Crystal"),
+    )
+)
+c
+```
+
+```python
+df_disc_liquid = df_disc.query("crystal == 'liquid'")
+df_disc_solid = df_disc.query("crystal == 'HexagonalCircle'")
+
+# Find the curvature which best fits the observed points
+curvature_disc_liquid = scipy.optimize.curve_fit(
+    probability_distribution_liquid, df_disc_liquid["bins"], df_disc_liquid["count"]
+)[0][0]
+curvature_disc_solid = scipy.optimize.curve_fit(
+    probability_distribution_solid, df_disc_solid["bins"], df_disc_solid["count"]
+)[0][0]
+
+f"The liquid curvature is {curvature_disc_liquid:.2f}, and the solid curvature is {curvature_disc_solid:.2f}"
+```
+
+```python
+df_disc_thermo_crys = pd.read_table(
+    "../data/simulations/disc_crystal/output/thermo-Disc-P1.00-T0.53-HexagonalCircle.log"
+)
+df_disc_thermo_crys["enthalpy"] = (
+    df_disc_thermo_crys["potential_energy"]
+    + df_disc_thermo_crys["kinetic_energy"]
+    + df_disc_thermo_crys["pressure"]
+    + df_disc_thermo_crys["volume"]
+) / df_disc_thermo_crys["N"]
+df_disc_thermo_liq = pd.read_table(
+    "../data/simulations/disc_liquid/output/thermo-Disc-P1.00-T0.53.log"
+)
+df_disc_thermo_liq["enthalpy"] = (
+    df_disc_thermo_liq["potential_energy"]
+    + df_disc_thermo_liq["kinetic_energy"]
+    + df_disc_thermo_liq["pressure"]
+    + df_disc_thermo_liq["volume"]
+) / df_disc_thermo_liq["N"]
+
+enthalpy_disc = (
+    df_disc_thermo_crys["enthalpy"].mean() - df_disc_thermo_liq["enthalpy"].mean()
+)
+```
+
+```python
+omega1_disc = lambda x: curvature_disc_liquid / 2 * x ** 2
+omega2_disc = lambda x: curvature_disc_solid / 2 * (x - 1) ** 2 + enthalpy_disc
+```
+
+```python
+plt.plot(x, omega1_disc(x))
+plt.plot(x, omega2_disc(x))
+plt.xlabel("$M/M_s$")
+plt.ylim((-0.5, 5))
+```
+
+```python
+roots_disc = scipy.optimize.fsolve(
+    lambda xy: np.array([xy[1] - omega1_disc(xy[0]), xy[1] - omega2_disc(xy[0])]),
+    (0.9, 0.1),
+)
+f"The value of M_c is {roots_disc[0]}"
+```
+
+```python
+probability_disc = df_disc_liquid.query("bins > @roots_disc[0]")["probability"].sum()
+f"The probability is {probability_disc:.3%}"
+```
+
+```python
+rate_disc = (
+    np.square(np.sqrt(curvature_disc_liquid) + np.sqrt(curvature_disc_solid))
+    / (
+        curvature_disc_solid * np.sqrt(curvature_disc_liquid)
+        + curvature_disc_liquid * np.sqrt(curvature_disc_solid)
+    )
+    * enthalpy_difference
+)
+f"The rate is {rate_disc}"
 ```
