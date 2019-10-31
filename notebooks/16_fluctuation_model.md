@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.1'
-      jupytext_version: 1.2.1
+      jupytext_version: 1.2.0
   kernelspec:
     display_name: crystal
     language: python
@@ -415,13 +415,16 @@ c = (
     alt.Chart(df_disc)
     .mark_line()
     .encode(
-        x=alt.X("bins", title="Orientation Order"),
+        x=alt.X("bins", title="Hexatic Order"),
         y=alt.Y("mean(count)", title="Distribution"),
         color=alt.Color("crystal", title="Crystal"),
     )
 )
-c
+with alt.data_transformers.enable("default"):
+    c.save("../figures/fluctuation_disc_normalised.svg", webdriver="firefox")
 ```
+
+![fig](../figures/fluctuation_disc_normalised.svg)
 
 ```python
 df_disc_liquid = df_disc.query("crystal == 'liquid'")
