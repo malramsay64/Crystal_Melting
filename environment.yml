@@ -10,7 +10,7 @@ dependencies:
   - malramsay::sdrun=0.8.1
   - malramsay::sdanalysis=0.10.0
   - malramsay::experi=0.3.3
-  - malramsay::packing=0.4.1
+  - malramsay::packing=0.5.0
   - malramsay::traj3dy=0.2.7
   - bokeh=1.2.*
   # Dev tools
