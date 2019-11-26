@@ -36,6 +36,7 @@ dependencies:
   - geckodriver=0.24.0
   # Writing tools
   - pandoc
+  - conda-forge::pandocfilters==1.4.2
   - pandoc-crossref
   - cairosvg
   - tectonic
