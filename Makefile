@@ -25,7 +25,7 @@ ml_data_dir = data/simulations/dataset/output
 model: models/knn-trimer.pkl ## Train the machine learning model
 
 models/knn-trimer.pkl:
-	python3 src/models.py train-models $(ml_data_dir)
+	crystal-train train-models $(ml_data_dir)
 
 #
 # Rates Rules
@@ -49,10 +49,10 @@ rates_analysis = $(addprefix $(rates_analysis_dir)/, $(notdir $(rates_trajectori
 
 .PHONY: rates rates-py
 rates-py: data/analysis/rates_clean.h5 ## Compute the rate of melting using slow python version
-	python3 src/melting_rates.py rates $<
+	crystal-melting rates $<
 
 rates: data/analysis/rates_rs_clean.h5 ## Compute the rate of melting using rust for analysis
-	python3 src/melting_rates.py rates $<
+	crystal-melting rates $<
 
 # Clean up the analysis files
 #
@@ -62,20 +62,20 @@ rates: data/analysis/rates_rs_clean.h5 ## Compute the rate of melting using rust
 # spinodal point, where a melting rate doesn't make sense.
 
 data/analysis/rates_clean.h5: data/analysis/rates.h5
-	python3 src/melting_rates.py clean $<
+	crystal-melting clean $<
 
 data/analysis/rates_rs_clean.h5: data/analysis/rates_rs.h5
-	python3 src/melting_rates.py clean $<
+	crystal-melting clean $<
 
 # Aggregate individual trajectories into a single file
 #
 # By having everything in a single file it is much simpler to perform further processing
 
 data/analysis/rates.h5: $(rates_analysis)
-	python3 src/melting_rates.py collate $@ $^
+	crystal-melting collate $@ $^
 
 data/analysis/rates_rs.h5: $(rates_analysis:.h5=.csv)
-	python3 src/melting_rates.py collate $@ $^
+	crystal-melting collate $@ $^
 
 # Calculate the melting rates for each trajectory
 #
@@ -83,7 +83,7 @@ data/analysis/rates_rs.h5: $(rates_analysis:.h5=.csv)
 # in addition to a rust implementation which is at least ~20x faster
 
 $(rates_analysis_dir)/dump-%.h5: $(rates_sim)/dump-%.gsd | $(ml_model)
-	python src/melting_rates.py melting --skip-frames 1 $< $@
+	crystal-melting melting --skip-frames 1 $< $@
 
 $(rates_analysis_dir)/dump-%.csv: $(rates_sim)/dump-%.gsd | $(ml_model)
 	trajedy --voronoi --skip-frames 1 $< $@ --training $(wildcard data/simulations/dataset/output/*.gsd)
@@ -132,10 +132,10 @@ melting: data/analysis/melting_rs_clean.h5 ## Compute melting of the interface f
 # takes on very different properties.
 
 data/analysis/melting_rs_clean.h5: data/analysis/melting_rs.h5
-	python3 src/melting_rates.py clean $<
+	crystal-melting clean $<
 
 data/analysis/melting_clean.h5: data/analysis/melting.h5
-	python3 src/melting_rates.py clean $<
+	crystal-melting clean $<
 
 # Collate the melting data
 #
@@ -143,10 +143,10 @@ data/analysis/melting_clean.h5: data/analysis/melting.h5
 # and combines it to a single file which is much easier to work with.
 
 data/analysis/melting_rs.h5: $(melting_analysis:.h5=.csv)
-	python3 src/melting_rates.py collate $@ $^
+	crystal-melting collate $@ $^
 
 data/analysis/melting.h5: $(melting_analysis)
-	python3 src/melting_rates.py collate $@ $^
+	crystal-melting collate $@ $^
 
 # Perform the melting analysis
 #
@@ -156,7 +156,7 @@ data/analysis/melting.h5: $(melting_analysis)
 # only a single simulation needs to be re-run.
 
 $(melting_analysis_dir)/dump-%.h5: $(melting_sim)/dump-%.gsd | $(ml_model)
-	python src/melting_rates.py melting --skip-frames 100 $< $@
+	crystal-melting melting --skip-frames 100 $< $@
 
 $(melting_analysis_dir)/dump-%.csv: $(melting_sim)/dump-%.gsd | $(ml_model)
 	trajedy --voronoi --skip-frames 100 $< $@ --training $(wildcard data/simulations/dataset/output/*.gsd)
@@ -194,7 +194,7 @@ bootstrap: data/analysis/dynamics_clean_agg.h5
 # mean, lower and upper, allowing for asymmetric errors.
 
 data/analysis/dynamics_clean_agg.h5: data/analysis/dynamics_clean.h5
-	python src/dynamics_calc.py bootstrap $<
+	dynamics-analysis bootstrap $<
 
 # Cleaning Dataset
 #
@@ -203,7 +203,7 @@ data/analysis/dynamics_clean_agg.h5: data/analysis/dynamics_clean.h5
 # of the ensemble as a whole, rather than a few points within it.
 
 data/analysis/dynamics_clean.h5: data/analysis/dynamics.h5
-	python src/dynamics_calc.py clean --min-samples $(dynamics_min_samples) $<
+	dynamics-analysis clean --min-samples $(dynamics_min_samples) $<
 
 # Collating Quantities
 #
@@ -211,7 +211,7 @@ data/analysis/dynamics_clean.h5: data/analysis/dynamics.h5
 # which is much easier to deal with.
 
 data/analysis/dynamics.h5: $(dynamics_analysis)
-	python3 src/dynamics_calc.py collate $@ $^
+	dynamics-analysis collate $@ $^
 
 # Dynamics Analysis
 #
@@ -269,13 +269,13 @@ fluctuation-disc: data/analysis/fluctuation_disc.h5
 # file.
 
 data/analysis/fluctuation_rs.h5: $(fluctuation_analysis_csv)
-	python3 src/fluctuations.py collate $@ $^
+	crystal-fluctuations collate $@ $^
 
 data/analysis/fluctuation.h5: $(fluctuation_analysis)
-	python3 src/fluctuations.py collate $@ $^
+	crystal-fluctuations collate $@ $^
 
 data/analysis/fluctuation_disc.h5: $(fluctuation_disc_analysis_csv)
-	python3 src/fluctuations.py collate-disc $@ $^
+	crystal-fluctuations collate-disc $@ $^
 
 # Analysis
 #
@@ -283,10 +283,10 @@ data/analysis/fluctuation_disc.h5: $(fluctuation_disc_analysis_csv)
 # for each of the rust and python implementations.
 
 $(fluctuation_analysis_dir)/dump-%.h5: $(thermo_sim)/dump-%.gsd | $(fluctuation_analysis_dir)
-	python3 src/fluctuations.py analyse $< $@
+	crystal-fluctuations analyse $< $@
 
 $(fluctuation_analysis_dir)/dump-%.h5: $(dynamics_sim)/dump-%.gsd | $(fluctuation_analysis_dir)
-	python3 src/fluctuations.py analyse $< $@
+	crystal-fluctuations analyse $< $@
 
 $(fluctuation_analysis_dir)/dump-%.csv: $(thermo_sim)/dump-%.gsd | $(fluctuation_analysis_dir)
 	trajedy $< $@ -n 100
@@ -314,7 +314,7 @@ $(fluctuation_disc_analysis_dir):
 thermo: data/analysis/thermodynamics.h5 ## Collate the thermodynamics into a single file
 
 data/analysis/thermodynamics.h5: $(wildcard $(thermo_sim)/thermo*.log) $(wildcard $(dynamics_sim)/thermo*.log)
-	python3 src/fluctuations.py thermodynamics $@ $^
+	crystal-fluctuations thermodynamics $@ $^
 
 #
 # Other Rules
@@ -324,7 +324,7 @@ interface-dynamics: ## Compute the dynamics of a simulation with a liquid--cryst
 	sdanalysis comp-dynamics -o data/analysis/interface data/simulations/interface/output/dump-*
 
 test: ## Test the functionality of the helper modules in src
-	python -m pytest src
+	python3 -m pytest src
 
 pack-dataset: ## Pack the relevant files from dataset into a tarball
 	cd data/simulations/dataset/output && tar cvJf dataset.tar.xz dump-*.gsd && mv dataset.tar.xz ../../../

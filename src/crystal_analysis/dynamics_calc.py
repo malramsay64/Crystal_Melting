@@ -11,8 +11,6 @@
 import logging
 from pathlib import Path
 
-import bootstrapped.bootstrap as bs
-import bootstrapped.stats_functions as bs_stats
 import click
 import numpy as np
 import pandas as pd

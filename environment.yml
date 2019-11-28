@@ -3,15 +3,19 @@ channels:
   - defaults
   - anaconda
   - conda-forge
+  - glotzer
 dependencies:
   # Running Simulations
   - python=3.6
   - numpy=1.16.*
   - malramsay::sdrun=0.8.1
-  - malramsay::sdanalysis=0.11.0
+  - malramsay::sdanalysis=0.11.2
   - malramsay::experi=0.3.4
   - malramsay::packing=0.5.0
   - malramsay::traj3dy=0.2.7
+  - pip
+  - pip:
+    - "--editable .[dev]"
   - bokeh=1.2.*
   # Dev tools
   - pytest=5.0.*
