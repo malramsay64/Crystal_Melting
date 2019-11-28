@@ -3,6 +3,7 @@ channels:
   - defaults
   - anaconda
   - conda-forge
+  - glotzer
 dependencies:
   # Running Simulations
   - python=3.6
