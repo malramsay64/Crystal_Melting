@@ -29,8 +29,8 @@ setup(
     extras_require={"dev": [], "test": []},
     entry_points="""
         [console_scripts]
-        dynamics-analysis=crystal_analysis.calc_dynamics:main
-        crystal-train_ml=crystal_analysis.models:main
+        dynamics-analysis=crystal_analysis.dynamics_calc:main
+        crystal-train-ml=crystal_analysis.models:main
         crystal-melting=crystal_analysis.melting_rates:main
         crystal-fluctuations=crystal_analysis.fluctuations:main
     """,

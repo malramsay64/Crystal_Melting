@@ -24,8 +24,8 @@ from sdanalysis import order
 from sdanalysis.read import open_trajectory
 from sdanalysis.util import get_filename_vars
 
-from detection import spatial_clustering
-from util import normalised_temperature
+from .detection import spatial_clustering
+from .util import normalised_temperature
 
 logger = logging.getLogger(__name__)
 

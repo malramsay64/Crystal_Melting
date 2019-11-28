@@ -22,7 +22,8 @@ jobs:
           python3 -m pytest
           dynamics-analysis --help
           crystal-melting --help
+          crystal-train-ml --help
           crystal-fluctuations --help
-          traj3dy --help
+          trajedy --help
           experi --help
           jupytext --help
