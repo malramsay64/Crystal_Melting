@@ -10,7 +10,7 @@
 from setuptools import find_packages, setup
 
 setup(
-    name="crystal_analysis",
+    name="crystal-analysis",
     version="0.1.0",
     description="Analysis of Crystal melting and Dynamics",
     url="https://github.com/malramsay64/Crystal_Melting",
@@ -29,9 +29,9 @@ setup(
     extras_require={"dev": [], "test": []},
     entry_points="""
         [console_scripts]
-        dynamics_analysis=crystal_analysis.calc_dynamics:main
-        crystal_train_ml=crystal_analysis.models:main
-        crystal_melting=crystal_analysis.melting_rates:main
-        crystal_fluctuations=crystal_analysis.fluctuations:main
+        dynamics_analysis=crystal-analysis.calc_dynamics:main
+        crystal_train_ml=crystal-analysis.models:main
+        crystal_melting=crystal-analysis.melting_rates:main
+        crystal_fluctuations=crystal-analysis.fluctuations:main
     """,
 )
