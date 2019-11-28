@@ -1,0 +1,29 @@
+name: Test source code
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v1
+
+      - name: Get conda info
+        run: $CONDA/bin/conda info
+
+      - name: Install environment using conda
+        run: $CONDA/bin/conda env update --name crystal
+
+      - name: Activate conda environment and test commands
+        run: |
+          source $CONDA/bin/activate crystal
+          python3 -m pytest
+          dynamics_analysis --help
+          dynamics_figures --help
+          crystal_melting --help
+          crystal_fluctuations --help
+          traj3dy --help
+          experi --help
+          jupytext --help
