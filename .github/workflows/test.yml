@@ -20,10 +20,9 @@ jobs:
         run: |
           source $CONDA/bin/activate crystal
           python3 -m pytest
-          dynamics_analysis --help
-          dynamics_figures --help
-          crystal_melting --help
-          crystal_fluctuations --help
+          dynamics-analysis --help
+          crystal-melting --help
+          crystal-fluctuations --help
           traj3dy --help
           experi --help
           jupytext --help
