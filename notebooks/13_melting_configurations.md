@@ -23,9 +23,6 @@ This notebook provides figures
 which provide the evidence for this decision.
 
 ```python
-%load_ext autoreload
-%autoreload 1
-
 from sdanalysis.figures import configuration
 from sdanalysis import HoomdFrame, order
 
@@ -33,10 +30,7 @@ from bokeh.io import output_notebook, show, export_svgs
 from bokeh.models import Range1d
 import gsd.hoomd
 
-import sys
-
-sys.path.append("../src")
-%aimport figures
+from crystal_analysis import figures
 
 output_notebook()
 ```

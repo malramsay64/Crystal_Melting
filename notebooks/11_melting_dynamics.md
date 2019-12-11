@@ -27,11 +27,7 @@ import numpy as np
 import altair as alt
 from ipywidgets import interact, ToggleButtons, IntSlider
 from uncertainties import unumpy
-
-import sys
-
-sys.path.append("../src")
-import figures
+from crystal_analysis import figures
 ```
 
 ## Input data

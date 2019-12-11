@@ -48,17 +48,12 @@ from sdanalysis.order import (
     create_ml_ordering,
 )
 from sdanalysis.figures import plot_frame
+from crystal_analysis.detection import read_all_files, neighbour_connectivity
 
 # Ignore any warnings which pop up
 import warnings
 
 warnings.filterwarnings("ignore")
-
-# Import project tools
-import sys
-
-sys.path.append("../src")
-from detection import read_all_files, neighbour_connectivity
 
 # Configure Bokeh to output the figures to the notebook
 from bokeh.io import output_notebook, show

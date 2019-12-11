@@ -30,11 +30,7 @@ from bokeh.io import export_svgs
 from sdanalysis import HoomdFrame
 from sdanalysis.figures import plot_frame, show, output_notebook
 
-import sys
-
-sys.path.append("../src")
-import detection
-import figures
+from crystal_analysis import detection, figures
 
 output_notebook()
 ```

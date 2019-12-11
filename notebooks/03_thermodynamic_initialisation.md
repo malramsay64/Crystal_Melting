@@ -24,13 +24,8 @@ and to confirm the existing thermodynamic behaviour.
 import pandas as pd
 import numpy as np
 import altair as alt
-
 from ipywidgets import interact
-
-import sys
-
-sys.path.append("../src")
-import figures
+import crystal_analysis.figures
 ```
 
 ## Hoomd Output

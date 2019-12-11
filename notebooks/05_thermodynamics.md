@@ -30,10 +30,7 @@ import pandas
 from pathlib import Path
 import itertools
 import altair as alt
-import sys
-
-sys.path.append("../src")
-import figures
+from crystal_analysis import figures
 
 from sdanalysis.util import get_filename_vars
 ```

@@ -31,11 +31,7 @@ There are two different fluctuations I am measuring
 import pandas as pd
 import altair as alt
 import numpy as np
-import sys
-
-sys.path.append("../src")
-import figures
-import fluctuations
+from crystal_analysis import figures, fluctuations
 
 %matplotlib inline
 import matplotlib.pyplot as plt

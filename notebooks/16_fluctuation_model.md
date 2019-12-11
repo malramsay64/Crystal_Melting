@@ -75,10 +75,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import altair as alt
-import sys
-
-sys.path.append("../src")
-import figures
+from crystal_analysis import figures
 ```
 
 ```python

@@ -27,11 +27,7 @@ the small melting rates at low temperatures.
 import numpy as np
 import pandas
 import altair as alt
-
-import sys
-
-sys.path.append("../src")
-import figures
+from crystal_analysis import figures
 ```
 
 ## Load Data

@@ -21,19 +21,10 @@ the error of the melting rate.
 Importantly I need an algorithm able to detect the small melting rates at low temperatures.
 
 ```python
-%load_ext autoreload
-%autoreload 2
-```
-
-```python
 import numpy as np
 import pandas
 import altair as alt
-
-import sys
-
-sys.path.append("../src")
-import figures
+from crystal_analysis import figures
 ```
 
 ## Load Data

@@ -27,10 +27,8 @@ import numpy as np
 import pandas
 import altair as alt
 import scipy.stats
-import sys
 
-sys.path.append("../src")
-import figures
+import crystal_analysis.figures
 ```
 
 ## Load Data

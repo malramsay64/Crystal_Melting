@@ -49,12 +49,11 @@ from sdanalysis.figures import plot_frame
 from sdanalysis.order import relative_orientations
 import sklearn
 import joblib
-
-# Utility functions I have written to make analysis simpler
-import sys
-
-sys.path.append("../src")
-from detection import read_all_files, classify_mols, plot_confusion_matrix
+from crystal_analysis.detection import (
+    read_all_files,
+    classify_mols,
+    plot_confusion_matrix,
+)
 
 # Show the configurations in the notebook
 from bokeh.plotting import show, output_notebook

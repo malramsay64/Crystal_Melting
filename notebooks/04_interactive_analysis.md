@@ -30,11 +30,7 @@ import ipywidgets as widgets
 from pathlib import Path
 from sdanalysis.util import get_filename_vars
 import matplotlib.pyplot as plt
-
-import sys
-
-sys.path.append("../src")
-import figures
+from crystal_analysis import figures
 ```
 
 <!-- #region -->
