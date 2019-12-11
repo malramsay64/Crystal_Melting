@@ -247,10 +247,10 @@ c = (
     )
 )
 with alt.data_transformers.enable("default"):
-    c.save("figures/fluctuation_normalised.svg")
+    c.save("../figures/fluctuation_normalised.svg")
 ```
 
-![](figures/fluctuation_normalised.svg)
+![](../figures/fluctuation_normalised.svg)
 
 
 With these quantities now having the appropriate range,
