@@ -321,17 +321,16 @@ and has a significantly larger value
 at that crossing point.
 
 ```python
-df = pd.DataFrame({
-    "Liquid": omega1(x),
-    "Crystal": omega2(x),
-    "x": x
-}).melt(id_vars="x", var_name="Phase")
+df = pd.DataFrame({"Liquid": omega1(x), "Crystal": omega2(x), "x": x}).melt(
+    id_vars="x", var_name="Phase"
+)
 
-c = alt.Chart(df).mark_line().encode(
-    x=alt.X("x", title="M/Mₛ"),
-    y=alt.Y("value", title=""),
-    color="Phase",
-).transform_filter(alt.datum.value < 5)
+c = (
+    alt.Chart(df)
+    .mark_line()
+    .encode(x=alt.X("x", title="M/Mₛ"), y=alt.Y("value", title=""), color="Phase")
+    .transform_filter(alt.datum.value < 5)
+)
 with alt.data_transformers.enable("default"):
     c.save("../figures/fluctuation_parabola_trimer.svg", webdriver="firefox")
 ```
@@ -481,17 +480,16 @@ omega2_disc = lambda x: curvature_disc_solid / 2 * (x - 1) ** 2 + enthalpy_disc
 ```
 
 ```python
-df = pd.DataFrame({
-    "Liquid": omega1_disc(x),
-    "Crystal": omega2_disc(x),
-    "x": x
-}).melt(id_vars="x", var_name="Phase")
+df = pd.DataFrame({"Liquid": omega1_disc(x), "Crystal": omega2_disc(x), "x": x}).melt(
+    id_vars="x", var_name="Phase"
+)
 
-c = alt.Chart(df).mark_line().encode(
-    x=alt.X("x", title="M/Mₛ"),
-    y=alt.Y("value", title=""),
-    color="Phase",
-).transform_filter(alt.datum.value < 5)
+c = (
+    alt.Chart(df)
+    .mark_line()
+    .encode(x=alt.X("x", title="M/Mₛ"), y=alt.Y("value", title=""), color="Phase")
+    .transform_filter(alt.datum.value < 5)
+)
 with alt.data_transformers.enable("default"):
     c.save("../figures/fluctuation_parabola_disc.svg", webdriver="firefox")
 ```
