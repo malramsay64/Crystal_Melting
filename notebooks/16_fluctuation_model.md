@@ -82,13 +82,25 @@ from crystal_analysis import figures
 x = np.linspace(0, 1, 101)
 omega1 = x ** 2
 omega2 = (x - 1) ** 2
+df_example = pd.DataFrame({"x": x, "Liquid": omega1, "Crystal": omega2,})
 ```
 
 ```python
-plt.plot(x, omega1)
-plt.plot(x, omega2)
-plt.xlabel("$M/M_s$")
+c = (
+    alt.Chart(df_example)
+    .transform_fold(["Liquid", "Crystal"])
+    .mark_line()
+    .encode(
+        x=alt.X("x", title="M"),
+        y=alt.Y("value:Q", title=""),
+        color=alt.Color("key:N", title="Phase"),
+    )
+)
+with alt.data_transformers.enable("default"):
+    c.save("../figures/fluctuation_parabola_example.svg", webdriver="firefox")
 ```
+
+![](../figures/fluctuation_parabola_example.svg)
 
 The simplest parabolas describing $\omega(M)$ are depicted above,
 with the left hand side of the minimum depicted in the blue line,
