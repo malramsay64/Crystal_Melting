@@ -474,7 +474,6 @@ df = (
 df.columns = ["crystal", "liquid"]
 df = df.join(rate_norm).reset_index().dropna()
 df["temp_norm"] = util.normalised_temperature(df["temperature"], df["pressure"])
-#     lambda x: x.fit_constant(x["rate_norm"], ))
 ```
 
 ```python
@@ -485,8 +484,16 @@ df["predict"] = -model(df["rate_norm"], const)
 ```
 
 ```python
-c = alt.Chart(df).mark_point().encode(x="temp_norm", y="rate_norm", color="pressure:N",)
-c + c.encode(y="predict").mark_line()
+c = alt.Chart(df).mark_point().encode(
+    x=alt.X("temp_norm", title="T/Tm", scale=alt.Scale(zero=False)),
+    y=alt.Y("rate_norm", title="Rotational Relaxation x Melting Rate"),
+    color=alt.Color("pressure:N", title="Pressure"),
+)
+c = c + c.encode(y="predict").mark_line()
+
+with alt.data_transformers.enable("default"):
+    c.save("../figures/fluctuation_rate_fit.svg", webdriver="firefox")
+c
 ```
 
 ```python
