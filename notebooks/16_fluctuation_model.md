@@ -75,7 +75,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import altair as alt
-from crystal_analysis import figures
+from crystal_analysis import figures, util
 ```
 
 ```python
@@ -392,6 +392,121 @@ rate = (
     * enthalpy_difference
 )
 f"The rate is {rate}"
+```
+
+```python
+def fit_constant(
+    rate_norm, curvature_liquid, curvature_solid, enthalpy_diff, temp_norm
+):
+    def rate_model(temp_norm, constant):
+        return (
+            -np.square(np.sqrt(curvature_liquid) + np.sqrt(curvature_solid))
+            / (
+                curvature_solid * np.sqrt(curvature_liquid)
+                + curvature_liquid * np.sqrt(curvature_solid)
+            )
+            * enthalpy_difference
+            * (1 - temp_norm)
+            * constant
+        )
+
+    p0 = (0,)
+    const, _ = scipy.optimize.curve_fit(rate_model, temp_norm, rate_norm, p0=p0)
+    return const, rate_model
+
+
+def normalise(df):
+    if np.all(df.groupby("crystal").count()["bins"] > 0):
+        # Calculate the mean for the liquid and crystal
+        weighted_means = df.groupby("crystal").apply(
+            lambda g: np.average(g["bins"], weights=g["count"])
+        )
+
+        # Normalise the bins to be centered on 0 and 1
+        df["bins"] = (df["bins"] - weighted_means["liquid"]) / (
+            weighted_means["p2"] - weighted_means["liquid"]
+        )
+        return df
+
+
+def find_curvature(label, bins, count):
+    if label in ["liquid"]:
+        # Find the curvature which best fits the observed points
+        return scipy.optimize.curve_fit(probability_distribution_liquid, bins, count)[
+            0
+        ][0]
+    elif label in ["p2", "crystal", "solid"]:
+        return scipy.optimize.curve_fit(
+            probability_distribution_solid, df_solid["bins"], df_solid["count"]
+        )[0][0]
+    else:
+        raise ValueError("Invalid value for label found:", label)
+```
+
+```python
+file = "../data/analysis/fluctuation_rs.h5"
+with pd.HDFStore(file) as src:
+    df = src.get("ordering").query("crystal in ['p2', 'liquid']")
+    df = df.assign(crystal=df["crystal"].cat.remove_unused_categories())
+
+rates = (
+    pd.read_hdf("../data/analysis/rates_rs_clean.h5", "rates")
+    .groupby(["temperature", "pressure"])["mean"]
+    .mean()
+)
+dynamics = pd.read_hdf(
+    "../data/analysis/dynamics_clean_agg.h5", "relaxations"
+).set_index(["temperature", "pressure"])["rot2_mean"]
+rate_norm = rates * dynamics
+rate_norm.name = "rate_norm"
+
+df = df.set_index(["temperature", "pressure"]).join(rate_norm)
+df = (
+    df.groupby(["temperature", "pressure"])
+    .apply(normalise)
+    .groupby(["temperature", "pressure"])
+    .apply(
+        lambda x: x.groupby("crystal").apply(
+            lambda x: find_curvature(x["crystal"][0], x["bins"], x["count"])
+        )
+    )
+)
+df.columns = ["crystal", "liquid"]
+df = df.join(rate_norm).reset_index().dropna()
+df["temp_norm"] = util.normalised_temperature(df["temperature"], df["pressure"])
+#     lambda x: x.fit_constant(x["rate_norm"], ))
+```
+
+```python
+const, model = fit_constant(
+    df["rate_norm"], df["liquid"], df["crystal"], enthalpy_difference, df["temp_norm"]
+)
+df["predict"] = -model(df["rate_norm"], const)
+```
+
+```python
+c = alt.Chart(df).mark_point().encode(x="temp_norm", y="rate_norm", color="pressure:N",)
+c + c.encode(y="predict").mark_line()
+```
+
+```python
+df_h = df.set_index(["temperature", "pressure"]).loc[(1.35, 13.50), :]
+df_high = pd.DataFrame(
+    {
+        "Liquid": df_h["liquid"] * x ** 2,
+        "Crystal": df_h["crystal"] * (x - 1) ** 2
+        + enthalpy_difference * (1 - df_h["temp_norm"]),
+        "x": x,
+    }
+).melt(id_vars="x", var_name="Phase")
+
+c = (
+    alt.Chart(df_high)
+    .mark_line()
+    .encode(x=alt.X("x", title="M/Mₛ"), y=alt.Y("value", title=""), color="Phase")
+    .transform_filter(alt.datum.value < 5)
+)
+c
 ```
 
 ## Comparison with Lennard Jones
