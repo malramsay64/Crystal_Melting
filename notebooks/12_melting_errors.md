@@ -25,11 +25,7 @@ import altair as alt
 import numpy as np
 import scipy.optimize
 import uncertainties
-
-import sys
-
-sys.path.append("../src")
-import figures
+from crystal_analysis import figures
 ```
 
 ## Error in Melting Rates
@@ -64,10 +60,12 @@ melt_frac_err = melt_err / melt_value
 melt_df = pandas.DataFrame(
     {
         "value": melt_value,
+        "value_abs": melt_value.abs(),
         "error": melt_err,
+        "error_abs": np.fmin(melt_err, melt_value.abs() - 1e-9),
         "error_frac": melt_frac_err,
-        "error_min": melt_value - 2 * melt_err,
-        "error_max": melt_value + 2 * melt_err,
+        "error_min": melt_value.abs() - 2 * melt_err,
+        "error_max": melt_value.abs() + 2 * melt_err,
     }
 )
 ```
@@ -76,13 +74,17 @@ melt_df = pandas.DataFrame(
 chart = alt.Chart(melt_df.reset_index()).encode(
     x=alt.X("temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False)),
     color=alt.Color("pressure:N", title="Pressure"),
+    y=alt.Y(
+        "value_abs",
+        title="Melting Rate",
+        axis=alt.Axis(format="e"),
+        scale=alt.Scale(type="log"),
+    ),
+    yError=alt.YError("error_abs"),
 )
 
-chart = chart.mark_point().encode(
-    y=alt.Y("value", title="Melting Rate", axis=alt.Axis(format="e"))
-) + chart.mark_rule().encode(y="error_min", y2="error_max")
+chart = chart.mark_point() + chart.mark_errorbar()
 
-chart = figures.hline(chart, 0)
 chart
 ```
 
@@ -95,11 +97,11 @@ with alt.data_transformers.enable("default"):
 chart = alt.Chart(melt_df.reset_index()).encode(
     x=alt.X("temperature", title="Temperature", scale=alt.Scale(zero=False)),
     color=alt.Color("pressure:N", title="Pressure"),
+    y=alt.Y("value", title="Melting Rate", axis=alt.Axis(format="e")),
+    yError=alt.YError("error"),
 )
 
-chart = chart.mark_point().encode(
-    y=alt.Y("value", title="Melting Rate", axis=alt.Axis(format="e"))
-) + chart.mark_rule().encode(y="error_min", y2="error_max")
+chart = chart.mark_point() + chart.mark_errorbar()
 
 chart = figures.hline(chart, 0)
 
@@ -218,7 +220,9 @@ df_energy = (
 
 ```python
 df_rates = (
-    melt_values.query("temp_norm < 1.20")
+    melt_values
+    # Only fit to normalised temperatures less than 1.20
+    .query("temp_norm < 1.20")
     .set_index("pressure")
     .join(df_energy)
     .groupby("pressure")
@@ -235,21 +239,18 @@ df_rates.to_csv("../results/rate_constants.csv")
 ```
 
 ```python
-df_theory = (
-    melt_values.query("temp_norm < 1.20")
-    .set_index("pressure")
-    .join(df_rates)
-    .join(df_energy)
-)
-df_theory["theory"] = rate_theory(
-    df_theory["temp_norm"],
-    df_theory["rate_coefficient"],
-    df_theory["crystal_free_energy"],
-)
+df_theory = melt_values.set_index("pressure").join(df_rates).join(df_energy)
+df_theory = df_theory.assign(
+    theory=rate_theory(
+        df_theory["temp_norm"],
+        df_theory["rate_coefficient"],
+        df_theory["crystal_free_energy"],
+    )
+).reset_index()
 ```
 
 ```python
-chart = alt.Chart(df_theory.reset_index()).encode(
+chart = alt.Chart(df_theory).encode(
     x=alt.X("temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False)),
     color=alt.Color("pressure:N", title="Pressure"),
     y=alt.Y("value", title="Rotational Relaxation × Melting Rate"),
@@ -267,4 +268,30 @@ chart
 ```python
 with alt.data_transformers.enable("default"):
     chart.save("../figures/normalised_melting_err.svg", webdriver="firefox")
+    chart.transform_filter("datum.temp_norm < 1.2").save(
+        "../figures/normalised_melting_err_low.svg"
+    )
+```
+
+```python
+chart = alt.Chart(
+    df_theory.assign(inv_temp_norm=1 / df_theory["temp_norm"]).reset_index()
+).encode(
+    x=alt.X("inv_temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False)),
+    color=alt.Color("pressure:N", title="Pressure"),
+    y=alt.Y("value", title="Rotational Relaxation × Melting Rate"),
+    yError=alt.YError("error"),
+)
+
+chart = (
+    chart.mark_point() + chart.mark_errorbar() + chart.mark_line().encode(y="theory")
+)
+
+chart = figures.hline(chart, 0.0)
+chart
+```
+
+```python
+with alt.data_transformers.enable("default"):
+    chart.save("../figures/normalised_melting_err_inv.svg", webdriver="firefox")
 ```
