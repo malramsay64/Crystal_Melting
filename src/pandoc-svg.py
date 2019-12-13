@@ -11,7 +11,7 @@ import os
 import subprocess
 import sys
 
-from pandocfilters import Image, Para, Str, toJSONFilter
+from pandocfilters import Image, toJSONFilter
 
 fmt_to_option = {
     "latex": "pdf",
