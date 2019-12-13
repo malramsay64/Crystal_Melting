@@ -321,7 +321,7 @@ which was computed earlier.
 
 ```python
 omega1 = lambda x: curvature_liquid / 2 * x ** 2
-omega2 = lambda x: curvature_solid / 2 * (x - 1) ** 2 + enthalpy_difference
+omega2 = lambda x: curvature_solid / 2 * (x - 1) ** 2
 ```
 
 And plotted,
@@ -454,13 +454,13 @@ rates = (
     .groupby(["temperature", "pressure"])["mean"]
     .mean()
 )
+rates.name = "rate"
 dynamics = pd.read_hdf(
     "../data/analysis/dynamics_clean_agg.h5", "relaxations"
 ).set_index(["temperature", "pressure"])["rot2_mean"]
-rate_norm = rates * dynamics
-rate_norm.name = "rate_norm"
+dynamics.name = "rotational_relaxation"
 
-df = df.set_index(["temperature", "pressure"]).join(rate_norm)
+df = df.set_index(["temperature", "pressure"])
 df = (
     df.groupby(["temperature", "pressure"])
     .apply(normalise)
@@ -472,32 +472,46 @@ df = (
     )
 )
 df.columns = ["crystal", "liquid"]
-df = df.join(rate_norm).reset_index().dropna()
+df = df.join(rates).join(dynamics).reset_index().dropna()
 df["temp_norm"] = util.normalised_temperature(df["temperature"], df["pressure"])
 ```
 
 ```python
 const, model = fit_constant(
-    df["rate_norm"], df["liquid"], df["crystal"], enthalpy_difference, df["temp_norm"]
+    df["rate"],
+    1 / df["rotational_relaxation"],
+    curvature_liquid,
+    df["liquid"],
+    df["crystal"],
+    df["temp_norm"],
 )
-df["predict"] = -model(df["rate_norm"], const)
+df["predict"] = model(
+    df["temp_norm"], const, 1 / df["rotational_relaxation"], df["liquid"], df["crystal"]
+)
 ```
 
 ```python
-c = alt.Chart(df).mark_point().encode(
-    x=alt.X("temp_norm", title="T/Tm", scale=alt.Scale(zero=False)),
-    y=alt.Y("rate_norm", title="Rotational Relaxation x Melting Rate"),
-    color=alt.Color("pressure:N", title="Pressure"),
+c = (
+    alt.Chart(df)
+    .mark_point()
+    .encode(
+        x=alt.X("temp_norm", title="T/Tm", scale=alt.Scale(zero=False)),
+        y=alt.Y("rate", title="Melting Rate"),
+        color=alt.Color("pressure:N", title="Pressure"),
+    )
 )
 c = c + c.encode(y="predict").mark_line()
 
 with alt.data_transformers.enable("default"):
     c.save("../figures/fluctuation_rate_fit.svg", webdriver="firefox")
+    c.transform_filter(alt.datum.temp_norm < 1.2).save(
+        "../figures/fluctuation_rate_fit_low.svg", webdriver="firefox"
+    )
 c
 ```
 
 ```python
-df_h = df.set_index(["temperature", "pressure"]).loc[(1.35, 13.50), :]
+df_h = df.set_index(["temperature", "pressure"]).loc[(2.00, 13.50), :]
 df_high = pd.DataFrame(
     {
         "Liquid": df_h["liquid"] * x ** 2,
@@ -511,7 +525,7 @@ c = (
     alt.Chart(df_high)
     .mark_line()
     .encode(x=alt.X("x", title="M/Mₛ"), y=alt.Y("value", title=""), color="Phase")
-    .transform_filter(alt.datum.value < 5)
+    .transform_filter(alt.datum.value < 6)
 )
 c
 ```
