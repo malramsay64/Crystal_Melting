@@ -72,13 +72,13 @@ def compute_crystal_growth(
         # Sum the volumes of the crystalline molecules
         voronoi_volume = np.sum(voronoi.volumes[labels == 1])
 
+        hull_area = 0.0
+        hull_volume = 0.0
         # Only compute ConvexHull for at least 5 particles
         if np.sum(labels == 1) > 5:
             hull = ConvexHull(snap.position[labels == 1, :2])
-        else:
-            hull = namedtuple("hull", ["area", "volume"])
-            hull.area = 0
-            hull.volume = 0
+            hull_area = hull.area
+            hull_volume = hull.volume
 
         if fvars.iteration_id is None:
             iter_id = 1
@@ -94,8 +94,8 @@ def compute_crystal_growth(
             "p2": float(states.p2),
             "p2gg": float(states.p2gg),
             "pg": float(states.pg),
-            "surface_area": float(hull.area),
-            "volume": float(hull.volume),
+            "surface_area": float(hull_area),
+            "volume": float(hull_volume),
             "voronoi_volume": float(voronoi_volume),
             "timestep": int(snap.timestep),
             "time": int(snap.timestep) * 0.005,
