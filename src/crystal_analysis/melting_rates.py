@@ -9,7 +9,6 @@
 """
 
 import logging
-from collections import namedtuple
 from pathlib import Path
 from typing import NamedTuple, Optional
 
@@ -51,7 +50,6 @@ def compute_crystal_growth(
 ) -> Optional[pd.DataFrame]:
     fvars = get_filename_vars(infile)
     order_list = []
-    order_dimension = 5.0
 
     ml_order = order.create_ml_ordering(KNNModel)
     voronoi = freud.voronoi.Voronoi(freud.box.Box(10, 10), buff=4)
@@ -198,7 +196,7 @@ def rates(infile):
     )
     gradient1.reset_index(inplace=True)
 
-    ## Temperatures above these are too high and the melting is more complicated.
+    # Temperatures above these are too high and the melting is more complicated.
     gradient1 = gradient1.query("temp_norm < 1.7")
     gradient1.to_hdf(infile, "rates", format="table")
 

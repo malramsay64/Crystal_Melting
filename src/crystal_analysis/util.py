@@ -36,7 +36,7 @@ def normalised_temperature(temperature: np.array, pressure: np.array) -> np.arra
     'results/melting_points.csv' file.
 
     Args:
-        temperature: A collection of temperatures for which the normalised 
+        temperature: A collection of temperatures for which the normalised
             value is to be calculated. These are all expected to be floating
             point values.
         pressure: The pressure corresponding to each of the input temperatures.

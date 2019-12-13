@@ -48,7 +48,7 @@ def aggregate(values: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     histogram. Values are binned in increments of 1a-4, with only the bins containing values being returned.
 
     Args:
-        values: A collection of values which will be binned into 
+        values: A collection of values which will be binned into
 
     Returns:
         centers: The centers of each of the bins
