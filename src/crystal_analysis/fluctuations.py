@@ -22,6 +22,7 @@ from typing import Tuple
 import click
 import numpy as np
 import pandas as pd
+import scipy.optimize
 from pandas.api.types import CategoricalDtype
 from sdanalysis import order
 from sdanalysis.read import open_trajectory
