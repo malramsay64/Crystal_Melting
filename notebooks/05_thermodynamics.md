@@ -153,8 +153,8 @@ for both pressures.
 The
 
 ```python
-c = plot_thermo(df.query("pressure == 13.50"), "potential_energy").transform_filter(
-    alt.datum.temperature < 1.60
+c = plot_thermo(df.query("pressure == 13.50"), "enthalpy").transform_filter(
+    alt.datum.temperature < 2.00
 )
 with alt.data_transformers.enable("default"):
     c.save("../figures/thermodynamics_potential_energy_P13.50.svg", webdriver="firefox")
@@ -162,10 +162,14 @@ c
 ```
 
 ```python
-c = plot_thermo(df.query("pressure == 1.00"), "potential_energy").transform_filter(
-    alt.datum.temperature < 0.55
+c = plot_thermo(df.query("pressure == 1.00"), "enthalpy").transform_filter(
+    alt.datum.temperature < 0.52
 )
 with alt.data_transformers.enable("default"):
     c.save("../figures/thermodynamics_potential_energy_P1.00.svg", webdriver="firefox")
 c
+```
+
+```python
+
 ```
