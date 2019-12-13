@@ -12,7 +12,8 @@ jobs:
           python-version: "3.6"
           architecture: x64
       - name: Install linters
-        run: python3 -m pip install mypy flake8
+        run: python3 -m pip install mypy flake8 black
 
-      - run: python3 -m mypy src/*
-      - run: python3 -m flake8 src/*
+      - run: python3 -m black --check src/*
+      - run: python3 -m mypy src
+      - run: python3 -m flake8 src
