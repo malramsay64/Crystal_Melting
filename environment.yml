@@ -17,6 +17,8 @@ dependencies:
   - pip:
     - "--editable .[dev]"
   - bokeh=1.2.*
+  - hdbscan
+  - umap-learn
   # Dev tools
   - pytest=5.0.*
   - mypy=0.720
