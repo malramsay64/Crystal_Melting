@@ -395,10 +395,15 @@ f"The rate is {rate}"
 ```
 
 ```python
+from functools import partial
+
+
 def fit_constant(
-    rate_norm, curvature_liquid, curvature_solid, enthalpy_diff, temp_norm
+    rate_norm, timescale, curvature_liquid, curvature_solid, enthalpy_diff, temp_norm
 ):
-    def rate_model(temp_norm, constant):
+    def rate_model(
+        temp_norm, constant, timescale, curvature_liquid, curvature_solid, enthalpy_diff
+    ):
         return (
             -np.square(np.sqrt(curvature_liquid) + np.sqrt(curvature_solid))
             / (
@@ -407,11 +412,19 @@ def fit_constant(
             )
             * enthalpy_difference
             * (1 - temp_norm)
+            * timescale
             * constant
         )
 
     p0 = (0,)
-    const, _ = scipy.optimize.curve_fit(rate_model, temp_norm, rate_norm, p0=p0)
+    model = partial(
+        rate_model,
+        timescale=timescale,
+        curvature_liquid=curvature_liquid,
+        curvature_solid=curvature_solid,
+        enthalpy_diff=enthalpy_diff,
+    )
+    const, _ = scipy.optimize.curve_fit(model, temp_norm, rate_norm, p0=p0)
     return const, rate_model
 
 
@@ -480,13 +493,18 @@ df["temp_norm"] = util.normalised_temperature(df["temperature"], df["pressure"])
 const, model = fit_constant(
     df["rate"],
     1 / df["rotational_relaxation"],
-    curvature_liquid,
     df["liquid"],
     df["crystal"],
+    enthalpy_difference,
     df["temp_norm"],
 )
 df["predict"] = model(
-    df["temp_norm"], const, 1 / df["rotational_relaxation"], df["liquid"], df["crystal"]
+    df["temp_norm"],
+    const,
+    1 / df["rotational_relaxation"],
+    df["liquid"],
+    df["crystal"],
+    enthalpy_difference,
 )
 ```
 
