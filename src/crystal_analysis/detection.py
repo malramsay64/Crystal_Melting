@@ -11,7 +11,7 @@
 import logging
 from itertools import product
 from pathlib import Path
-from typing import List, NamedTuple
+from typing import List, NamedTuple, Optional
 
 import gsd.hoomd
 import matplotlib.pyplot as plt
@@ -32,11 +32,12 @@ def read_file(
     pressure: float = 1.00,
     temperature: float = 0.40,
     crystal: str = "p2",
+    directory: Optional[Path] = None,
 ) -> HoomdFrame:
-
-    data_dir = Path("../data/simulation/trimer")
+    if directory is None:
+        directory = Path("../data/simulations/interface/output")
     fname = f"dump-Trimer-P{pressure:.2f}-T{temperature:.2f}-{crystal}.gsd"
-    with gsd.hoomd.open(str(data_dir / fname), "rb") as trj:
+    with gsd.hoomd.open(str(directory / fname), "rb") as trj:
         return HoomdFrame(trj[index])
 
 
