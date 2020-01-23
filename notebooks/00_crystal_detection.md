@@ -50,10 +50,14 @@ from sdanalysis.order import relative_orientations
 import sklearn
 import joblib
 from crystal_analysis.detection import (
+    read_file,
     read_all_files,
     classify_mols,
     plot_confusion_matrix,
+    create_ml_ordering,
 )
+from crystal_analysis.figures import style_snapshot
+from bokeh.io import export_svgs
 
 # Show the configurations in the notebook
 from bokeh.plotting import show, output_notebook
@@ -341,4 +345,28 @@ plot_confusion_matrix(
 
 ```python
 predictions
+```
+
+## Testing Machine Learning
+
+```python
+selected_frames = [9, 2999, 1499]
+crystals = ["p2", "p2gg", "pg"]
+temperature = 0.45
+
+knn_order = create_ml_ordering("../models/knn-trimer.pkl")
+
+snaps = []
+for index in selected_frames:
+    for crystal in crystals:
+        snap = read_file(
+                index=index,
+                temperature=temperature,
+                pressure=1.0,
+                crystal=crystal,
+            )
+        plt = plot_frame(snap, knn_order)
+        plt = style_snapshot(plt)
+        plt.output_backend = "svg"
+        export_svgs(plt, f"../figures/ml_demo_trimer_{crystal}_{index}.svg")
 ```
