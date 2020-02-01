@@ -9,7 +9,7 @@ dependencies:
   - python=3.6
   - numpy=1.16.*
   - malramsay::sdrun=0.8.1
-  - malramsay::sdanalysis=0.11.3
+  - malramsay::sdanalysis=0.11.4
   - malramsay::experi=0.3.4
   - malramsay::packing=0.5.0
   - malramsay::traj3dy=0.2.7
