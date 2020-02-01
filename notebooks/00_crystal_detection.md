@@ -360,11 +360,8 @@ snaps = []
 for index in selected_frames:
     for crystal in crystals:
         snap = read_file(
-                index=index,
-                temperature=temperature,
-                pressure=1.0,
-                crystal=crystal,
-            )
+            index=index, temperature=temperature, pressure=1.0, crystal=crystal,
+        )
         plt = plot_frame(snap, knn_order)
         plt = style_snapshot(plt)
         plt.output_backend = "svg"

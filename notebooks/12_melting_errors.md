@@ -74,23 +74,19 @@ melt_df = pandas.DataFrame(
 chart = alt.Chart(melt_df.reset_index()).encode(
     x=alt.X("temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False)),
     color=alt.Color("pressure:N", title="Pressure"),
-    y=alt.Y(
-        "value_abs",
-        title="Melting Rate",
-        axis=alt.Axis(format="e"),
-        scale=alt.Scale(type="log"),
-    ),
-    yError=alt.YError("error_abs"),
+    y=alt.Y("value", title="Melting Rate", axis=alt.Axis(format="e"),),
+    yError=alt.YError("error"),
 )
 
 chart = chart.mark_point() + chart.mark_errorbar()
+chart = figures.hline(chart, 0)
 
 chart
 ```
 
 ```python
 with alt.data_transformers.enable("default"):
-    chart.save("../figures/growth_rates_err.svg", webdriver="firefox")
+    chart.save("../figures/melting_rates_err.svg", webdriver="firefox")
 ```
 
 ```python
@@ -250,6 +246,10 @@ df_theory = df_theory.assign(
 ```
 
 ```python
+df_theory
+```
+
+```python
 chart = alt.Chart(df_theory).encode(
     x=alt.X("temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False)),
     color=alt.Color("pressure:N", title="Pressure"),
@@ -267,17 +267,30 @@ chart
 
 ```python
 with alt.data_transformers.enable("default"):
-    chart.save("../figures/normalised_melting_err.svg", webdriver="firefox")
+    chart.save("../figures/normalised_melting_fit.svg", webdriver="firefox")
     chart.transform_filter("datum.temp_norm < 1.2").save(
-        "../figures/normalised_melting_err_low.svg"
+        "../figures/normalised_melting_fit_low.svg"
     )
 ```
 
 ```python
-chart = alt.Chart(
-    df_theory.assign(inv_temp_norm=1 / df_theory["temp_norm"]).reset_index()
-).encode(
-    x=alt.X("inv_temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False)),
+df_theory = melt_values.set_index("pressure").join(df_rates).join(df_energy).reset_index().set_index(["pressure", "temperature"]).join(rot_value.to_frame())
+df_theory = df_theory.assign(
+    theory=rate_theory(
+        df_theory["temp_norm"],
+        df_theory["rate_coefficient"],
+        df_theory["crystal_free_energy"],
+    ) * df_theory["rot2_mean"]
+).reset_index()
+```
+
+```python
+df_theory
+```
+
+```python
+chart = alt.Chart(df_theory).encode(
+    x=alt.X("temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False)),
     color=alt.Color("pressure:N", title="Pressure"),
     y=alt.Y("value", title="Rotational Relaxation × Melting Rate"),
     yError=alt.YError("error"),
@@ -292,6 +305,5 @@ chart
 ```
 
 ```python
-with alt.data_transformers.enable("default"):
-    chart.save("../figures/normalised_melting_err_inv.svg", webdriver="firefox")
+
 ```

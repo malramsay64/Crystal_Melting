@@ -113,17 +113,27 @@ Plotting the melting rate with the calculated errors as a function of temperatur
 
 ```python
 chart = (
-    alt.Chart(rates_df)
+    alt.Chart(rates_df.assign(abs_mean=rates_df["mean"].abs()))
     .mark_point()
     .encode(
         x=alt.X("temp_norm:Q", title="T/Tₘ", scale=alt.Scale(zero=False)),
-        y=alt.Y("mean", title="Crystal Growth Rate", axis=alt.Axis(format="e")),
+        y=alt.Y(
+            "abs_mean",
+            title="Crystal Melting Rate",
+            axis=alt.Axis(format="e"),
+            scale=alt.Scale(type="log"),
+        ),
         color=alt.Color("pressure:N", title="Pressure"),
     )
+    .transform_filter(alt.datum.abs_mean > 0)
 )
 
 # Add horizontal line at y = 0
-chart = figures.hline(chart, 0)
+# chart = figures.hline(chart, 0)
 
 chart
+```
+
+```python
+
 ```

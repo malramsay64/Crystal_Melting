@@ -111,7 +111,7 @@ def create_chart(pressure, axis):
 ```
 
 ```python
-file = "../data/simulations/dynamics/output/thermo-Trimer-P1.00-T0.30.log"
+file = "../data/simulations/dynamics/output/thermo-Trimer-P1.00-T0.35.log"
 discard_quantities = ["timestep", "lz", "xz", "yz", "N"]
 with open(file) as src:
     thermo_quantities = [c.strip() for c in src.readline().split("\t")]
