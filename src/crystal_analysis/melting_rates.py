@@ -28,7 +28,7 @@ from .util import normalised_temperature
 
 logger = logging.getLogger(__name__)
 
-KNNModel = Path(__file__).parent / "../models/knn-trimer.pkl"
+KNNModel = Path(__file__).parent / "models/knn-trimer.pkl"
 
 
 class CrystalFractions(NamedTuple):

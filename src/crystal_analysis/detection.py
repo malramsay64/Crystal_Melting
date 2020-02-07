@@ -149,7 +149,7 @@ def neighbour_connectivity(snapshot, max_neighbours=6, max_radius=5):
 
 def spatial_clustering(snapshot: Frame, classification: np.ndarray = None):
     if classification is None:
-        knn_model = create_ml_ordering("../models/knn-trimer.pkl")
+        knn_model = create_ml_ordering("models/knn-trimer.pkl")
         classification = knn_model(snapshot)
 
     connectivity = neighbour_connectivity(snapshot)
