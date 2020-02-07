@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.2'
-      jupytext_version: 1.3.0
+      jupytext_version: 1.3.3
   kernelspec:
     display_name: crystal
     language: python
@@ -74,10 +74,10 @@ c = (
     .mark_point()
     .encode(
         x=alt.X("time", title="Time", axis=alt.Axis(format="e")),
-        y=alt.Y("value", title="Fraction"),
+        y=alt.Y("value", title="Particles"),
         color=alt.Color("variable", title="Crystal"),
     )
-    .transform_filter(alt.datum.time < 2e8)
+    .transform_filter(alt.datum.time < 2e5)
 )
 c
 ```
@@ -121,7 +121,7 @@ c = (
         y=alt.Y("value", title="Fraction"),
         color=alt.Color("variable", title="Crystal"),
     )
-    .transform_filter(alt.datum.time < 2e8)
+    .transform_filter(alt.datum.time < 4e5)
 )
 c
 ```
