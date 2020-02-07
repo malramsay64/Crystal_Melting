@@ -26,6 +26,7 @@ import pandas
 import altair as alt
 import gsd.hoomd
 from bokeh.io import export_svgs
+from bokeh.models import Range1d
 
 from sdanalysis import HoomdFrame
 from sdanalysis.figures import plot_frame, show, output_notebook
@@ -169,6 +170,33 @@ from sdanalysis.order import create_ml_ordering
 knn_order = create_ml_ordering("../models/knn-trimer.pkl")
 ```
 
+## Plot defect propagation
+
+This is a sequence of images which should show the motion of the defect throughout the simulation.
+
+```python
+frame = plot_frame(snap_init, order_list=knn_order(snap_init), categorical_colour=True)
+frame = figures.style_snapshot(frame)
+show(frame)
+```
+
+```python
+trajectory_file = (
+    "../data/simulations/interface/output/dump-Trimer-P13.50-T1.40-p2gg.gsd"
+)
+snapshots = []
+with gsd.hoomd.open(trajectory_file) as trj:
+    for index, i in enumerate(range(948, 957, 2)):
+        snap = HoomdFrame(trj[i])
+        snapshots.append(snap)
+        frame = plot_frame(snap, order_function=knn_order, categorical_colour=True)
+        frame.x_range = Range1d(10, 40)
+        frame.y_range = Range1d(0, 30)
+        figures.style_snapshot(frame)
+        frame.output_backend = "svg"
+        export_svgs(frame, f"../figures/phase_transition_{index}.svg")
+```
+
 ```python
 frame = plot_frame(snap_init, order_list=knn_order(snap_init), categorical_colour=True)
 frame = figures.style_snapshot(frame)
@@ -203,6 +231,20 @@ show(frame)
 ```python
 frame.output_backend = "svg"
 export_svgs(frame, "../figures/configuration-P13.50-T1.40-p2gg_end.svg")
+```
+
+```python
+frame = plot_frame(
+    snap_process, order_function=knn_order, 
+)
+frame = figures.style_snapshot(frame)
+show(frame)
+```
+
+
+```python
+frame.output_backend = "svg"
+export_svgs(frame, "../figures/configuration-P13.50-T1.40-p2gg_process_layers.svg")
 ```
 
 ## Melting pg Crystal
