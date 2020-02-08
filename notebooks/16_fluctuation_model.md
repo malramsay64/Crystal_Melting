@@ -75,6 +75,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import altair as alt
+import scipy.optimize
+import functools
 from crystal_analysis import figures, util
 ```
 
@@ -281,8 +283,6 @@ with the liquid having an offset of 0,
 while the solid has an offset of 1.
 
 ```python
-import scipy.optimize
-import functools
 
 
 def probability_distribition(x, curvature, offset):

@@ -234,9 +234,7 @@ export_svgs(frame, "../figures/configuration-P13.50-T1.40-p2gg_end.svg")
 ```
 
 ```python
-frame = plot_frame(
-    snap_process, order_function=knn_order, 
-)
+frame = plot_frame(snap_process, order_function=knn_order,)
 frame = figures.style_snapshot(frame)
 show(frame)
 ```
