@@ -57,3 +57,38 @@ c = alt.Chart(df).mark_point().encode(x="Dim 1", y="Dim 2", color="Cluster:N")
 with alt.data_transformers.enable("default"):
     c.save("../figures/clustering_liquid.svg")
 ```
+
+```python
+basis = []
+import gsd.hoomd
+from sdanalysis import HoomdFrame
+frame = HoomdFrame(
+    gsd.hoomd.open("../data/simulations/interface/output/dump-Trimer-P1.00-T0.35-p2.gsd")[-1]
+)
+basis = relative_orientations(
+    frame.box, frame.position, frame.orientation, max_neighbours=6
+)
+basis.sort(axis=1)
+groups = hdbscan.HDBSCAN(min_cluster_size=50, cluster_selection_epsilon=0.01).fit_predict(
+    basis
+)
+```
+
+```python
+from sdanalysis.figures import plot_frame, show, output_notebook
+output_notebook()
+```
+
+```python
+show(plot_frame(frame, order_list=groups, categorical_colour=True))
+```
+
+```python
+df = pandas.DataFrame(
+    {"Dim 1": transformed[:, 0], "Dim 2": transformed[:, 1], "Cluster": groups,}
+)
+c = alt.Chart(df).mark_point().encode(x="Dim 1", y="Dim 2", color="Cluster:N")
+with alt.data_transformers.enable("default"):
+    c.save("../figures/clustering_crystal_p2.svg")
+c
+```
