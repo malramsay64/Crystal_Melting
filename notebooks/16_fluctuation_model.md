@@ -77,6 +77,7 @@ import pandas as pd
 import altair as alt
 import scipy.optimize
 import functools
+from functools import partial
 from crystal_analysis import figures, util
 ```
 
@@ -84,7 +85,7 @@ from crystal_analysis import figures, util
 x = np.linspace(0, 1, 101)
 omega1 = x ** 2
 omega2 = (x - 1) ** 2
-df_example = pd.DataFrame({"x": x, "Liquid": omega1, "Crystal": omega2,})
+df_example = pd.DataFrame({"x": x, "Liquid": omega1, "Crystal": omega2})
 ```
 
 ```python
@@ -118,13 +119,13 @@ which we give the value $M_\text{cusp}$.
 Currently these are depicting the state where the curvature $\lambda$ of
 the liquid state $\lambda_0$ is the same as the solid state $\lambda_s$,
 and the free energy of the liquid is equal to that of the solid.
-The difference between the two free energies is given by the parameter $\Delta$,
+The difference between the chemical potential energy of each is given by the parameter $\Delta \mu$,
 indicating the relative heights of the two parabolas.
 
 The free energy difference between the solid and the liquid
 can be approximated as
 
-$$ \Delta \approx \Delta h_m \left( 1 - \frac{T}{T_m} \right) $$
+$$ \Delta \mu \approx \Delta h_m \left( 1 - \frac{T}{T_m} \right) $$
 
 where $\Delta h_m$ is the per-particle enthalpy difference between
 the liquid and the solid at the melting point.
@@ -136,7 +137,7 @@ can be found from the probability distribution of states.
 ## Thermodynamics
 
 The first quantity which is to be calculated
-is the thermodynamic quantity $\Delta$.
+is the thermodynamic quantity $\Delta \mu$.
 For simplicity,
 the rest of this notebook will only be concerned
 with quantities at a pressure of 13.50
@@ -283,8 +284,6 @@ with the liquid having an offset of 0,
 while the solid has an offset of 1.
 
 ```python
-
-
 def probability_distribition(x, curvature, offset):
     return np.sqrt(curvature / 2 * np.pi) * np.exp(
         -curvature / 2 * np.square(x - offset)
@@ -378,26 +377,92 @@ f"The probability is {probability:.3%}"
 
 Based on the expression for the melting rate
 
-$$ v = -\left[ \frac{2K\Gamma(\sqrt{\lambda_0} + \sqrt{\lambda_s})^2}{M_s^2(\lambda_s\sqrt{\lambda_0} + \lambda_0\sqrt{\lambda_s})}\right] \Delta $$
+$$ v(T) = -\left[ \frac{2K\Gamma(T)(\sqrt{\lambda_0} + \sqrt{\lambda_s})^2}{M_s^2(\lambda_s\sqrt{\lambda_0} + \lambda_0\sqrt{\lambda_s})}\right] \Delta \mu(T) $$
 
 the melting rate can be calculated
 
 ```python
-rate = (
-    np.square(np.sqrt(curvature_liquid) + np.sqrt(curvature_solid))
-    / (
-        curvature_solid * np.sqrt(curvature_liquid)
-        + curvature_liquid * np.sqrt(curvature_solid)
+def melting_rate(temperature):
+    return (
+        np.square(np.sqrt(curvature_liquid) + np.sqrt(curvature_solid))
+        / (
+            curvature_solid * np.sqrt(curvature_liquid)
+            + curvature_liquid * np.sqrt(curvature_solid)
+        )
+        * enthalpy_difference
+        * (1 - temperature / melting_point)
     )
-    * enthalpy_difference
+
+
+f"The rate at T=1.35 is {melting_rate(1.40)}"
+```
+
+## Fit to Model
+
+Through a refactoring of the above equation
+
+$$ \frac{v(T)}{\Gamma(T) \Delta\mu(T)} = -2K\left[ \frac{(\sqrt{\lambda_0} + \sqrt{\lambda_s})^2}{(\lambda_s\sqrt{\lambda_0} + \lambda_0\sqrt{\lambda_s})}\right]$$
+
+```python
+file = "../data/analysis/fluctuation_rs.h5"
+with pd.HDFStore(file) as src:
+    df_fluctuation = (
+        src.get("ordering")
+        .query("crystal in ['p2', 'liquid']")
+        .assign(crystal=lambda df: df["crystal"].cat.remove_unused_categories())
+        .groupby(["temperature", "pressure"])
+        .apply(normalise)
+        .reset_index(drop=True)
+        .groupby(["temperature", "pressure"])
+        .apply(
+            lambda x: x.groupby("crystal").apply(
+                lambda y: find_curvature(y["crystal"].values[0], y["bins"], y["count"])
+            )
+        )
+    )
+
+df_rates = (
+    pd.read_hdf("../data/analysis/rates_rs_clean.h5", "rates")
+    .groupby(["temperature", "pressure"])["mean"]
+    .mean()
+).to_frame("rate")
+
+df_dynamics = (
+    pd.read_hdf("../data/analysis/dynamics_clean_agg.h5", "relaxations")
+    .set_index(["temperature", "pressure"])["rot2_mean"]
+    .to_frame("rotational_relaxation")
 )
-f"The rate is {rate}"
+
+df_fluctuation.columns = ["crystal", "liquid"]
+df_all = df_fluctuation.join(df_rates).join(df_dynamics).reset_index().dropna()
+df_all["temp_norm"] = util.normalised_temperature(df_all["temperature"], df_all["pressure"])
 ```
 
 ```python
-from functools import partial
+def fluctuation_rate(liquid, crystal):
+    return np.square(np.sqrt(liquid) + np.sqrt(crystal)) / (crystal * np.sqrt(liquid) + liquid * np.sqrt(crystal))
+```
 
+```python
+df_dft = pd.DataFrame({
+    "x": fluctuation_rate(df_all["liquid"], df_all["crystal"]) * (enthalpy_difference * (1-df_all["temp_norm"])),
+    "y": df_all["rate"] * df_all["rotational_relaxation"],
+    "pressure": df_all["pressure"],
+})
+```
 
+```python
+chart_dft = alt.Chart(df_dft).mark_point().encode(
+    x=alt.X("x", title="Fluctuation × Δμ", scale=alt.Scale(zero=False)),
+    y=alt.Y("y", title="Melting Rate × Rotational Relaxtion"),
+    color="pressure:N",
+)
+with alt.data_transformers.enable("default"):
+    chart_dft.save("../figures/melting_dft.svg", webdriver="firefox")
+chart_dft
+```
+
+```python
 def fit_constant(
     rate_norm, timescale, curvature_liquid, curvature_solid, enthalpy_diff, temp_norm
 ):
@@ -405,7 +470,7 @@ def fit_constant(
         temp_norm, constant, timescale, curvature_liquid, curvature_solid, enthalpy_diff
     ):
         return (
-            -np.square(np.sqrt(curvature_liquid) + np.sqrt(curvature_solid))
+            -np.square(np.sqrt(curvature_liquid) + np.sqrt(curvchart_dfte_solid))
             / (
                 curvature_solid * np.sqrt(curvature_liquid)
                 + curvature_liquid * np.sqrt(curvature_solid)
@@ -457,53 +522,20 @@ def find_curvature(label, bins, count):
 ```
 
 ```python
-file = "../data/analysis/fluctuation_rs.h5"
-with pd.HDFStore(file) as src:
-    df = src.get("ordering").query("crystal in ['p2', 'liquid']")
-    df = df.assign(crystal=df["crystal"].cat.remove_unused_categories())
-
-rates = (
-    pd.read_hdf("../data/analysis/rates_rs_clean.h5", "rates")
-    .groupby(["temperature", "pressure"])["mean"]
-    .mean()
-)
-rates.name = "rate"
-dynamics = pd.read_hdf(
-    "../data/analysis/dynamics_clean_agg.h5", "relaxations"
-).set_index(["temperature", "pressure"])["rot2_mean"]
-dynamics.name = "rotational_relaxation"
-
-df = df.set_index(["temperature", "pressure"])
-df = (
-    df.groupby(["temperature", "pressure"])
-    .apply(normalise)
-    .groupby(["temperature", "pressure"])
-    .apply(
-        lambda x: x.groupby("crystal").apply(
-            lambda x: find_curvature(x["crystal"][0], x["bins"], x["count"])
-        )
-    )
-)
-df.columns = ["crystal", "liquid"]
-df = df.join(rates).join(dynamics).reset_index().dropna()
-df["temp_norm"] = util.normalised_temperature(df["temperature"], df["pressure"])
-```
-
-```python
 const, model = fit_constant(
-    df["rate"],
-    1 / df["rotational_relaxation"],
-    df["liquid"],
-    df["crystal"],
+    df_all["rate"],
+    1 / df_all["rotational_relaxation"],
+    df_all["liquid"],
+    df_all["crystal"],
     enthalpy_difference,
-    df["temp_norm"],
+    df_all["temp_norm"],
 )
-df["predict"] = model(
-    df["temp_norm"],
+df_all["predict"] = model(
+    df_all["temp_norm"],
     const,
-    1 / df["rotational_relaxation"],
-    df["liquid"],
-    df["crystal"],
+    1 / df_all["rotational_relaxation"],
+    df_all["liquid"],
+    df_all["crystal"],
     enthalpy_difference,
 )
 ```
