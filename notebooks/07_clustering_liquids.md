@@ -22,6 +22,7 @@ import numpy as np
 from crystal_analysis import figures
 import hdbscan
 from sdanalysis.figures import plot_frame, show, output_notebook
+
 output_notebook()
 ```
 
@@ -53,9 +54,15 @@ transformed_liquid = umap.UMAP().fit_transform(basis_liquid[choices])
 
 ```python
 df_liquid = pandas.DataFrame(
-    {"Dim 1": transformed_liquid[:, 0], "Dim 2": transformed_liquid[:, 1], "Cluster": groups_liquid}
+    {
+        "Dim 1": transformed_liquid[:, 0],
+        "Dim 2": transformed_liquid[:, 1],
+        "Cluster": groups_liquid,
+    }
 )
-c_liquid = alt.Chart(df_liquid).mark_point().encode(x="Dim 1", y="Dim 2", color="Cluster:N")
+c_liquid = (
+    alt.Chart(df_liquid).mark_point().encode(x="Dim 1", y="Dim 2", color="Cluster:N")
+)
 with alt.data_transformers.enable("default"):
     c_liquid.save("../figures/clustering_liquid.svg")
 ```

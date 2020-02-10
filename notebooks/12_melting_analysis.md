@@ -166,13 +166,9 @@ $$ \frac{v(T)}{\sqrt{T} \text{vs} [1-\exp{\frac{-\Delta \mu(T)}{k_B T}] $$
 should result in a straight line.
 
 ```python
-df_chemical
-```
-
-```python
 df_turnbull = pandas.DataFrame(
     {
-        "y": df_chemical["value"] / df_chemical["temperature"],
+        "y": df_chemical["value"] / np.sqrt(df_chemical["temperature"]),
         "x": 1 - np.exp(-df_chemical["delta_mu"] / df_chemical["temperature"]),
         "pressure": df_chemical["pressure"],
     }

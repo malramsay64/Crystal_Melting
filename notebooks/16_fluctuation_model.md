@@ -382,87 +382,11 @@ $$ v(T) = -\left[ \frac{2K\Gamma(T)(\sqrt{\lambda_0} + \sqrt{\lambda_s})^2}{M_s^
 the melting rate can be calculated
 
 ```python
-def melting_rate(temperature):
-    return (
-        np.square(np.sqrt(curvature_liquid) + np.sqrt(curvature_solid))
-        / (
-            curvature_solid * np.sqrt(curvature_liquid)
-            + curvature_liquid * np.sqrt(curvature_solid)
-        )
-        * enthalpy_difference
-        * (1 - temperature / melting_point)
-    )
-
-
-f"The rate at T=1.35 is {melting_rate(1.40)}"
-```
-
-## Fit to Model
-
-Through a refactoring of the above equation
-
-$$ \frac{v(T)}{\Gamma(T) \Delta\mu(T)} = -2K\left[ \frac{(\sqrt{\lambda_0} + \sqrt{\lambda_s})^2}{(\lambda_s\sqrt{\lambda_0} + \lambda_0\sqrt{\lambda_s})}\right]$$
-
-```python
-file = "../data/analysis/fluctuation_rs.h5"
-with pd.HDFStore(file) as src:
-    df_fluctuation = (
-        src.get("ordering")
-        .query("crystal in ['p2', 'liquid']")
-        .assign(crystal=lambda df: df["crystal"].cat.remove_unused_categories())
-        .groupby(["temperature", "pressure"])
-        .apply(normalise)
-        .reset_index(drop=True)
-        .groupby(["temperature", "pressure"])
-        .apply(
-            lambda x: x.groupby("crystal").apply(
-                lambda y: find_curvature(y["crystal"].values[0], y["bins"], y["count"])
-            )
-        )
-    )
-
-df_rates = (
-    pd.read_hdf("../data/analysis/rates_rs_clean.h5", "rates")
-    .groupby(["temperature", "pressure"])["mean"]
-    .mean()
-).to_frame("rate")
-
-df_dynamics = (
-    pd.read_hdf("../data/analysis/dynamics_clean_agg.h5", "relaxations")
-    .set_index(["temperature", "pressure"])["rot2_mean"]
-    .to_frame("rotational_relaxation")
-)
-
-df_fluctuation.columns = ["crystal", "liquid"]
-df_all = df_fluctuation.join(df_rates).join(df_dynamics).reset_index().dropna()
-df_all["temp_norm"] = util.normalised_temperature(df_all["temperature"], df_all["pressure"])
-```
-
-```python
 def fluctuation_rate(liquid, crystal):
-    return np.square(np.sqrt(liquid) + np.sqrt(crystal)) / (crystal * np.sqrt(liquid) + liquid * np.sqrt(crystal))
-```
+    return np.square(np.sqrt(liquid) + np.sqrt(crystal)) / (
+        crystal * np.sqrt(liquid) + liquid * np.sqrt(crystal)
+    )
 
-```python
-df_dft = pd.DataFrame({
-    "x": fluctuation_rate(df_all["liquid"], df_all["crystal"]) * (enthalpy_difference * (1-df_all["temp_norm"])),
-    "y": df_all["rate"] * df_all["rotational_relaxation"],
-    "pressure": df_all["pressure"],
-})
-```
-
-```python
-chart_dft = alt.Chart(df_dft).mark_point().encode(
-    x=alt.X("x", title="Fluctuation × Δμ", scale=alt.Scale(zero=False)),
-    y=alt.Y("y", title="Melting Rate × Rotational Relaxtion"),
-    color="pressure:N",
-)
-with alt.data_transformers.enable("default"):
-    chart_dft.save("../figures/melting_dft.svg", webdriver="firefox")
-chart_dft
-```
-
-```python
 def fit_constant(
     rate_norm, timescale, curvature_liquid, curvature_solid, enthalpy_diff, temp_norm
 ):
@@ -470,11 +394,7 @@ def fit_constant(
         temp_norm, constant, timescale, curvature_liquid, curvature_solid, enthalpy_diff
     ):
         return (
-            -np.square(np.sqrt(curvature_liquid) + np.sqrt(curvchart_dfte_solid))
-            / (
-                curvature_solid * np.sqrt(curvature_liquid)
-                + curvature_liquid * np.sqrt(curvature_solid)
-            )
+            -fluctuation_rate(curvature_liquid, curvature_solid)
             * enthalpy_difference
             * (1 - temp_norm)
             * timescale
@@ -521,6 +441,79 @@ def find_curvature(label, bins, count):
         raise ValueError("Invalid value for label found:", label)
 ```
 
+
+
+
+## Fit to Model
+
+Through a refactoring of the above equation
+
+$$ \frac{v(T)}{\Gamma(T) \Delta\mu(T)} = -2K\left[ \frac{(\sqrt{\lambda_0} + \sqrt{\lambda_s})^2}{(\lambda_s\sqrt{\lambda_0} + \lambda_0\sqrt{\lambda_s})}\right]$$
+
+```python
+file = "../data/analysis/fluctuation_rs.h5"
+with pd.HDFStore(file) as src:
+    df_fluctuation = (
+        src.get("ordering")
+        .query("crystal in ['p2', 'liquid']")
+        .assign(crystal=lambda df: df["crystal"].cat.remove_unused_categories())
+        .groupby(["temperature", "pressure"])
+        .apply(normalise)
+        .reset_index(drop=True)
+        .groupby(["temperature", "pressure"])
+        .apply(
+            lambda x: x.groupby("crystal").apply(
+                lambda y: find_curvature(y["crystal"].values[0], y["bins"], y["count"])
+            )
+        )
+    )
+
+df_rates = (
+    pd.read_hdf("../data/analysis/rates_rs_clean.h5", "rates")
+    .groupby(["temperature", "pressure"])["mean"]
+    .mean()
+).to_frame("rate")
+
+df_dynamics = (
+    pd.read_hdf("../data/analysis/dynamics_clean_agg.h5", "relaxations")
+    .set_index(["temperature", "pressure"])["rot2_mean"]
+    .to_frame("rotational_relaxation")
+)
+
+df_fluctuation.columns = ["crystal", "liquid"]
+df_all = df_fluctuation.join(df_rates).join(df_dynamics).reset_index().dropna()
+df_all["temp_norm"] = util.normalised_temperature(
+    df_all["temperature"], df_all["pressure"]
+)
+```
+
+```python
+df_dft = pd.DataFrame(
+    {
+        "x": fluctuation_rate(df_all["liquid"], df_all["crystal"])
+        * (enthalpy_difference * (1 - df_all["temp_norm"])),
+        "y": df_all["rate"] * df_all["rotational_relaxation"],
+        "pressure": df_all["pressure"],
+    }
+)
+```
+
+```python
+chart_dft = (
+    alt.Chart(df_dft)
+    .mark_point()
+    .encode(
+        x=alt.X("x", title="Fluctuation × Δμ", scale=alt.Scale(zero=False)),
+        y=alt.Y("y", title="Melting Rate × Rotational Relaxtion"),
+        color="pressure:N",
+    )
+)
+with alt.data_transformers.enable("default"):
+    chart_dft.save("../figures/melting_dft.svg", webdriver="firefox")
+chart_dft
+```
+
+
 ```python
 const, model = fit_constant(
     df_all["rate"],
@@ -542,7 +535,7 @@ df_all["predict"] = model(
 
 ```python
 c = (
-    alt.Chart(df)
+    alt.Chart(df_all)
     .mark_point()
     .encode(
         x=alt.X("temp_norm", title="T/Tm", scale=alt.Scale(zero=False)),
@@ -561,7 +554,7 @@ c
 ```
 
 ```python
-df_h = df.set_index(["temperature", "pressure"]).loc[(2.00, 13.50), :]
+df_h = df_all.set_index(["temperature", "pressure"]).loc[(2.00, 13.50), :]
 df_high = pd.DataFrame(
     {
         "Liquid": df_h["liquid"] * x ** 2,
