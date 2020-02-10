@@ -250,7 +250,7 @@ chart_wilson = (
     .mark_point()
     .encode(
         x=alt.X("x", title="1-exp[Δμ/kT]"),
-        y=alt.Y("y", title="v(T) × 𝜏"),
+        y=alt.Y("y", title="v(T) × τ"),
         color=alt.Color("pressure:N", title="Pressure"),
     )
 )
