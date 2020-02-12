@@ -90,6 +90,8 @@ with alt.data_transformers.enable("default"):
     )
 ```
 
+![solid state transition](../figures/solid_state_transition-P13.50-T1.35-p2gg.svg)
+
 ```python
 with pandas.HDFStore("../data/analysis/dynamics_clean_agg.h5") as src:
     df_dynamics = src.get("relaxations")
@@ -132,6 +134,8 @@ with alt.data_transformers.enable("default"):
         "../figures/solid_state_transition-P13.50-T1.40-p2gg.svg", webdriver="firefox"
     )
 ```
+
+![](../figures/solid_state_transition-P13.50-T1.40-p2gg.svg)
 
 One of the features of the solid state transition
 is the stepped nature of the transition,
@@ -234,7 +238,7 @@ export_svgs(frame, "../figures/configuration-P13.50-T1.40-p2gg_end.svg")
 ```
 
 ```python
-frame = plot_frame(snap_process, order_function=knn_order,)
+frame = plot_frame(snap_process, order_function=knn_order)
 frame = figures.style_snapshot(frame)
 show(frame)
 ```

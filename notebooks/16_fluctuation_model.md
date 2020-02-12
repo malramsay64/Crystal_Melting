@@ -550,8 +550,9 @@ with alt.data_transformers.enable("default"):
     c.transform_filter(alt.datum.temp_norm < 1.2).save(
         "../figures/fluctuation_rate_fit_low.svg", webdriver="firefox"
     )
-c
 ```
+
+![fluctuation rate fit](../figures/fluctuation_rate_fit.svg)
 
 ```python
 df_h = df_all.set_index(["temperature", "pressure"]).loc[(2.00, 13.50), :]

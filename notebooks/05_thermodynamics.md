@@ -158,8 +158,9 @@ c = plot_thermo(df.query("pressure == 13.50"), "enthalpy").transform_filter(
 )
 with alt.data_transformers.enable("default"):
     c.save("../figures/thermodynamics_potential_energy_P13.50.svg", webdriver="firefox")
-c
 ```
+
+![thermodynamics PE P=13.50](../figures/thermodynamics_potential_energy_P13.50.svg)
 
 ```python
 c = plot_thermo(df.query("pressure == 1.00"), "enthalpy").transform_filter(
@@ -167,9 +168,6 @@ c = plot_thermo(df.query("pressure == 1.00"), "enthalpy").transform_filter(
 )
 with alt.data_transformers.enable("default"):
     c.save("../figures/thermodynamics_potential_energy_P1.00.svg", webdriver="firefox")
-c
 ```
 
-```python
-
-```
+![thermodynamics PE P=1.00](../figures/thermodynamics_potential_energy_P1.00.svg)

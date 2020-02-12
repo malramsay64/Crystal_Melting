@@ -67,6 +67,8 @@ with alt.data_transformers.enable("default"):
     c_liquid.save("../figures/clustering_liquid.svg")
 ```
 
+![liquid clustering](../figures/clustering_liquid.svg)
+
 ```python
 basis = []
 import gsd.hoomd
@@ -100,3 +102,5 @@ with alt.data_transformers.enable("default"):
     c_p2.save("../figures/clustering_crystal_p2.svg")
 c_p2
 ```
+
+![clustering crystal](../figures/clustering_crystal_p2.svg)

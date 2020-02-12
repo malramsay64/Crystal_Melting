@@ -69,7 +69,7 @@ That is the temperature at which the melting rate nearly goes to 0.
 ```python
 chart = alt.Chart(df_melt.reset_index()).encode(
     x=alt.X("temperature", title="Temperature", scale=alt.Scale(zero=False)),
-    color=alt.Color("pressure:N", title="Pressure"),
+    color=alt.Color("pressure:N", title="Pressure", legend=None),
     y=alt.Y("value", title="Melting Rate", axis=alt.Axis(format="e")),
     yError=alt.YError("error"),
 )
@@ -98,7 +98,7 @@ putting the rates from both pressures on the same figure.
 chart = alt.Chart(df_melt.reset_index()).encode(
     x=alt.X("temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False)),
     color=alt.Color("pressure:N", title="Pressure"),
-    y=alt.Y("value", title="Crystal Growth Rate", axis=alt.Axis(format="e"),),
+    y=alt.Y("value", title="Crystal Growth Rate", axis=alt.Axis(format="e")),
     yError=alt.YError("error"),
 )
 
@@ -187,8 +187,9 @@ chart_turnbull = (
 )
 with alt.data_transformers.enable("default"):
     chart_turnbull.save("../figures/melting_turnbull.svg", webdriver="firefox")
-chart_turnbull
 ```
+
+![Turnbull melting](../figures/melting_turnbull.svg)
 
 ## Wilson--Frenkel
 
@@ -256,8 +257,9 @@ chart_wilson = (
 )
 with alt.data_transformers.enable("default"):
     chart_wilson.save("../figures/melting_wilson.svg", webdriver="firefox")
-chart_wilson
 ```
+
+![Wilson--Frenkel model of melting](../figures/melting_wilson.svg)
 
 ## Fitting to Wilson-Frenkel Theory
 

@@ -43,7 +43,3 @@ knn_order(snap).astype(bool)
 ```python
 show(configuration.plot_frame(snap, knn_order))
 ```
-
-```python
-
-```

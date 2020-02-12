@@ -74,7 +74,7 @@ with alt.data_transformers.enable("default"):
     chart.save("../figures/melting_radius.svg", webdriver="firefox")
 ```
 
-<img src="../figures/melting_radius.svg">
+![](../figures/melting_radius.svg)
 
 ```python
 melting_df[["radius", "pressure", "temperature"]]

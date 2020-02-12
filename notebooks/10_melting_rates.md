@@ -83,6 +83,8 @@ with alt.data_transformers.enable("default"):
     chart.save("../figures/melting_radius.svg", webdriver="firefox")
 ```
 
+![melting radius](../figures/melting_radius.svg)
+
 ## Calculating $\Delta V/ \Delta t$
 
 The quantity we are interested in is rate of melting for a given surface area,
