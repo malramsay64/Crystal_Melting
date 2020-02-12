@@ -387,6 +387,7 @@ def fluctuation_rate(liquid, crystal):
         crystal * np.sqrt(liquid) + liquid * np.sqrt(crystal)
     )
 
+
 def fit_constant(
     rate_norm, timescale, curvature_liquid, curvature_solid, enthalpy_diff, temp_norm
 ):
@@ -471,8 +472,8 @@ with pd.HDFStore(file) as src:
 df_rates = (
     pd.read_hdf("../data/analysis/rates_rs_clean.h5", "rates")
     .groupby(["temperature", "pressure"])["mean"]
-    .mean()
-).to_frame("rate")
+    .agg(rate="mean", error="sem")
+)
 
 df_dynamics = (
     pd.read_hdf("../data/analysis/dynamics_clean_agg.h5", "relaxations")
@@ -494,6 +495,7 @@ df_dft = pd.DataFrame(
         * (enthalpy_difference * (1 - df_all["temp_norm"])),
         "y": df_all["rate"] * df_all["rotational_relaxation"],
         "pressure": df_all["pressure"],
+        "error": df_all["error"],
     }
 )
 ```
@@ -505,6 +507,7 @@ chart_dft = (
     .encode(
         x=alt.X("x", title="Fluctuation × Δμ", scale=alt.Scale(zero=False)),
         y=alt.Y("y", title="Melting Rate × Rotational Relaxtion"),
+        yError=alt.YError("error"),
         color="pressure:N",
     )
 )
@@ -513,6 +516,7 @@ with alt.data_transformers.enable("default"):
 chart_dft
 ```
 
+![dft model of melting](../figures/melting_dft.svg)
 
 ```python
 const, model = fit_constant(
@@ -531,6 +535,10 @@ df_all["predict"] = model(
     df_all["crystal"],
     enthalpy_difference,
 )
+```
+
+```python
+const
 ```
 
 ```python
