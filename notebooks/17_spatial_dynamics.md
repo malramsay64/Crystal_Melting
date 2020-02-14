@@ -108,13 +108,16 @@ c_pg = (
     .mark_point(filled=True)
     .encode(
         x=alt.X(
-            "x", title="", scale=alt.Scale(domain=(-length * 4 / 6, length * 4 / 6))
+            "x",
+            title="",
+            scale=alt.Scale(domain=(-length * 4 / 6, length * 4 / 6)),
+            axis=None,
         ),
-        y=alt.Y("y", title="", scale=alt.Scale(domain=(-length, length))),
+        y=alt.Y("y", title="", scale=alt.Scale(domain=(-length, length)), axis=None),
         # When updated version of altair is released (4.2) use domainMid=relax_liq
         color=alt.Color(
             "rot_relax",
-            title="τᵣ",
+            title="Relaxation Time",
             scale=alt.Scale(
                 type="log",
                 domain=[
@@ -182,14 +185,17 @@ c_p2 = (
     alt.Chart(df_p2)
     .mark_point(filled=True)
     .encode(
-        x=alt.X("x", title="", scale=alt.Scale(domain=(-length, length))),
+        x=alt.X("x", title="", scale=alt.Scale(domain=(-length, length)), axis=None),
         y=alt.Y(
-            "y", title="", scale=alt.Scale(domain=(-length * 4 / 6, length * 4 / 6))
+            "y",
+            title="",
+            scale=alt.Scale(domain=(-length * 4 / 6, length * 4 / 6)),
+            axis=None,
         ),
         # When updated version of altair is released (4.2) use domainMid=relax_liq
         color=alt.Color(
             "rot_relax",
-            title="τᵣ",
+            title="Relaxation Time",
             scale=alt.Scale(
                 type="log",
                 domain=[
@@ -205,4 +211,4 @@ with alt.data_transformers.enable("default"):
     c_p2.save("../figures/spatial_relaxation_p2.svg", webdriver="firefox")
 ```
 
-![p2 relaxations](../figures/spatial_relaxation_p2.svg)
+![p2 -relaxations](../figures/spatial_relaxation_p2.svg)
