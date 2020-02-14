@@ -79,7 +79,6 @@ c = (
     )
     .transform_filter(alt.datum.time < 2e5)
 )
-c
 ```
 
 
@@ -123,9 +122,8 @@ c = (
         y=alt.Y("value", title="Fraction"),
         color=alt.Color("variable", title="Crystal"),
     )
-    .transform_filter(alt.datum.time < 4e5)
+    .transform_filter(alt.datum.time < 2e5)
 )
-c
 ```
 
 ```python
