@@ -193,9 +193,10 @@ with gsd.hoomd.open(trajectory_file) as trj:
     for index, i in enumerate(range(948, 957, 2)):
         snap = HoomdFrame(trj[i])
         snapshots.append(snap)
-        frame = plot_frame(snap, order_function=knn_order, categorical_colour=True)
+        frame = plot_frame(snap, order_function=knn_order, categorical_colour=False)
         frame.x_range = Range1d(10, 40)
-        frame.y_range = Range1d(0, 30)
+        frame.y_range = Range1d(5, 25)
+        frame.plot_height = int(3/4 * frame.plot_height)
         figures.style_snapshot(frame)
         frame.output_backend = "svg"
         export_svgs(frame, f"../figures/phase_transition_{index}.svg")
