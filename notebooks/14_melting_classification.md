@@ -56,10 +56,15 @@ this is done using the `melt` function.
 ```python
 df_melt = (
     df.melt(id_vars=["crystal", "time", "temperature", "pressure"])
-    .query("variable in ['P2', 'P2GG', 'PG']")
+    .query("variable in ['P2', 'P2GG', 'PG', 'Liquid']")
     .set_index(["pressure", "temperature", "crystal"])
     .sort_index()
 )
+# Convert the volumes to fractions
+df_melt["value"] = df_melt.groupby(
+    ["crystal", "time", "temperature", "pressure"]
+).transform(lambda x: x / x.sum())
+df_melt = df_melt.query("variable in ['P2', 'P2GG', 'PG']")
 ```
 
 ## Solid State Phase Transition
@@ -74,20 +79,17 @@ c = (
     .mark_point()
     .encode(
         x=alt.X("time", title="Time", axis=alt.Axis(format="e")),
-        y=alt.Y("value", title="Particles"),
+        y=alt.Y("value", title="Fraction"),
         color=alt.Color("variable", title="Crystal"),
     )
     .transform_filter(alt.datum.time < 2e5)
 )
-```
-
-
-```python
 with alt.data_transformers.enable("default"):
     c.save(
         "../figures/solid_state_transition-P13.50-T1.35-p2gg.svg", webdriver="firefox"
     )
 ```
+
 
 ![solid state transition](../figures/solid_state_transition-P13.50-T1.35-p2gg.svg)
 
@@ -124,9 +126,7 @@ c = (
     )
     .transform_filter(alt.datum.time < 2e5)
 )
-```
 
-```python
 with alt.data_transformers.enable("default"):
     c.save(
         "../figures/solid_state_transition-P13.50-T1.40-p2gg.svg", webdriver="firefox"
@@ -134,6 +134,7 @@ with alt.data_transformers.enable("default"):
 ```
 
 ![](../figures/solid_state_transition-P13.50-T1.40-p2gg.svg)
+
 
 One of the features of the solid state transition
 is the stepped nature of the transition,
@@ -253,25 +254,16 @@ export_svgs(frame, "../figures/configuration-P13.50-T1.40-p2gg_process_layers.sv
 While the
 
 ```python
-groupbys = list(df_melt.reset_index().columns)
-groupbys.remove("variable")
-groupbys.remove("value")
-```
-
-```python
-df_melt_agg = df_melt.reset_index().groupby(groupbys).sum().reset_index()
-```
-
-```python
 c = (
-    alt.Chart(df_melt_agg.query("pressure==13.50 and temperature == 1.40"))
-    .mark_point()
+    alt.Chart(df.query("pressure==13.50 and temperature == 1.40"))
+    .mark_line()
     .encode(
-        x=alt.X("time", title="Time"),
-        y=alt.Y("value", title="Volume"),
+        x=alt.X("time", title="Time", axis=alt.Axis(format="e")),
+        y=alt.Y("radius", title="Radius"),
         color=alt.Color("crystal", title="Crystal"),
-    )
+    ).transform_fold(["P2", "P2GG", "PG"])
 )
+    
 with alt.data_transformers.enable("default"):
     c.save("../figures/melting_crystal_comparison.svg", webdriver="firefox")
 ```
@@ -284,10 +276,6 @@ with gsd.hoomd.open(trajectory_file) as trj:
     snap_init = HoomdFrame(trj[0])
     snap_process = HoomdFrame(trj[30_000])
     snap_end = HoomdFrame(trj[60_000])
-```
-
-```python
-snap_process.timestep
 ```
 
 ```python

@@ -96,7 +96,7 @@ putting the rates from both pressures on the same figure.
 
 ```python
 chart = alt.Chart(df_melt.reset_index()).encode(
-    x=alt.X("temp_norm", title="T/Tₘ", scale=alt.Scale(zero=False)),
+    x=alt.X("temp_norm", title="T/Tm", scale=alt.Scale(zero=False)),
     color=alt.Color("pressure:N", title="Pressure"),
     y=alt.Y("value", title="Crystal Growth Rate", axis=alt.Axis(format="e")),
     yError=alt.YError("error"),
