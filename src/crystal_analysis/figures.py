@@ -67,8 +67,7 @@ def json_dir(data, data_dir="altairdata"):
 
 def use_data_transformer():
     """Register and use an altair data transformer"""
-    alt.data_transformers.register("json_dir", json_dir)
-    alt.data_transformers.enable("json_dir")
+    alt.data_transformers.enable("data_server_proxied")
 
 
 # This configures Altair to behave as expected when I load this module

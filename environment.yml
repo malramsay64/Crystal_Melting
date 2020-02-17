@@ -32,6 +32,8 @@ dependencies:
   - ipykernel=5.1.1
   - ipywidgets
   - altair=4
+  - altair_data_server=0.4.1
+  - jupyter-server-proxy=1.2.0
   - nbdime=1.1
   - matplotlib=3.1
   - jupyterlab=1.2.6
