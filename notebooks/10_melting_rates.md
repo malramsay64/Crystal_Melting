@@ -75,15 +75,12 @@ chart = (
         y=alt.Y("radius:Q", title="Estimated Radius"),
     )
 )
-chart
-```
-
-```python
 with alt.data_transformers.enable("default"):
     chart.save("../figures/melting_radius.svg", webdriver="firefox")
 ```
 
 ![melting radius](../figures/melting_radius.svg)
+
 
 ## Calculating $\Delta V/ \Delta t$
 
@@ -134,8 +131,4 @@ chart = (
 # chart = figures.hline(chart, 0)
 
 chart
-```
-
-```python
-
 ```
