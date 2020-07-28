@@ -70,16 +70,19 @@ chart = (
             scale=alt.Scale(type="linear"),
         ),
         color=alt.Color("temperature:N", title="Temperature"),
-        row=alt.Row("pressure:N", title="Pressure"),
+        #row=alt.Row("pressure:N", title="Pressure"),
         detail="iter_id",
         y=alt.Y("radius:Q", title="Estimated Radius"),
     )
 )
+
 with alt.data_transformers.enable("default"):
-    chart.save("../figures/melting_radius.svg", webdriver="firefox")
+    chart.transform_filter(alt.datum.pressure == 1.00).save("../figures/melting_radius_P1.svg", webdriver="firefox")
+    chart.transform_filter(alt.datum.pressure == 13.50).save("../figures/melting_radius_P13.svg", webdriver="firefox")
 ```
 
-![melting radius](../figures/melting_radius.svg)
+![melting radius](../figures/melting_radius_P1.svg)
+![melting radius](../figures/melting_radius_P13.svg)
 
 
 ## Calculating $\Delta V/ \Delta t$
