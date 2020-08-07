@@ -6,7 +6,7 @@ jupyter:
       extension: .md
       format_name: markdown
       format_version: '1.2'
-      jupytext_version: 1.3.3
+      jupytext_version: 1.5.2
   kernelspec:
     display_name: crystal
     language: python
@@ -104,6 +104,7 @@ with alt.data_transformers.enable("default"):
 ```
 
 ![](../figures/fluctuation_parabola_example.svg)
+
 
 The simplest parabolas describing $\omega(M)$ are depicted above,
 with the left hand side of the minimum depicted in the blue line,
@@ -373,6 +374,11 @@ probability = df_liquid.query("bins > @roots[0]")["probability"].sum()
 f"The probability is {probability:.3%}"
 ```
 
+```python
+probability = df_solid.query("bins < @roots[0]")["probability"].sum()
+f"The probability is {probability:.3%}"
+```
+
 ## Melting Rate
 
 Based on the expression for the melting rate
@@ -508,7 +514,7 @@ chart_dft = (
         x=alt.X("x", title="Fluctuation × Δμ", scale=alt.Scale(zero=False)),
         y=alt.Y("y", title="Melting Rate × Rotational Relaxtion"),
         yError=alt.YError("error"),
-        color="pressure:N",
+        color=alt.Color("pressure:N", title="Pressure"),
     )
 )
 with alt.data_transformers.enable("default"):
@@ -551,7 +557,7 @@ c = (
         color=alt.Color("pressure:N", title="Pressure"),
     )
 )
-c = c + c.encode(y="predict").mark_line()
+c = c + c.encode(y="predict").mark_line(interpolate="basis")
 
 with alt.data_transformers.enable("default"):
     c.save("../figures/fluctuation_rate_fit.svg", webdriver="firefox")
@@ -706,6 +712,11 @@ f"The value of M_c is {roots_disc[0]}"
 
 ```python
 probability_disc = df_disc_liquid.query("bins > @roots_disc[0]")["probability"].sum()
+f"The probability is {probability_disc:.3%}"
+```
+
+```python
+probability_disc = df_disc_solid.query("bins < @roots_disc[0]")["probability"].sum()
 f"The probability is {probability_disc:.3%}"
 ```
 
